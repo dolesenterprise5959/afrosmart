@@ -70,6 +70,8 @@ export async function createOrGetThread(
       callUnlocked: false,
       lastMessage: "",
       lastMessageAt: now,
+      lastSenderId: "",
+      lastReadBy: {},
       createdAt: now,
     });
   }
@@ -123,13 +125,35 @@ export async function postMessage(
     callUnlocked = isCallUnlocked(participants, senders);
   }
 
+  const sentAt = Timestamp.now();
   await ref.update({
     lastMessage: text.slice(0, 140),
-    lastMessageAt: Timestamp.now(),
+    lastMessageAt: sentAt,
+    lastSenderId: session.uid,
+    // Sending implies the sender has read up to their own message.
+    [`lastReadBy.${session.uid}`]: sentAt,
     ...(callUnlocked && data.callUnlocked !== true ? { callUnlocked: true } : {}),
   });
 
   return { ok: true, data: { callUnlocked } };
+}
+
+/** Mark a thread as read by the current user (clears their unread badge). */
+export async function markThreadRead(
+  session: SessionUser,
+  threadId: string,
+): Promise<Result<{ read: true }>> {
+  const ref = adminDb().collection("threads").doc(threadId);
+  const snap = await ref.get();
+  if (!snap.exists) return { ok: false, status: 404, error: "Thread not found" };
+
+  const participants: string[] = snap.data()?.participants ?? [];
+  if (!participants.includes(session.uid)) {
+    return { ok: false, status: 403, error: "Not a participant" };
+  }
+
+  await ref.update({ [`lastReadBy.${session.uid}`]: Timestamp.now() });
+  return { ok: true, data: { read: true } };
 }
 
 /** Reveal the counterpart's phone — only after the call has been unlocked. */

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useUnread } from "@/components/messaging/UnreadProvider";
 
 const items = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -13,6 +14,7 @@ const items = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { unreadCount } = useUnread();
 
   function isActive(href: string) {
     return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -32,8 +34,13 @@ export function BottomNav() {
                   active ? "text-brand" : "text-muted"
                 }`}
               >
-                <span aria-hidden className="text-lg leading-none">
+                <span aria-hidden className="relative text-lg leading-none">
                   {item.icon}
+                  {item.href === "/messages" && unreadCount > 0 && (
+                    <span className="absolute -right-2 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                 </span>
                 {item.label}
               </Link>

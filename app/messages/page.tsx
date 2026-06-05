@@ -1,25 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { collection, onSnapshot, query, where, type Timestamp } from "firebase/firestore";
+import { type Timestamp } from "firebase/firestore";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { getDb } from "@/lib/firebase/client";
+import { useUnread } from "@/components/messaging/UnreadProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
-
-interface ThreadRow {
-  id: string;
-  buyerId: string;
-  sellerId: string;
-  buyerName: string;
-  sellerName: string;
-  listingTitle: string;
-  lastMessage: string;
-  callUnlocked: boolean;
-  lastMessageAt?: Timestamp;
-}
 
 function relativeTime(ts?: Timestamp): string {
   if (!ts) return "";
@@ -34,33 +21,18 @@ function relativeTime(ts?: Timestamp): string {
 
 export default function MessagesPage() {
   const { user, loading, configured } = useAuth();
-  const [threads, setThreads] = useState<ThreadRow[]>([]);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!user) return;
-    const q = query(
-      collection(getDb(), "threads"),
-      where("participants", "array-contains", user.uid),
-    );
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as ThreadRow[];
-        rows.sort(
-          (a, b) => (b.lastMessageAt?.toMillis() ?? 0) - (a.lastMessageAt?.toMillis() ?? 0),
-        );
-        setThreads(rows);
-        setReady(true);
-      },
-      () => setReady(true),
-    );
-    return unsub;
-  }, [user]);
+  const { threads, ready, unreadCount, isUnread } = useUnread();
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-5">
-      <h1 className="text-xl font-bold">Messages</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-xl font-bold">Messages</h1>
+        {unreadCount > 0 && (
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">
+            {unreadCount}
+          </span>
+        )}
+      </div>
 
       {!configured ? (
         <p className="mt-6 text-sm text-muted">
@@ -93,23 +65,29 @@ export default function MessagesPage() {
         <ul className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {threads.map((t) => {
             const counterpart = user.uid === t.buyerId ? t.sellerName : t.buyerName;
+            const unread = isUnread(t);
             return (
               <li key={t.id}>
-                <Link href={`/messages/${t.id}`} className="flex items-center gap-3 p-3 hover:bg-surface">
+                <Link
+                  href={`/messages/${t.id}`}
+                  className={`flex items-center gap-3 p-3 hover:bg-surface ${unread ? "bg-brand/5" : ""}`}
+                >
                   <Avatar name={counterpart || "?"} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate font-medium">{counterpart}</p>
-                      <span className="shrink-0 text-xs text-muted">
-                        {relativeTime(t.lastMessageAt)}
-                      </span>
+                      <p className={`truncate ${unread ? "font-bold" : "font-medium"}`}>{counterpart}</p>
+                      <span className="shrink-0 text-xs text-muted">{relativeTime(t.lastMessageAt)}</span>
                     </div>
                     <p className="truncate text-xs text-muted">{t.listingTitle}</p>
-                    <p className="truncate text-sm text-muted">
+                    <p className={`truncate text-sm ${unread ? "font-medium text-foreground" : "text-muted"}`}>
                       {t.lastMessage || "Start the conversation"}
                     </p>
                   </div>
-                  {t.callUnlocked && <span title="Call unlocked">📞</span>}
+                  {unread ? (
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-brand" title="Unread" />
+                  ) : t.callUnlocked ? (
+                    <span title="Call unlocked">📞</span>
+                  ) : null}
                 </Link>
               </li>
             );

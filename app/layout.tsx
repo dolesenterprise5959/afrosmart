@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { UnreadProvider } from "@/components/messaging/UnreadProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,10 +54,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <BottomNav />
+          <UnreadProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <BottomNav />
+          </UnreadProvider>
         </AuthProvider>
       </body>
     </html>

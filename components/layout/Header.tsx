@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { AuthMenu } from "@/components/layout/AuthMenu";
+import { MessagesNavLink } from "@/components/layout/MessagesNavLink";
 import { Button } from "@/components/ui/Button";
 
 export function Header() {
@@ -22,6 +23,7 @@ export function Header() {
         </div>
 
         <nav className="ml-auto flex items-center gap-2">
+          <MessagesNavLink />
           <Button href="/listing/new" variant="primary" size="sm">
             + Post
           </Button>

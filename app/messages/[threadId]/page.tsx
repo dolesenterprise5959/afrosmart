@@ -72,6 +72,12 @@ export default function ThreadPage() {
     });
   }, [user, threadId]);
 
+  // Mark the thread read on open and whenever a new message arrives while viewing.
+  useEffect(() => {
+    if (!user || !threadId) return;
+    fetch(`/api/threads/${threadId}/read`, { method: "POST" }).catch(() => {});
+  }, [user, threadId, messages.length]);
+
   // Reveal the phone once the call is unlocked.
   useEffect(() => {
     if (thread?.callUnlocked && !phone) {
