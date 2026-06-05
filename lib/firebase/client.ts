@@ -14,7 +14,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 // edge cases on Cloud Run). Set the env vars to point a build at a different
 // Firebase project.
 const config: FirebaseOptions = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyCDoMbDYC8gWdyGng1tyNXhQArNm3faLoo",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyCDoMbDYC8gWdyGng1tyNXhQArNm3faloo",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "afrosmart.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "afrosmart",
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "afrosmart.firebasestorage.app",
