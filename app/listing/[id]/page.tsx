@@ -4,6 +4,8 @@ import { ListingGallery } from "@/components/listing/ListingGallery";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { isFounder } from "@/lib/founder";
 import { MessageSellerButton } from "@/components/messaging/MessageSellerButton";
 import { SaveButton } from "@/components/listing/SaveButton";
 import { ReportDialog } from "@/components/report/ReportDialog";
@@ -72,9 +74,10 @@ export default async function ListingDetailPage({
             >
               <Avatar name={seller.displayName} />
               <div className="min-w-0">
-                <p className="flex items-center gap-1.5 truncate font-medium">
+                <p className="flex flex-wrap items-center gap-1.5 font-medium">
                   {seller.displayName}
-                  {seller.isBusiness && <Badge tone="accent">Business</Badge>}
+                  {isFounder(seller.id) && <VerifiedBadge kind="founder" label="Founder" />}
+                  {seller.isBusiness && <VerifiedBadge kind="business" label="Business" />}
                 </p>
                 <p className="text-xs text-muted">
                   ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}

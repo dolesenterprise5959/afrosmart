@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 
 const geistSans = Geist({
@@ -16,9 +17,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AfroSmart — Buy & Sell in Liberia",
+  metadataBase: new URL("https://afrosmart.app"),
+  title: {
+    default: "AfroSmart — Buy. Sell. Connect Across Africa.",
+    template: "%s · AfroSmart",
+  },
   description:
-    "AfroSmart is the simple, fast, and trusted way for Liberians to buy and sell cars, phones, electronics, property, services and more — locally.",
+    "AfroSmart is Liberia's trusted digital marketplace for vehicles, real estate, electronics, phones, jobs, services and local commerce — connecting buyers and sellers across Africa.",
+  applicationName: "AfroSmart",
+  openGraph: {
+    type: "website",
+    siteName: "AfroSmart",
+    title: "AfroSmart — Buy. Sell. Connect Across Africa.",
+    description:
+      "Liberia's trusted marketplace for vehicles, real estate, electronics, jobs, services and more.",
+    url: "https://afrosmart.app",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AfroSmart — Buy. Sell. Connect Across Africa.",
+    description:
+      "Liberia's trusted marketplace for vehicles, real estate, electronics, jobs, services and more.",
+  },
 };
 
 export default function RootLayout({
@@ -35,6 +55,7 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           <main className="flex-1">{children}</main>
+          <Footer />
           <BottomNav />
         </AuthProvider>
       </body>

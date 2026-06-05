@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
+import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { isFounder } from "@/lib/founder";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StarRating } from "@/components/rating/StarRating";
@@ -33,9 +34,10 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
       <div className="flex items-center gap-4">
         <Avatar name={user.displayName} size="lg" />
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-bold">
+          <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold">
             {user.displayName}
-            {user.isBusiness && <Badge tone="accent">Business</Badge>}
+            {isFounder(user.id) && <VerifiedBadge kind="founder" />}
+            {user.isBusiness && <VerifiedBadge kind="business" />}
           </h1>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
             <StarRating value={user.ratingAvg} />
