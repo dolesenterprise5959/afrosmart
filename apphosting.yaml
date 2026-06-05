@@ -18,22 +18,22 @@ env:
   # --- Public Firebase Web config (safe to expose; needed at BUILD + RUNTIME) ---
   # Fill these in here, or move them to Secret Manager and use `secret:` instead.
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: REPLACE_ME
+    value: AIzaSyCDoMbDYC8gWdyGng1tyNXhQArNm3faLoo
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: your-project.firebaseapp.com
+    value: afrosmart.firebaseapp.com
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: your-project
+    value: afrosmart
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    value: your-project.appspot.com
+    value: afrosmart.firebasestorage.app
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    value: REPLACE_ME
+    value: "1041694228358"
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: REPLACE_ME
+    value: "1:1041694228358:web:bf26df6982e2c1b6793607"
     availability: [BUILD, RUNTIME]
 
   # --- Server credentials ---

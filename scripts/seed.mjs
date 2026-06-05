@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { cert, initializeApp } from "firebase-admin/app";
+import { applicationDefault, cert, initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -32,16 +32,30 @@ function loadEnv() {
 }
 loadEnv();
 
-const projectId = process.env.FIREBASE_PROJECT_ID;
+// Credentials, in order of preference (mirrors lib/firebase/admin.ts):
+//   1. Explicit service-account env vars (FIREBASE_*) — paste a downloaded key.
+//   2. Application Default Credentials (ADC) — key-free, via
+//      `gcloud auth application-default login` + GOOGLE_CLOUD_PROJECT=afrosmart.
 const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
 const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+const projectId =
+  process.env.FIREBASE_PROJECT_ID ||
+  process.env.GOOGLE_CLOUD_PROJECT ||
+  process.env.GCLOUD_PROJECT ||
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
-if (!projectId || !clientEmail || !privateKey) {
-  console.error("Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY in .env.local.");
+if (clientEmail && privateKey && projectId) {
+  initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
+} else if (projectId) {
+  // No explicit key — rely on ADC. Requires `gcloud auth application-default login`.
+  initializeApp({ credential: applicationDefault(), projectId });
+} else {
+  console.error(
+    "No credentials. Either set FIREBASE_PROJECT_ID/FIREBASE_CLIENT_EMAIL/FIREBASE_PRIVATE_KEY in .env.local,\n" +
+      "or run `gcloud auth application-default login` and set GOOGLE_CLOUD_PROJECT=afrosmart for the ADC path.",
+  );
   process.exit(1);
 }
-
-initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
 const db = getFirestore();
 
 const USERS = [
