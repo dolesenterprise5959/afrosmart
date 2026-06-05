@@ -21,4 +21,13 @@ describe("toE164 (Liberia phone normalisation)", () => {
   it("trims surrounding whitespace", () => {
     expect(toE164("  0770000001 ")).toBe("+231770000001");
   });
+
+  it("does not double the country code when typed without a +", () => {
+    expect(toE164("231770000001")).toBe("+231770000001");
+    expect(toE164("231 77 000 0001")).toBe("+231770000001");
+  });
+
+  it("treats a 00 international prefix like +", () => {
+    expect(toE164("00231770000001")).toBe("+231770000001");
+  });
 });

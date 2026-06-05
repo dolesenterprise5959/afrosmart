@@ -38,7 +38,14 @@ function LoginForm() {
       confirmationRef.current = await sendOtp(phone, verifierRef.current);
       setStep("otp");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send code. Try again.");
+      const code = (err as { code?: string } | null)?.code;
+      setError(
+        code === "auth/invalid-phone-number" || code === "auth/missing-phone-number"
+          ? "That doesn't look like a valid Liberian number. Enter it as +231 followed by your 8–9 digit number, e.g. 0770000000."
+          : err instanceof Error
+            ? err.message
+            : "Could not send code. Try again.",
+      );
     } finally {
       setPending(false);
     }
