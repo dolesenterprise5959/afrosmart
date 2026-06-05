@@ -69,12 +69,27 @@ export interface Vehicle {
   vin: string;
 }
 
+export type ListingType = "sale" | "rent";
+export type PropertyType = "house" | "apartment" | "land" | "commercial" | "office" | "other";
+
+/** Structured property details, present on listings in the `property` category. */
+export interface Property {
+  listingType: ListingType;
+  propertyType: PropertyType;
+  bedrooms: number;
+  bathrooms: number;
+  /** Building floor area, in square feet. */
+  squareFeet: number;
+  /** Land/plot size, in square feet (0 when not applicable). */
+  landSize: number;
+}
+
 export interface Listing {
   id: string;
   sellerId: string;
   title: string;
   description: string;
-  /** Price in Liberian Dollars (LRD). */
+  /** Price in Liberian Dollars (LRD). For rentals this is the monthly rent. */
   price: number;
   category: CategoryId;
   county: string;
@@ -87,6 +102,8 @@ export interface Listing {
   createdAt: string;
   /** Structured vehicle spec, present when category === "cars". */
   vehicle?: Vehicle;
+  /** Structured property spec, present when category === "property". */
+  property?: Property;
 }
 
 // --- Messaging ---

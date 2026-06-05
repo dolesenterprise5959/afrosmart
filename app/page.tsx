@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 // Cars has a dedicated vehicle marketplace at /vehicles.
 const FEATURED_CATEGORIES = [
   { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
-  { id: "property", label: "Real Estate", icon: "🏠", href: "/marketplace/property" },
+  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
   { id: "electronics", label: "Electronics", icon: "💻", href: "/marketplace/electronics" },
   { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
   { id: "jobs", label: "Jobs", icon: "💼", href: "/marketplace/jobs" },

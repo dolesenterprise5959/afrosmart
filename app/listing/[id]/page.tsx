@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { VehicleSpecs } from "@/components/listing/VehicleSpecs";
+import { PropertySpecs } from "@/components/listing/PropertySpecs";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -71,6 +72,13 @@ export default async function ListingDetailPage({
             <div>
               <h2 className="mb-1.5 text-sm font-semibold text-muted">Vehicle details</h2>
               <VehicleSpecs vehicle={listing.vehicle} />
+            </div>
+          )}
+
+          {listing.property && (
+            <div>
+              <h2 className="mb-1.5 text-sm font-semibold text-muted">Property details</h2>
+              <PropertySpecs property={listing.property} />
             </div>
           )}
 

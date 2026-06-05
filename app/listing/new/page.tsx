@@ -11,6 +11,7 @@ import {
   VEHICLE_NEWEST_YEAR,
   VEHICLE_OLDEST_YEAR,
 } from "@/lib/vehicles";
+import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { uploadListingPhotos } from "@/lib/firebase/storage-client";
 import { createListingAction } from "@/app/listing/new/actions";
@@ -68,6 +69,17 @@ export default function NewListingPage() {
               vin: String(form.get("v_vin") ?? ""),
             }
           : undefined,
+        property:
+          String(form.get("category") ?? "") === "property"
+            ? {
+                listingType: String(form.get("p_listingType") ?? ""),
+                propertyType: String(form.get("p_propertyType") ?? ""),
+                bedrooms: String(form.get("p_bedrooms") ?? ""),
+                bathrooms: String(form.get("p_bathrooms") ?? ""),
+                squareFeet: String(form.get("p_squareFeet") ?? ""),
+                landSize: String(form.get("p_landSize") ?? ""),
+              }
+            : undefined,
       });
 
       // On success the action redirects; only errors return here.
@@ -228,6 +240,48 @@ export default function NewListingPage() {
                 <input name="v_interiorColor" className={field} placeholder="Black" />
               </label>
             </div>
+          </fieldset>
+        )}
+
+        {/* Property details — shown for the Real Estate category */}
+        {category === "property" && (
+          <fieldset className="rounded-2xl border border-border bg-surface p-4">
+            <legend className="px-1 text-sm font-semibold">🏠 Property details</legend>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Listing type</span>
+                <select name="p_listingType" className={field} defaultValue="sale">
+                  {LISTING_TYPES.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Property type</span>
+                <select name="p_propertyType" className={field} defaultValue="house">
+                  {PROPERTY_TYPES.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Bedrooms</span>
+                <input name="p_bedrooms" type="number" min={0} className={field} placeholder="3" defaultValue="0" />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Bathrooms</span>
+                <input name="p_bathrooms" type="number" min={0} className={field} placeholder="2" defaultValue="0" />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Floor area (sq ft)</span>
+                <input name="p_squareFeet" type="number" min={0} className={field} placeholder="1200" defaultValue="0" />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Land size (sq ft) <span className="text-muted">(optional)</span></span>
+                <input name="p_landSize" type="number" min={0} className={field} placeholder="5000" defaultValue="0" />
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-muted">For rentals, enter the monthly rent in the Price field above.</p>
           </fieldset>
         )}
 

@@ -53,6 +53,25 @@ export function validateVehicleFields(v: VehicleFields): string | null {
   return null;
 }
 
+export interface PropertyFields {
+  listingType: string;
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  squareFeet: number;
+}
+
+/** Returns an error message, or null when the core property fields are valid. */
+export function validatePropertyFields(p: PropertyFields): string | null {
+  if (p.listingType !== "sale" && p.listingType !== "rent") return "Please choose Sale or Rent.";
+  const types = ["house", "apartment", "land", "commercial", "office", "other"];
+  if (!types.includes(p.propertyType)) return "Please choose a property type.";
+  if (!Number.isFinite(p.bedrooms) || p.bedrooms < 0) return "Please enter a valid number of bedrooms.";
+  if (!Number.isFinite(p.bathrooms) || p.bathrooms < 0) return "Please enter a valid number of bathrooms.";
+  if (!Number.isFinite(p.squareFeet) || p.squareFeet < 0) return "Please enter a valid square footage.";
+  return null;
+}
+
 /** Returns an error message, or null when the star value is valid (1–5). */
 export function validateStars(stars: number): string | null {
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) {

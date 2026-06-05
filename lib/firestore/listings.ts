@@ -15,7 +15,7 @@ import {
   LISTINGS as SAMPLE_LISTINGS,
   getListing as sampleGetListing,
 } from "@/lib/mock";
-import type { CategoryId, Listing, Vehicle } from "@/lib/types";
+import type { CategoryId, Listing, Property, Vehicle } from "@/lib/types";
 
 const COLLECTION = "listings";
 const FETCH_LIMIT = 60;
@@ -35,6 +35,7 @@ export interface NewListingInput {
   city: string;
   photos: string[];
   vehicle?: Vehicle;
+  property?: Property;
 }
 
 type FirestoreDoc = FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore.DocumentSnapshot;
@@ -62,6 +63,19 @@ function docToVehicle(v: unknown): Vehicle | undefined {
   };
 }
 
+function docToProperty(p: unknown): Property | undefined {
+  if (!p || typeof p !== "object") return undefined;
+  const r = p as Record<string, unknown>;
+  return {
+    listingType: (r.listingType as Property["listingType"]) ?? "sale",
+    propertyType: (r.propertyType as Property["propertyType"]) ?? "house",
+    bedrooms: Number(r.bedrooms) || 0,
+    bathrooms: Number(r.bathrooms) || 0,
+    squareFeet: Number(r.squareFeet) || 0,
+    landSize: Number(r.landSize) || 0,
+  };
+}
+
 function docToListing(doc: FirestoreDoc): Listing {
   const d = doc.data() ?? {};
   return {
@@ -78,6 +92,7 @@ function docToListing(doc: FirestoreDoc): Listing {
     featured: Boolean(d.featured),
     createdAt: toIso(d.createdAt),
     ...(d.vehicle ? { vehicle: docToVehicle(d.vehicle) } : {}),
+    ...(d.property ? { property: docToProperty(d.property) } : {}),
   };
 }
 
@@ -184,8 +199,9 @@ export async function createListing(
       status: "active",
       featured: false,
       createdAt: Timestamp.now(),
-      // Firestore rejects `undefined`, so only include the vehicle map when present.
+      // Firestore rejects `undefined`, so only include the maps when present.
       ...(input.vehicle ? { vehicle: input.vehicle } : {}),
+      ...(input.property ? { property: input.property } : {}),
     });
   revalidateTag(LISTINGS_TAG, "max"); // refresh browse caches (stale-while-revalidate)
   return ref.id;
