@@ -29,7 +29,17 @@ service cloud.firestore {
       allow get: if isSelf(uid) || isAdmin();
       allow list: if false;
       allow create: if isSelf(uid);
-      allow update: if isSelf(uid) || isAdmin();
+      // Admins (and the Admin SDK, which bypasses rules) can change anything.
+      // A user may edit their own profile, but NOT the server-controlled fields:
+      // verification, suspension and rating aggregates. This prevents a user from
+      // self-granting a verified badge or clearing a suspension from the client.
+      allow update: if isAdmin()
+        || (isSelf(uid)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'verified', 'verifiedType', 'verificationStatus',
+              'verificationRequestedType', 'verificationNote', 'verificationRequestedAt',
+              'suspended', 'ratingAvg', 'ratingCount', 'ratingSum'
+            ]));
       allow delete: if isAdmin();
     }
 

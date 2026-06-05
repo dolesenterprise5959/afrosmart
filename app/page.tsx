@@ -9,14 +9,15 @@ import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings
 // Always reflect the latest listings from Firestore.
 export const dynamic = "force-dynamic";
 
-// The six headline categories. "Real Estate" maps to the `property` category id.
+// The six headline categories. "Real Estate" maps to the `property` category id;
+// Cars has a dedicated vehicle marketplace at /vehicles.
 const FEATURED_CATEGORIES = [
-  { id: "cars", label: "Cars", icon: "🚗" },
-  { id: "property", label: "Real Estate", icon: "🏠" },
-  { id: "electronics", label: "Electronics", icon: "💻" },
-  { id: "phones", label: "Phones", icon: "📱" },
-  { id: "jobs", label: "Jobs", icon: "💼" },
-  { id: "services", label: "Services", icon: "🛠️" },
+  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
+  { id: "property", label: "Real Estate", icon: "🏠", href: "/marketplace/property" },
+  { id: "electronics", label: "Electronics", icon: "💻", href: "/marketplace/electronics" },
+  { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
+  { id: "jobs", label: "Jobs", icon: "💼", href: "/marketplace/jobs" },
+  { id: "services", label: "Services", icon: "🛠️", href: "/marketplace/services" },
 ];
 
 export default async function Home() {
@@ -60,7 +61,7 @@ export default async function Home() {
           {FEATURED_CATEGORIES.map((c) => (
             <Link
               key={c.id}
-              href={`/marketplace/${c.id}`}
+              href={c.href}
               className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-3 py-5 text-center transition-colors hover:border-brand hover:bg-surface"
             >
               <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand/10 text-2xl transition-transform group-hover:scale-110">

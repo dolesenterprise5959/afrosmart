@@ -7,7 +7,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     heading: "Marketplace",
     links: [
       { href: "/marketplace", label: "Browse all" },
-      { href: "/marketplace/cars", label: "Cars" },
+      { href: "/vehicles", label: "Vehicles" },
       { href: "/marketplace/property", label: "Real Estate" },
       { href: "/marketplace/electronics", label: "Electronics" },
       { href: "/listing/new", label: "Post a listing" },
@@ -18,6 +18,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     links: [
       { href: "/about", label: "About AfroSmart" },
       { href: "/founder", label: "Founder" },
+      { href: "/verify", label: "Get verified" },
       { href: "/contact", label: "Contact us" },
     ],
   },

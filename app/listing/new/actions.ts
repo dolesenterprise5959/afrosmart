@@ -5,8 +5,25 @@ import { verifySession } from "@/lib/auth/dal";
 import { createListing } from "@/lib/firestore/listings";
 import { ensureUserProfile, isSuspended } from "@/lib/firestore/users";
 import { checkRateLimit, rateLimitMessage } from "@/lib/firestore/ratelimit";
-import { validateListingFields } from "@/lib/validation";
-import type { CategoryId } from "@/lib/types";
+import { validateListingFields, validateVehicleFields } from "@/lib/validation";
+import { FUEL_TYPES, TRANSMISSIONS, VEHICLE_CONDITIONS } from "@/lib/vehicles";
+import type { CategoryId, FuelType, Transmission, Vehicle, VehicleCondition } from "@/lib/types";
+
+interface VehiclePayload {
+  make?: string;
+  model?: string;
+  year?: string | number;
+  mileage?: string | number;
+  condition?: string;
+  fuelType?: string;
+  transmission?: string;
+  exteriorColor?: string;
+  interiorColor?: string;
+  vin?: string;
+}
+
+const oneOf = <T extends string>(opts: { id: T }[], value: unknown, fallback: T): T =>
+  opts.some((o) => o.id === value) ? (value as T) : fallback;
 
 export interface CreateListingResult {
   error?: string;
@@ -20,6 +37,7 @@ interface CreateListingPayload {
   county: string;
   city: string;
   photos: string[];
+  vehicle?: VehiclePayload;
 }
 
 // Server-side create. Re-verifies the session (never trusts the client for the
@@ -50,6 +68,30 @@ export async function createListingAction(
   const error = validateListingFields({ title, description, price, category, county, city });
   if (error) return { error };
 
+  // Structured vehicle details for car listings.
+  let vehicle: Vehicle | undefined;
+  if (category === "cars" && input.vehicle) {
+    const v = input.vehicle;
+    const make = (v.make ?? "").trim();
+    const model = (v.model ?? "").trim();
+    const year = Math.trunc(Number(v.year));
+    const mileage = Math.trunc(Number(v.mileage));
+    const vErr = validateVehicleFields({ make, model, year, mileage });
+    if (vErr) return { error: vErr };
+    vehicle = {
+      make,
+      model,
+      year,
+      mileage,
+      condition: oneOf<VehicleCondition>(VEHICLE_CONDITIONS, v.condition, "used"),
+      fuelType: oneOf<FuelType>(FUEL_TYPES, v.fuelType, "petrol"),
+      transmission: oneOf<Transmission>(TRANSMISSIONS, v.transmission, "automatic"),
+      exteriorColor: (v.exteriorColor ?? "").trim(),
+      interiorColor: (v.interiorColor ?? "").trim(),
+      vin: (v.vin ?? "").trim(),
+    };
+  }
+
   await ensureUserProfile(session.uid, { phone: session.phone, county, city });
   const id = await createListing(session.uid, {
     title,
@@ -59,6 +101,7 @@ export async function createListingAction(
     county,
     city,
     photos,
+    vehicle,
   });
 
   redirect(`/listing/${id}`);

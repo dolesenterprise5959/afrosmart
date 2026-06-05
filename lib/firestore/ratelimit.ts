@@ -7,7 +7,7 @@ import "server-only";
 import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
 import { evaluateRateLimit, type RateLimitState } from "@/lib/utils/ratelimit-core";
 
-export type RateAction = "message" | "report" | "listing" | "thread" | "rating";
+export type RateAction = "message" | "report" | "listing" | "thread" | "rating" | "verification";
 
 // Tuned for normal use while blocking spam. Windows are per-user.
 export const RATE_LIMITS: Record<RateAction, { max: number; windowMs: number }> = {
@@ -16,6 +16,7 @@ export const RATE_LIMITS: Record<RateAction, { max: number; windowMs: number }> 
   listing: { max: 10, windowMs: 60 * 60_000 }, // 10 new listings / hour
   thread: { max: 20, windowMs: 60 * 60_000 }, // 20 new conversations / hour
   rating: { max: 20, windowMs: 60 * 60_000 }, // 20 ratings / hour
+  verification: { max: 3, windowMs: 24 * 60 * 60_000 }, // 3 verification requests / day
 };
 
 export interface RateLimitDecision {
@@ -60,7 +61,9 @@ export function rateLimitMessage(action: RateAction, retryAfterSec: number): str
           ? "posting listings"
           : action === "rating"
             ? "submitting ratings"
-            : "starting conversations";
+            : action === "verification"
+              ? "requesting verification"
+              : "starting conversations";
   const wait =
     retryAfterSec >= 60 ? `${Math.ceil(retryAfterSec / 60)} minute(s)` : `${retryAfterSec} second(s)`;
   return `You're ${noun} too fast. Please wait ${wait} and try again.`;

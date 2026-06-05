@@ -34,6 +34,25 @@ export function validateListingFields(f: ListingFields): string | null {
   return null;
 }
 
+export interface VehicleFields {
+  make: string;
+  model: string;
+  year: number;
+  mileage: number;
+}
+
+/** Returns an error message, or null when the core vehicle fields are valid. */
+export function validateVehicleFields(v: VehicleFields): string | null {
+  if (v.make.trim().length < 2) return "Please enter the vehicle make.";
+  if (v.model.trim().length < 1) return "Please enter the vehicle model.";
+  const nextYear = new Date().getFullYear() + 1;
+  if (!Number.isInteger(v.year) || v.year < 1980 || v.year > nextYear) {
+    return `Please enter a valid year (1980–${nextYear}).`;
+  }
+  if (!Number.isFinite(v.mileage) || v.mileage < 0) return "Please enter a valid mileage.";
+  return null;
+}
+
 /** Returns an error message, or null when the star value is valid (1–5). */
 export function validateStars(stars: number): string | null {
   if (!Number.isInteger(stars) || stars < 1 || stars > 5) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ListingGallery } from "@/components/listing/ListingGallery";
+import { VehicleSpecs } from "@/components/listing/VehicleSpecs";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -66,6 +67,13 @@ export default async function ListingDetailPage({
             </p>
           </div>
 
+          {listing.vehicle && (
+            <div>
+              <h2 className="mb-1.5 text-sm font-semibold text-muted">Vehicle details</h2>
+              <VehicleSpecs vehicle={listing.vehicle} />
+            </div>
+          )}
+
           {/* Seller */}
           {seller && (
             <Link
@@ -76,8 +84,14 @@ export default async function ListingDetailPage({
               <div className="min-w-0">
                 <p className="flex flex-wrap items-center gap-1.5 font-medium">
                   {seller.displayName}
-                  {isFounder(seller.id) && <VerifiedBadge kind="founder" label="Founder" />}
-                  {seller.isBusiness && <VerifiedBadge kind="business" label="Business" />}
+                  {isFounder(seller.id) ? (
+                    <VerifiedBadge kind="founder" label="Founder" />
+                  ) : seller.verified ? (
+                    <VerifiedBadge
+                      kind={seller.verifiedType === "business" ? "business" : "seller"}
+                      label={seller.verifiedType === "business" ? "Business" : "Verified"}
+                    />
+                  ) : null}
                 </p>
                 <p className="text-xs text-muted">
                   ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}

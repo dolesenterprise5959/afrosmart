@@ -24,6 +24,11 @@ export interface County {
   cities: string[];
 }
 
+/** Kinds of admin-approved verification. */
+export type VerifiedType = "seller" | "business";
+/** Lifecycle of a verification request. */
+export type VerificationStatus = "none" | "pending" | "verified" | "rejected";
+
 export interface User {
   id: string;
   displayName: string;
@@ -37,9 +42,32 @@ export interface User {
   ratingCount: number;
   /** ISO date string. */
   joinedAt: string;
+  /** Admin-approved verification (server-controlled; clients can't self-set). */
+  verified?: boolean;
+  verifiedType?: VerifiedType | null;
+  verificationStatus?: VerificationStatus;
 }
 
 export type ListingStatus = "active" | "sold" | "removed";
+
+export type VehicleCondition = "new" | "used" | "certified";
+export type FuelType = "petrol" | "diesel" | "hybrid" | "electric" | "other";
+export type Transmission = "automatic" | "manual";
+
+/** Structured vehicle details, present on listings in the `cars` category. */
+export interface Vehicle {
+  make: string;
+  model: string;
+  year: number;
+  mileage: number;
+  condition: VehicleCondition;
+  fuelType: FuelType;
+  transmission: Transmission;
+  exteriorColor: string;
+  interiorColor: string;
+  /** Vehicle Identification Number (optional). */
+  vin: string;
+}
 
 export interface Listing {
   id: string;
@@ -57,6 +85,8 @@ export interface Listing {
   featured: boolean;
   /** ISO date string. */
   createdAt: string;
+  /** Structured vehicle spec, present when category === "cars". */
+  vehicle?: Vehicle;
 }
 
 // --- Messaging ---

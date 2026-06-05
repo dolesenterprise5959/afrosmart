@@ -15,7 +15,7 @@ import {
   LISTINGS as SAMPLE_LISTINGS,
   getListing as sampleGetListing,
 } from "@/lib/mock";
-import type { CategoryId, Listing } from "@/lib/types";
+import type { CategoryId, Listing, Vehicle } from "@/lib/types";
 
 const COLLECTION = "listings";
 const FETCH_LIMIT = 60;
@@ -34,6 +34,7 @@ export interface NewListingInput {
   county: string;
   city: string;
   photos: string[];
+  vehicle?: Vehicle;
 }
 
 type FirestoreDoc = FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore.DocumentSnapshot;
@@ -42,6 +43,23 @@ function toIso(value: unknown): string {
   if (value instanceof Timestamp) return value.toDate().toISOString();
   if (typeof value === "string") return value;
   return new Date().toISOString();
+}
+
+function docToVehicle(v: unknown): Vehicle | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  const r = v as Record<string, unknown>;
+  return {
+    make: String(r.make ?? ""),
+    model: String(r.model ?? ""),
+    year: Number(r.year) || 0,
+    mileage: Number(r.mileage) || 0,
+    condition: (r.condition as Vehicle["condition"]) ?? "used",
+    fuelType: (r.fuelType as Vehicle["fuelType"]) ?? "petrol",
+    transmission: (r.transmission as Vehicle["transmission"]) ?? "manual",
+    exteriorColor: String(r.exteriorColor ?? ""),
+    interiorColor: String(r.interiorColor ?? ""),
+    vin: String(r.vin ?? ""),
+  };
 }
 
 function docToListing(doc: FirestoreDoc): Listing {
@@ -59,6 +77,7 @@ function docToListing(doc: FirestoreDoc): Listing {
     status: d.status ?? "active",
     featured: Boolean(d.featured),
     createdAt: toIso(d.createdAt),
+    ...(d.vehicle ? { vehicle: docToVehicle(d.vehicle) } : {}),
   };
 }
 
@@ -165,6 +184,8 @@ export async function createListing(
       status: "active",
       featured: false,
       createdAt: Timestamp.now(),
+      // Firestore rejects `undefined`, so only include the vehicle map when present.
+      ...(input.vehicle ? { vehicle: input.vehicle } : {}),
     });
   revalidateTag(LISTINGS_TAG, "max"); // refresh browse caches (stale-while-revalidate)
   return ref.id;
