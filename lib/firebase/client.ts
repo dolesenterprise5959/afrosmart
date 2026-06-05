@@ -6,13 +6,20 @@ import { getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
+// The Firebase *Web* config is public by design — it ships to every browser and
+// is safe to commit. Real security is enforced by Firestore/Storage rules and
+// App Check, not by hiding these values (they're also in apphosting.yaml). We
+// hardcode them as fallbacks so the client bundle always has a valid config even
+// when build-time NEXT_PUBLIC_* injection is unavailable (e.g. Docker build-arg
+// edge cases on Cloud Run). Set the env vars to point a build at a different
+// Firebase project.
 const config: FirebaseOptions = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyCDoMbDYC8gWdyGng1tyNXhQArNm3faLoo",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "afrosmart.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "afrosmart",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "afrosmart.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "1041694228358",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "1:1041694228358:web:bf26df6982e2c1b6793607",
 };
 
 /** True when the public Firebase config is present (set in .env.local). */
