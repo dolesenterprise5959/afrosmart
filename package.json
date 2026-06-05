@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "seed": "node scripts/seed.mjs",
     "test": "vitest run",
     "test:rules": "vitest run --config vitest.rules.config.ts"
