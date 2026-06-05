@@ -1,0 +1,95 @@
+rules_version = '2';
+
+// AfroSmart Firestore Security Rules (Phase 3 draft).
+//
+// Core invariant: a user's phone number is NEVER readable by other users from
+// the client. Phone numbers are revealed only through a trusted server endpoint
+// (Admin SDK) after the call-unlock condition is met. These rules are the real
+// enforcement layer — the UI is not trusted.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      // Set via Admin SDK custom claims (request.auth.token.admin == true).
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // --- Users ---
+    // Public profile fields are world-readable, but the `phone` field must not
+    // be queried by other users. Client reads of another user's doc are denied;
+    // public profile data is served via a server DTO that strips `phone`.
+    match /users/{uid} {
+      allow get: if isSelf(uid) || isAdmin();
+      allow list: if false;
+      allow create: if isSelf(uid);
+      allow update: if isSelf(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // --- Listings ---
+    match /listings/{listingId} {
+      allow read: if true; // browsing is open to everyone
+      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update, delete: if isAdmin()
+        || (isSignedIn() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // --- Messaging threads ---
+    // Clients may READ a thread/its messages only if they are a participant.
+    // ALL writes (creating threads, sending messages, flipping callUnlocked) go
+    // through trusted server route handlers using the Admin SDK, which bypasses
+    // these rules. Denying client writes here guarantees the server is the only
+    // path that can set the sender id or unlock the call.
+    match /threads/{threadId} {
+      allow read: if isSignedIn()
+        && request.auth.uid in resource.data.participants;
+      allow write: if false;
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn()
+          && request.auth.uid in get(/databases/$(database)/documents/threads/$(threadId)).data.participants;
+        allow write: if false;
+      }
+    }
+
+    // --- Ratings ---
+    // Public to read; written ONLY by the server (Admin SDK), which updates the
+    // ratee's aggregate (ratingAvg/ratingCount/ratingSum) atomically in a
+    // transaction. Client writes can't keep that aggregate correct, so they're
+    // denied here.
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // --- Reports ---
+    // Fully server-mediated: created via a route handler and read only by admins
+    // through the Admin SDK. No client access.
+    match /reports/{reportId} {
+      allow read, write: if false;
+    }
+
+    // --- Saved listings (per-user) ---
+    match /saved/{uid}/items/{listingId} {
+      allow read, write: if isSelf(uid);
+    }
+
+    // --- Reference data (counties/categories) ---
+    match /counties/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- Rate-limit counters --- (server-only; never touched by clients)
+    match /rateLimits/{id} {
+      allow read, write: if false;
+    }
+  }
+}

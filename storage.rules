@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// AfroSmart Firebase Storage rules.
+// Listing photos are publicly readable (so anyone browsing can see them) but
+// only the owner may upload under their own folder, and only reasonably-sized
+// image files.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /listings/{uid}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

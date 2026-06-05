@@ -32,9 +32,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but keep the committed template
+!.env.local.example
 
 # vercel
 .vercel
+
+# firebase (real project id / cache / logs — templates are committed as *.example)
+.firebaserc
+.firebase
+firebase-debug.log
+*-debug.log
 
 # typescript
 *.tsbuildinfo

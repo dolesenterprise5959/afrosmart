@@ -1,0 +1,6 @@
+{
+  "//": "Copy to .firebaserc and replace with your real Firebase project id. .firebaserc is gitignored so the real project id stays out of source control; the Firebase CLI reads it to know which project to target for `firebase deploy`.",
+  "projects": {
+    "default": "your-firebase-project-id"
+  }
+}

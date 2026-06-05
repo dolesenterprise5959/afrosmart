@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Build / Lint / Test gates — must pass before merge.
+  verify:
+    name: Lint · Typecheck · Test · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        # NEXT_PUBLIC_* are not required to compile; real values are injected at deploy time.
+        run: npm run build
+
+  # Firestore Security Rules — proves the phone-privacy / call-unlock invariants
+  # on the emulator. Requires Java (provided here) + the rules-testing lib.
+  rules:
+    name: Firestore rules (emulator)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - name: Install rules-testing + firebase-tools
+        run: npm i -D @firebase/rules-unit-testing@^4 firebase-tools --legacy-peer-deps
+      - name: Run rules suite on the Firestore emulator
+        run: npx firebase emulators:exec --only firestore "npm run test:rules"

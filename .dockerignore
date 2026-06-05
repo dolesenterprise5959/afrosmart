@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+npm-debug.log*
+.env*
+!.env.local.example
+.firebaserc
+.firebase
+coverage
+tests
+docs
+*.md
+.DS_Store
+Dockerfile
+.dockerignore

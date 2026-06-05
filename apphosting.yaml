@@ -1,0 +1,52 @@
+# Firebase App Hosting configuration (runs this Next.js app on Cloud Run).
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+#
+# Credentials note: in production the Admin SDK uses Application Default
+# Credentials from the App Hosting backend's service account — so NO
+# FIREBASE_PRIVATE_KEY is needed here (see lib/firebase/admin.ts). Grant that
+# service account the "Cloud Datastore User" + "Firebase Authentication Admin"
+# + "Storage Object Admin" roles (least privilege).
+
+runConfig:
+  minInstances: 1 # avoid cold starts (matters for Liberia latency)
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  # --- Public Firebase Web config (safe to expose; needed at BUILD + RUNTIME) ---
+  # Fill these in here, or move them to Secret Manager and use `secret:` instead.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: REPLACE_ME
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: your-project.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: your-project
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: your-project.appspot.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: REPLACE_ME
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: REPLACE_ME
+    availability: [BUILD, RUNTIME]
+
+  # --- Server credentials ---
+  # Preferred: leave these unset and rely on Application Default Credentials.
+  # If you must use an explicit key instead, store it in Secret Manager and
+  # reference it (do NOT inline the private key):
+  #
+  # - variable: FIREBASE_PROJECT_ID
+  #   value: your-project
+  #   availability: [RUNTIME]
+  # - variable: FIREBASE_CLIENT_EMAIL
+  #   value: firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+  #   availability: [RUNTIME]
+  # - variable: FIREBASE_PRIVATE_KEY
+  #   secret: firebase-private-key   # created via: firebase apphosting:secrets:set
+  #   availability: [RUNTIME]
