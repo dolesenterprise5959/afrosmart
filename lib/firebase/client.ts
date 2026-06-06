@@ -5,6 +5,25 @@
 import { getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
+
+// App Check (reCAPTCHA Enterprise) — protects Auth/Firestore/Storage from abuse,
+// fake clients and SMS/quota theft. The site key is public by design.
+const RECAPTCHA_ENTERPRISE_SITE_KEY = "6Lf-yAwtAAAAABtv4yiqDJ3ILVbbLzQJsMKzFa6B";
+let appCheckStarted = false;
+
+function ensureAppCheck(app: FirebaseApp): void {
+  if (appCheckStarted || typeof window === "undefined") return;
+  appCheckStarted = true;
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_ENTERPRISE_SITE_KEY),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch {
+    // App Check init must never break the app (enforcement is monitored first).
+  }
+}
 
 // The Firebase *Web* config is public by design — it ships to every browser and
 // is safe to commit. Real security is enforced by Firestore/Storage rules and
@@ -31,7 +50,9 @@ export function getFirebaseApp(): FirebaseApp {
       "Firebase is not configured. Copy .env.local.example to .env.local and fill in the NEXT_PUBLIC_FIREBASE_* values.",
     );
   }
-  return getApps()[0] ?? initializeApp(config);
+  const app = getApps()[0] ?? initializeApp(config);
+  ensureAppCheck(app);
+  return app;
 }
 
 export function getFirebaseAuth(): Auth {
