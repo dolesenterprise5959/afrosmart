@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
 import { createRecaptcha, sendOtp, confirmOtp, toE164 } from "@/lib/firebase/auth-client";
 import { validateLiberianMobile } from "@/lib/utils/phone";
+import { DEFAULT_COUNTRY } from "@/lib/countries";
 
 const RESEND_COOLDOWN = 30; // seconds between code sends (anti-spam)
 const MAX_ATTEMPTS = 5; // wrong codes before a lockout
@@ -136,27 +137,21 @@ function LoginForm() {
         <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-6 flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Phone number</span>
-            <div className="flex gap-2">
-              <select
-                aria-label="Country"
-                defaultValue="LR"
-                className="h-12 shrink-0 rounded-xl border border-border bg-card px-2 text-base outline-none focus:border-brand"
-              >
-                <option value="LR">🇱🇷 +231</option>
-              </select>
+            <div className="flex h-12 items-center rounded-xl border border-border bg-card focus-within:border-brand">
+              <span className="pl-3 pr-1 text-xl" aria-hidden>{DEFAULT_COUNTRY.flag}</span>
               <input
-                className="h-12 min-w-0 flex-1 rounded-xl border border-border bg-card px-4 text-base outline-none focus:border-brand"
+                className="h-12 min-w-0 flex-1 rounded-r-xl bg-transparent px-2 text-base outline-none"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel-national"
-                placeholder="77 000 0000"
+                placeholder={DEFAULT_COUNTRY.example}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
             <span className="text-xs text-muted">
-              Enter your local number — e.g. Lonestar 77…, Orange 88…
+              Enter your Liberian mobile number — we add {DEFAULT_COUNTRY.dialCode} automatically (Lonestar 77…, Orange 88…).
             </span>
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}

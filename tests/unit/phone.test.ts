@@ -30,6 +30,13 @@ describe("toE164 (Liberia phone normalisation)", () => {
   it("treats a 00 international prefix like +", () => {
     expect(toE164("00231770000001")).toBe("+231770000001");
   });
+
+  it("converts local numbers across prefixes to E.164", () => {
+    expect(toE164("0770000000")).toBe("+231770000000");
+    expect(toE164("0880000000")).toBe("+231880000000");
+    expect(toE164("88 000 0000")).toBe("+231880000000");
+    expect(toE164("0550000000")).toBe("+231550000000");
+  });
 });
 
 describe("toLocalPhone (display format)", () => {
