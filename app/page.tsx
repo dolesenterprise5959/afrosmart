@@ -10,17 +10,13 @@ import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings
 // Always reflect the latest listings from Firestore.
 export const dynamic = "force-dynamic";
 
-// Everyday headline categories (not just cars/real estate). Cars/Real Estate have
-// dedicated marketplaces; the rest are popular local categories.
-const FEATURED_CATEGORIES = [
+// The 4 highest-traffic categories shown on the homepage. Everything else lives
+// on the dedicated /categories page ("View All Categories").
+const TOP_CATEGORIES = [
   { id: "rice", label: "Food", icon: "🍚", href: "/marketplace/rice" },
-  { id: "barber", label: "Services", icon: "💈", href: "/services" },
-  { id: "motorbike", label: "Transport", icon: "🛵", href: "/marketplace/motorbike" },
-  { id: "restaurants", label: "Shops", icon: "🍽️", href: "/marketplace/restaurants" },
-  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
   { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
   { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
-  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental" },
+  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
 ];
 
 export default async function Home() {
@@ -47,14 +43,11 @@ export default async function Home() {
         <SponsoredAd />
       </section>
 
-      {/* Category cards — real AI photos, high on the page */}
+      {/* Top categories — compact 4-up; everything else on /categories */}
       <section className="mt-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Browse by category</h2>
-          <Link href="/marketplace" className="text-sm font-medium text-brand">All categories →</Link>
-        </div>
-        <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
-          {FEATURED_CATEGORIES.map((c) => (
+        <h2 className="mb-3 text-lg font-semibold">Browse by category</h2>
+        <div className="grid grid-cols-4 gap-2.5">
+          {TOP_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
@@ -64,6 +57,12 @@ export default async function Home() {
             </Link>
           ))}
         </div>
+        <Link
+          href="/categories"
+          className="mt-2.5 flex items-center justify-center rounded-2xl border border-border bg-card py-3 text-sm font-semibold text-brand transition-colors hover:border-brand hover:bg-surface"
+        >
+          View All Categories →
+        </Link>
       </section>
 
       {/* Featured */}
