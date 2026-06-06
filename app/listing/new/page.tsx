@@ -13,6 +13,7 @@ import {
   VEHICLE_OLDEST_YEAR,
 } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
+import { isServiceCategory } from "@/lib/services";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { uploadListingPhotos } from "@/lib/firebase/storage-client";
 import { createListingAction } from "@/app/listing/new/actions";
@@ -82,6 +83,13 @@ export default function NewListingPage() {
                 landSize: String(form.get("p_landSize") ?? ""),
               }
             : undefined,
+        service: isServiceCategory(String(form.get("category") ?? ""))
+          ? {
+              businessName: String(form.get("s_businessName") ?? ""),
+              phone: String(form.get("s_phone") ?? ""),
+              whatsapp: String(form.get("s_whatsapp") ?? ""),
+            }
+          : undefined,
       });
 
       // On success the action redirects; only errors return here.
@@ -294,6 +302,32 @@ export default function NewListingPage() {
               </label>
             </div>
             <p className="mt-2 text-xs text-muted">For rentals, enter the monthly rent in the Price field above.</p>
+          </fieldset>
+        )}
+
+        {/* Business contact — shown for service categories (public on services) */}
+        {isServiceCategory(category) && (
+          <fieldset className="rounded-2xl border border-border bg-surface p-4">
+            <legend className="px-1 text-sm font-semibold">🏪 Business details</legend>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">Business name</span>
+                <input name="s_businessName" className={field} placeholder="e.g. Sharp Cuts Barber" />
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium">Phone <span className="text-muted">(public)</span></span>
+                  <input name="s_phone" type="tel" className={field} placeholder="0770 000 000" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium">WhatsApp <span className="text-muted">(public)</span></span>
+                  <input name="s_whatsapp" type="tel" className={field} placeholder="0770 000 000" />
+                </label>
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              For services, your phone &amp; WhatsApp are shown publicly so customers can reach you directly.
+            </p>
           </fieldset>
         )}
 

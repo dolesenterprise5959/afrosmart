@@ -7,6 +7,9 @@ import { ensureUserProfile, getPublicProfile, isSuspended } from "@/lib/firestor
 import { checkRateLimit, rateLimitMessage } from "@/lib/firestore/ratelimit";
 import { isFeaturedEligible } from "@/lib/premium";
 import { sellerType as deriveSellerType } from "@/lib/sellers";
+import { isServiceCategory } from "@/lib/services";
+import { toE164 } from "@/lib/utils/phone";
+import type { ServiceInfo } from "@/lib/types";
 import { validateListingFields, validatePropertyFields, validateVehicleFields } from "@/lib/validation";
 import { FUEL_TYPES, TRANSMISSIONS, VEHICLE_CONDITIONS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
@@ -37,6 +40,12 @@ interface PropertyPayload {
   landSize?: string | number;
 }
 
+interface ServicePayload {
+  businessName?: string;
+  phone?: string;
+  whatsapp?: string;
+}
+
 const oneOf = <T extends string>(opts: { id: T }[], value: unknown, fallback: T): T =>
   opts.some((o) => o.id === value) ? (value as T) : fallback;
 
@@ -55,6 +64,7 @@ interface CreateListingPayload {
   photos: string[];
   vehicle?: VehiclePayload;
   property?: PropertyPayload;
+  service?: ServicePayload;
 }
 
 // Server-side create. Re-verifies the session (never trusts the client for the
@@ -125,6 +135,20 @@ export async function createListingAction(
     property = { listingType, propertyType, bedrooms, bathrooms, squareFeet, landSize };
   }
 
+  // Public business contact for service-category listings.
+  let service: ServiceInfo | undefined;
+  if (isServiceCategory(category) && input.service) {
+    const s = input.service;
+    const businessName = (s.businessName ?? "").trim().slice(0, 100);
+    if (businessName) {
+      service = {
+        businessName,
+        phone: s.phone ? toE164(s.phone) : "",
+        whatsapp: s.whatsapp ? toE164(s.whatsapp) : "",
+      };
+    }
+  }
+
   await ensureUserProfile(session.uid, { phone: session.phone, county, city });
   // Read the seller's account once: drives seller type + featured eligibility.
   const profile = await getPublicProfile(session.uid);
@@ -142,6 +166,7 @@ export async function createListingAction(
     photos,
     vehicle,
     property,
+    service,
     featured,
   });
 

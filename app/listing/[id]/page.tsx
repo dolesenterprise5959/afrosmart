@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { VehicleSpecs } from "@/components/listing/VehicleSpecs";
 import { PropertySpecs } from "@/components/listing/PropertySpecs";
+import { ServiceContact } from "@/components/listing/ServiceContact";
 import { sellerType, sellerTypeLabel } from "@/lib/sellers";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { incrementListingView } from "@/lib/firestore/analytics";
@@ -89,6 +90,13 @@ export default async function ListingDetailPage({
             <div>
               <h2 className="mb-1.5 text-sm font-semibold text-muted">Property details</h2>
               <PropertySpecs property={listing.property} />
+            </div>
+          )}
+
+          {listing.service && (
+            <div>
+              <h2 className="mb-1.5 text-sm font-semibold text-muted">Contact this business</h2>
+              <ServiceContact service={listing.service} />
             </div>
           )}
 

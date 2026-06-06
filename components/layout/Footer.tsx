@@ -6,6 +6,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     heading: "Marketplace",
     links: [
       { href: "/marketplace", label: "Browse all" },
+      { href: "/services", label: "Services & businesses" },
       { href: "/vehicles", label: "Vehicles" },
       { href: "/properties", label: "Real Estate" },
       { href: "/marketplace/electronics", label: "Electronics" },

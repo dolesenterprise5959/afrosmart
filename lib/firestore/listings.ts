@@ -15,7 +15,7 @@ import {
   LISTINGS as SAMPLE_LISTINGS,
   getListing as sampleGetListing,
 } from "@/lib/mock";
-import type { CategoryId, Currency, Listing, Property, SellerType, Vehicle } from "@/lib/types";
+import type { CategoryId, Currency, Listing, Property, SellerType, ServiceInfo, Vehicle } from "@/lib/types";
 
 const COLLECTION = "listings";
 const FETCH_LIMIT = 60;
@@ -38,6 +38,7 @@ export interface NewListingInput {
   photos: string[];
   vehicle?: Vehicle;
   property?: Property;
+  service?: ServiceInfo;
   /** Premium/Business sellers get featured placement. */
   featured?: boolean;
 }
@@ -80,6 +81,16 @@ function docToProperty(p: unknown): Property | undefined {
   };
 }
 
+function docToService(s: unknown): ServiceInfo | undefined {
+  if (!s || typeof s !== "object") return undefined;
+  const r = s as Record<string, unknown>;
+  return {
+    businessName: String(r.businessName ?? ""),
+    phone: String(r.phone ?? ""),
+    whatsapp: String(r.whatsapp ?? ""),
+  };
+}
+
 function docToListing(doc: FirestoreDoc): Listing {
   const d = doc.data() ?? {};
   return {
@@ -99,6 +110,7 @@ function docToListing(doc: FirestoreDoc): Listing {
     createdAt: toIso(d.createdAt),
     ...(d.vehicle ? { vehicle: docToVehicle(d.vehicle) } : {}),
     ...(d.property ? { property: docToProperty(d.property) } : {}),
+    ...(d.service ? { service: docToService(d.service) } : {}),
   };
 }
 
@@ -210,6 +222,7 @@ export async function createListing(
       // Firestore rejects `undefined`, so only include the maps when present.
       ...(input.vehicle ? { vehicle: input.vehicle } : {}),
       ...(input.property ? { property: input.property } : {}),
+      ...(input.service ? { service: input.service } : {}),
     });
   revalidateTag(LISTINGS_TAG, "max"); // refresh browse caches (stale-while-revalidate)
   return ref.id;

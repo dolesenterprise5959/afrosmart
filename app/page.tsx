@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 // dedicated marketplaces; the rest are popular local categories.
 const FEATURED_CATEGORIES = [
   { id: "rice", label: "Food", icon: "🍚", href: "/marketplace/rice" },
-  { id: "barber", label: "Services", icon: "💈", href: "/marketplace/barber" },
+  { id: "barber", label: "Services", icon: "💈", href: "/services" },
   { id: "motorbike", label: "Transport", icon: "🛵", href: "/marketplace/motorbike" },
   { id: "restaurants", label: "Shops", icon: "🍽️", href: "/marketplace/restaurants" },
   { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },

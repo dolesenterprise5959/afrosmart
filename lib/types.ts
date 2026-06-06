@@ -90,6 +90,16 @@ export interface Property {
   landSize: number;
 }
 
+/** Public business contact for service listings (shown openly, unlike the
+ *  privacy-protected peer marketplace where phone is call-unlocked). */
+export interface ServiceInfo {
+  businessName: string;
+  /** Public contact phone (E.164). */
+  phone: string;
+  /** Public WhatsApp number (E.164). */
+  whatsapp: string;
+}
+
 export interface Listing {
   id: string;
   sellerId: string;
@@ -114,6 +124,8 @@ export interface Listing {
   vehicle?: Vehicle;
   /** Structured property spec, present when category === "property". */
   property?: Property;
+  /** Public business contact, present on service-category listings. */
+  service?: ServiceInfo;
 }
 
 // --- Messaging ---
