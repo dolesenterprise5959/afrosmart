@@ -57,8 +57,8 @@ const CATEGORY_IMAGE: Record<string, string> = {
   "house-rental": "rental-home", "bicycle-rental": "rental-vehicle",
   // Jobs / Agriculture / Construction / Beauty
   jobs: "jobs", "job-listings": "jobs",
-  agriculture: "agriculture", farm: "agriculture", livestock: "agriculture", "farm-produce": "agriculture",
-  construction: "construction", "building-materials": "construction", plumbing: "construction", "electrical-repair": "construction",
+  agriculture: "agriculture", livestock: "agriculture", "farm-produce": "agriculture",
+  construction: "construction", "building-materials": "construction", plumbing: "construction",
   beauty: "beauty-salon", cosmetics: "beauty-salon",
 };
 
