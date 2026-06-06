@@ -7,15 +7,17 @@ import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings
 // Always reflect the latest listings from Firestore.
 export const dynamic = "force-dynamic";
 
-// The six headline categories. "Real Estate" maps to the `property` category id;
-// Cars has a dedicated vehicle marketplace at /vehicles.
+// Everyday headline categories (not just cars/real estate). Cars/Real Estate have
+// dedicated marketplaces; the rest are popular local categories.
 const FEATURED_CATEGORIES = [
-  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
+  { id: "rice", label: "Food", icon: "🍚", href: "/marketplace/rice" },
+  { id: "barber", label: "Services", icon: "💈", href: "/marketplace/barber" },
+  { id: "motorbike", label: "Transport", icon: "🛵", href: "/marketplace/motorbike" },
+  { id: "restaurants", label: "Shops", icon: "🍽️", href: "/marketplace/restaurants" },
   { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
-  { id: "electronics", label: "Electronics", icon: "💻", href: "/marketplace/electronics" },
+  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
   { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
-  { id: "jobs", label: "Jobs", icon: "💼", href: "/marketplace/jobs" },
-  { id: "services", label: "Services", icon: "🛠️", href: "/marketplace/services" },
+  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental" },
 ];
 
 export default async function Home() {
@@ -27,48 +29,38 @@ export default async function Home() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-10">
-      {/* Hero */}
-      <section className="mt-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-5 py-9 text-brand-foreground sm:px-8 sm:py-12">
-        <h1 className="max-w-2xl text-3xl font-bold leading-tight sm:text-4xl">
-          Buy. Sell. Connect Across Africa.
+      {/* Hero — compact on mobile (search-first below) */}
+      <section className="mt-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-5 py-6 text-brand-foreground sm:px-8 sm:py-10">
+        <h1 className="max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
+          AfroSmart — Liberia&apos;s community marketplace
         </h1>
-        <p className="mt-3 max-w-xl text-sm text-brand-foreground/85 sm:text-base">
-          Liberia&apos;s trusted marketplace for vehicles, real estate, electronics, phones,
-          jobs and services — close to you, from people you can trust.
+        <p className="mt-2 max-w-2xl text-sm text-brand-foreground/85 sm:text-base">
+          For food, services, transport, businesses, real estate, jobs, and everyday commerce.
         </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Button href="/marketplace" variant="secondary" size="lg">Browse marketplace</Button>
-          <Button
-            href="/listing/new"
-            size="lg"
-            className="bg-brand-foreground/15 text-brand-foreground ring-1 ring-brand-foreground/30 hover:bg-brand-foreground/25"
-          >
-            + Post a listing
-          </Button>
-        </div>
-        {/* Inline search on mobile (the header search is hidden there). */}
-        <div className="mt-6 md:hidden">
-          <SearchBar />
-        </div>
       </section>
 
-      {/* Category cards */}
-      <section className="mt-8">
+      {/* Search — the primary action */}
+      <section className="mt-4">
+        <SearchBar />
+      </section>
+
+      {/* Category cards — high on the page so users browse immediately */}
+      <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Browse by category</h2>
           <Link href="/marketplace" className="text-sm font-medium text-brand">All categories →</Link>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-4 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
           {FEATURED_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
-              className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-3 py-5 text-center transition-colors hover:border-brand hover:bg-surface"
+              className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-2 py-4 text-center transition-colors hover:border-brand hover:bg-surface"
             >
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand/10 text-2xl transition-transform group-hover:scale-110">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand/10 text-xl transition-transform group-hover:scale-110">
                 {c.icon}
               </span>
-              <span className="text-sm font-medium">{c.label}</span>
+              <span className="text-xs font-medium">{c.label}</span>
             </Link>
           ))}
         </div>

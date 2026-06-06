@@ -21,8 +21,8 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="sticky bottom-0 z-40 border-t border-border bg-card md:hidden">
-      <ul className="mx-auto flex max-w-6xl items-stretch justify-between">
+    <nav className="sticky bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <ul className="mx-auto flex max-w-md items-stretch justify-between px-1">
         {items.map((item) => {
           const active = isActive(item.href);
           return (
@@ -30,14 +30,19 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-                  active ? "text-brand" : "text-muted"
+                className={`flex flex-col items-center gap-1 px-1 pb-1.5 pt-2 text-[11px] font-medium transition-colors ${
+                  active ? "text-brand" : "text-muted hover:text-foreground"
                 }`}
               >
-                <span aria-hidden className="relative text-lg leading-none">
+                <span
+                  aria-hidden
+                  className={`relative grid h-8 w-12 place-items-center rounded-full text-lg leading-none transition-colors ${
+                    active ? "bg-brand/10" : ""
+                  }`}
+                >
                   {item.icon}
                   {item.href === "/messages" && unreadCount > 0 && (
-                    <span className="absolute -right-2 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
+                    <span className="absolute right-1.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}

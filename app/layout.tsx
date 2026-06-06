@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s · AfroSmart",
   },
   description:
-    "AfroSmart is Liberia's trusted digital marketplace for vehicles, real estate, electronics, phones, jobs, services and local commerce — connecting buyers and sellers across Africa.",
+    "AfroSmart — Liberia's community marketplace for food, services, transport, businesses, real estate, jobs, and everyday commerce.",
   applicationName: "AfroSmart",
   openGraph: {
     type: "website",
