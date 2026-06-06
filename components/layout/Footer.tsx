@@ -16,7 +16,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     heading: "Company",
     links: [
       { href: "/about", label: "About AfroSmart" },
-      { href: "/categories", label: "Browse categories" },
+      { href: "/marketplace", label: "Browse marketplace" },
       { href: "/pricing", label: "Pricing & Plans" },
       { href: "/verify", label: "Get verified" },
       { href: "/contact", label: "Contact us" },

@@ -15,7 +15,7 @@ import {
   LISTINGS as SAMPLE_LISTINGS,
   getListing as sampleGetListing,
 } from "@/lib/mock";
-import type { CategoryId, Listing, Property, Vehicle } from "@/lib/types";
+import type { CategoryId, Currency, Listing, Property, Vehicle } from "@/lib/types";
 
 const COLLECTION = "listings";
 const FETCH_LIMIT = 60;
@@ -30,6 +30,7 @@ export interface NewListingInput {
   title: string;
   description: string;
   price: number;
+  currency: Currency;
   category: CategoryId;
   county: string;
   city: string;
@@ -86,6 +87,7 @@ function docToListing(doc: FirestoreDoc): Listing {
     title: d.title ?? "",
     description: d.description ?? "",
     price: typeof d.price === "number" ? d.price : Number(d.price) || 0,
+    currency: d.currency === "USD" ? "USD" : "LRD",
     category: d.category ?? "general",
     county: d.county ?? "",
     city: d.city ?? "",
@@ -194,6 +196,7 @@ export async function createListing(
       title: input.title,
       description: input.description,
       price: input.price,
+      currency: input.currency,
       category: input.category,
       county: input.county,
       city: input.city,

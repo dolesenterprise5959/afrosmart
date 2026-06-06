@@ -12,15 +12,24 @@ import {
 } from "@/lib/mock";
 
 describe("catalog", () => {
-  it("defines all 7 PRD categories", () => {
-    expect(CATEGORIES.map((c) => c.id).sort()).toEqual(
-      ["cars", "electronics", "general", "jobs", "phones", "property", "services"].sort(),
-    );
+  it("includes the core categories plus the expanded local-market catalog", () => {
+    const ids = CATEGORIES.map((c) => c.id);
+    for (const id of ["cars", "property", "phones", "electronics", "services", "jobs", "general"]) {
+      expect(ids).toContain(id);
+    }
+    // Local-market / everyday additions across the new groups.
+    for (const id of ["rice", "barber", "restaurants", "motorbike", "churches", "truck-rental"]) {
+      expect(ids).toContain(id);
+    }
+    expect(ids.length).toBeGreaterThan(40);
+    expect(new Set(ids).size).toBe(ids.length); // no duplicate ids
   });
 
-  it("defines the 6 initial counties from the PRD", () => {
-    expect(COUNTIES).toHaveLength(6);
-    expect(COUNTIES.map((c) => c.name)).toContain("Montserrado");
+  it("defines all 15 counties of Liberia", () => {
+    expect(COUNTIES).toHaveLength(15);
+    const names = COUNTIES.map((c) => c.name);
+    expect(names).toContain("Montserrado");
+    expect(names).toContain("Maryland");
   });
 
   it("looks up a category by id", () => {
@@ -32,7 +41,13 @@ describe("catalog", () => {
 describe("formatPrice", () => {
   it("formats LRD with thousands separators", () => {
     expect(formatPrice(78000)).toBe("L$ 78,000");
-    expect(formatPrice(950000)).toBe("L$ 950,000");
+    expect(formatPrice(950000, "LRD")).toBe("L$ 950,000");
+  });
+  it("formats USD with a $ sign", () => {
+    expect(formatPrice(1850, "USD")).toBe("$1,850");
+  });
+  it("shows Free for a zero/empty price", () => {
+    expect(formatPrice(0)).toBe("Free");
   });
 });
 

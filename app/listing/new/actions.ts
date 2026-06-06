@@ -48,6 +48,7 @@ interface CreateListingPayload {
   title: string;
   description: string;
   price: string | number;
+  currency?: string;
   category: string;
   county: string;
   city: string;
@@ -76,6 +77,7 @@ export async function createListingAction(
   const title = input.title?.trim() ?? "";
   const description = input.description?.trim() ?? "";
   const price = Number(input.price);
+  const currency = input.currency === "USD" ? "USD" : "LRD";
   const category = input.category as CategoryId;
   const county = input.county?.trim() ?? "";
   const city = input.city?.trim() ?? "";
@@ -130,6 +132,7 @@ export async function createListingAction(
     title,
     description,
     price,
+    currency,
     category,
     county,
     city,

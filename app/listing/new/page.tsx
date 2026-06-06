@@ -52,6 +52,7 @@ export default function NewListingPage() {
         title: String(form.get("title") ?? ""),
         description: String(form.get("description") ?? ""),
         price: String(form.get("price") ?? ""),
+        currency: String(form.get("currency") ?? "LRD"),
         category: String(form.get("category") ?? ""),
         county: String(form.get("county") ?? ""),
         city: String(form.get("city") ?? ""),
@@ -146,8 +147,14 @@ export default function NewListingPage() {
 
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">Price (L$)</span>
-            <input name="price" className={field} inputMode="numeric" placeholder="0" required />
+            <span className="text-sm font-medium">Price</span>
+            <div className="flex gap-2">
+              <select name="currency" defaultValue="LRD" className={`${field} w-24 shrink-0`}>
+                <option value="LRD">L$ LRD</option>
+                <option value="USD">$ USD</option>
+              </select>
+              <input name="price" className={field} inputMode="numeric" placeholder="0" required />
+            </div>
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Category</span>

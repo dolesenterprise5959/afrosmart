@@ -55,7 +55,10 @@ export default async function ListingDetailPage({
           <div>
             {category && <Badge tone="brand">{category.icon} {category.label}</Badge>}
             <h1 className="mt-2 text-2xl font-bold leading-tight">{listing.title}</h1>
-            <PriceTag amount={listing.price} className="mt-1 block text-2xl" />
+            <span className="mt-1 flex items-baseline gap-2">
+              <PriceTag amount={listing.price} currency={listing.currency} className="text-2xl" />
+              {listing.price > 0 && <Badge tone="neutral">{listing.currency ?? "LRD"}</Badge>}
+            </span>
             <p className="mt-1 text-sm text-muted">
               📍 {listing.city}, {listing.county} County
             </p>

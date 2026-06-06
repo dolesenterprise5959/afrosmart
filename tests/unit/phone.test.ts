@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toE164 } from "@/lib/utils/phone";
+import { toE164, toLocalPhone } from "@/lib/utils/phone";
 
 describe("toE164 (Liberia phone normalisation)", () => {
   it("prefixes a local number with the country code", () => {
@@ -29,5 +29,17 @@ describe("toE164 (Liberia phone normalisation)", () => {
 
   it("treats a 00 international prefix like +", () => {
     expect(toE164("00231770000001")).toBe("+231770000001");
+  });
+});
+
+describe("toLocalPhone (display format)", () => {
+  it("strips +231 and shows grouped local format", () => {
+    expect(toLocalPhone("+231770000001")).toBe("077 000 0001");
+  });
+  it("returns empty for empty input", () => {
+    expect(toLocalPhone("")).toBe("");
+  });
+  it("leaves a non-Liberian number unchanged", () => {
+    expect(toLocalPhone("+15551234567")).toBe("+15551234567");
   });
 });

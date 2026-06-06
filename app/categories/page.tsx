@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
-import { CATEGORY_GROUPS, categoryHref } from "@/lib/categories";
+import { CategoryBrowser } from "@/components/layout/CategoryBrowser";
 
 export const metadata: Metadata = {
   title: "All Categories",
-  description: "Browse everything on AfroSmart — food & agriculture, services, retail, transportation, community and more across Liberia.",
+  description: "Browse everything on AfroSmart — food & agriculture, services, retail, transportation, business and community across Liberia.",
 };
 
 export default function CategoriesPage() {
@@ -18,28 +17,8 @@ export default function CategoriesPage() {
         <SearchBar />
       </div>
 
-      <div className="mt-6 space-y-8">
-        {CATEGORY_GROUPS.map((group) => (
-          <section key={group.id}>
-            <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-              <span aria-hidden>{group.icon}</span> {group.label}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {group.categories.map((c) => (
-                <Link
-                  key={c.id}
-                  href={categoryHref(c.id)}
-                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 transition-colors hover:border-brand hover:bg-surface"
-                >
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand/10 text-xl transition-transform group-hover:scale-110">
-                    {c.icon}
-                  </span>
-                  <span className="min-w-0 truncate text-sm font-medium">{c.label}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="mt-6">
+        <CategoryBrowser />
       </div>
     </div>
   );

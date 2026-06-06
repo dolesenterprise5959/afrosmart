@@ -27,7 +27,14 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <h3 className="line-clamp-2 text-sm font-medium text-foreground group-hover:text-brand-dark">
           {listing.title}
         </h3>
-        <PriceTag amount={listing.price} className="text-base" />
+        <div className="flex items-baseline gap-1.5">
+          <PriceTag amount={listing.price} currency={listing.currency} className="text-base" />
+          {listing.price > 0 && (
+            <span className="rounded bg-surface px-1 text-[10px] font-semibold text-muted">
+              {listing.currency ?? "LRD"}
+            </span>
+          )}
+        </div>
         <p className="mt-auto pt-1 text-xs text-muted">
           📍 {listing.city}, {listing.county}
         </p>

@@ -20,3 +20,24 @@ export function toE164(raw: string): string {
   digits = digits.replace(/^0+/, "");
   return `${LIBERIA_CC}${digits}`;
 }
+
+/**
+ * Format a stored E.164 Liberian number for DISPLAY in local format, e.g.
+ * "+231770000001" -> "077 000 0001". The full +231 form stays stored for SMS
+ * and dialing (tel: links). Non-Liberian numbers are returned unchanged.
+ */
+export function toLocalPhone(e164: string): string {
+  const s = (e164 ?? "").trim();
+  if (!s) return "";
+  let national: string;
+  if (s.startsWith(LIBERIA_CC)) national = s.slice(LIBERIA_CC.length);
+  else if (s.startsWith("+")) return s; // a non-Liberian number — leave as-is
+  else national = s;
+
+  national = national.replace(/\D/g, "").replace(/^0+/, "");
+  if (!national) return s;
+
+  const local = `0${national}`; // restore the local trunk "0"
+  const m = local.match(/^(\d{3})(\d{3})(\d{0,4})$/);
+  return m ? `${m[1]} ${m[2]}${m[3] ? ` ${m[3]}` : ""}` : local;
+}

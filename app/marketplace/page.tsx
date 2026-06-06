@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import { CategoryChips } from "@/components/layout/CategoryChips";
 import { CountyFilter } from "@/components/layout/CountyFilter";
+import { CurrencyFilter } from "@/components/layout/CurrencyFilter";
+import { CategoryBrowser } from "@/components/layout/CategoryBrowser";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -12,12 +13,16 @@ export const dynamic = "force-dynamic";
 export default async function MarketplacePage({
   searchParams,
 }: PageProps<"/marketplace">) {
-  const { q, county } = await searchParams;
+  const { q, county, currency } = await searchParams;
   const query = typeof q === "string" ? q.trim() : "";
   const countyFilter = typeof county === "string" ? county : "";
+  const currencyFilter = typeof currency === "string" ? currency : "";
 
   let listings = await searchListings(query);
   if (countyFilter) listings = listings.filter((l) => l.county === countyFilter);
+  if (currencyFilter) listings = listings.filter((l) => (l.currency ?? "LRD") === currencyFilter);
+
+  const browsing = !query && !countyFilter && !currencyFilter;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
@@ -29,31 +34,44 @@ export default async function MarketplacePage({
         {countyFilter ? ` in ${countyFilter}` : " across Liberia"}
       </p>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <CategoryChips active="all" />
-        </div>
+      {/* Filters */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <Suspense fallback={null}>
           <CountyFilter />
         </Suspense>
+        <Suspense fallback={null}>
+          <CurrencyFilter />
+        </Suspense>
+        {!browsing && (
+          <Button href="/marketplace" variant="outline" size="sm">Clear</Button>
+        )}
       </div>
 
-      <div className="mt-6">
+      {/* One unified place to reach every category (shown when not searching). */}
+      {browsing && (
+        <section className="mt-6">
+          <h2 className="mb-3 text-lg font-semibold">Shop by category</h2>
+          <CategoryBrowser />
+        </section>
+      )}
+
+      <section className="mt-8">
+        <h2 className="mb-3 text-lg font-semibold">
+          {browsing ? "Latest listings" : "Results"}
+        </h2>
         {listings.length > 0 ? (
           <ListingGrid listings={listings} />
         ) : (
           <EmptyState
             icon="🔍"
             title="No listings found"
-            description="Try a different search or county filter."
+            description="Try a different search, county or currency."
             action={
-              <Button href="/marketplace" variant="outline">
-                Clear filters
-              </Button>
+              <Button href="/marketplace" variant="outline">Clear filters</Button>
             }
           />
         )}
-      </div>
+      </section>
     </div>
   );
 }

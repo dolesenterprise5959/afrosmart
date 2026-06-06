@@ -2,7 +2,7 @@
 // is replaced by Firestore reads in Phase 4. Photo fields hold Tailwind gradient
 // classes so listings render as colourful placeholders with no remote images.
 
-import type { County, Listing, User } from "@/lib/types";
+import type { Currency, County, Listing, User } from "@/lib/types";
 import { ALL_CATEGORIES, getCategory } from "@/lib/categories";
 
 // The category catalog now lives in lib/categories.ts (grouped taxonomy).
@@ -223,8 +223,9 @@ export function getRecentListings(): Listing[] {
 }
 
 /** Format an LRD amount the way Liberian sellers write it: "L$ 78,000". */
-export function formatPrice(amount: number): string {
+export function formatPrice(amount: number, currency: Currency = "LRD"): string {
   // Community listings (churches, beaches, free events) post at no price.
   if (!amount || amount <= 0) return "Free";
-  return `L$ ${amount.toLocaleString("en-US")}`;
+  const n = amount.toLocaleString("en-US");
+  return currency === "USD" ? `$${n}` : `L$ ${n}`;
 }

@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getDb } from "@/lib/firebase/client";
 import { sendMessage, fetchUnlockedPhone } from "@/lib/messaging/client";
+import { toLocalPhone } from "@/lib/utils/phone";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 
@@ -150,7 +151,7 @@ export default function ThreadPage() {
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto py-4">
         {thread?.callUnlocked && (
           <p className="mx-auto rounded-full bg-brand/10 px-3 py-1 text-center text-xs text-brand-dark">
-            🔓 Call unlocked{phone ? ` — ${phone}` : ""}. You can now call.
+            🔓 Call unlocked{phone ? ` — ${toLocalPhone(phone)}` : ""}. You can now call.
           </p>
         )}
         {messages.length === 0 && (
