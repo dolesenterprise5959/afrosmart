@@ -10,13 +10,17 @@ import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings
 // Always reflect the latest listings from Firestore.
 export const dynamic = "force-dynamic";
 
-// The 4 highest-traffic categories shown on the homepage. Everything else lives
-// on the dedicated /categories page ("View All Categories").
+// The top categories shown on the homepage as a horizontal swipe row. Everything
+// else lives on the dedicated /categories page ("View All Categories").
 const TOP_CATEGORIES = [
   { id: "rice", label: "Food", icon: "🍚", href: "/marketplace/rice" },
   { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
   { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
   { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
+  { id: "barber", label: "Services", icon: "💈", href: "/services" },
+  { id: "motorbike", label: "Transport", icon: "🛵", href: "/marketplace/motorbike" },
+  { id: "restaurants", label: "Shops", icon: "🍽️", href: "/marketplace/restaurants" },
+  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental" },
 ];
 
 export default async function Home() {
@@ -43,26 +47,23 @@ export default async function Home() {
         <SponsoredAd />
       </section>
 
-      {/* Top categories — compact 4-up; everything else on /categories */}
+      {/* Top categories — horizontal swipe row; full list on /categories */}
       <section className="mt-6">
-        <h2 className="mb-3 text-lg font-semibold">Browse by category</h2>
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Browse by category</h2>
+          <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>
+        </div>
+        <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TOP_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
-              className="group block overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface"
+              className="group block w-[78px] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-24"
             >
               <CategoryArt category={c.id} icon={c.icon} label={c.label} />
             </Link>
           ))}
         </div>
-        <Link
-          href="/categories"
-          className="mt-2.5 flex items-center justify-center rounded-2xl border border-border bg-card py-3 text-sm font-semibold text-brand transition-colors hover:border-brand hover:bg-surface"
-        >
-          View All Categories →
-        </Link>
       </section>
 
       {/* Featured */}
