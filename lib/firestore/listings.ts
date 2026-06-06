@@ -141,6 +141,38 @@ async function fetchRecentListings(): Promise<Listing[]> {
 }
 export const getRecentListings = cached(fetchRecentListings, ["listings:recent"]);
 
+/**
+ * Count active listings per group of category ids (for homepage category cards).
+ * Uses Firestore count() aggregation when configured; otherwise tallies samples.
+ */
+export async function getCategoryCounts(
+  groups: Record<string, string[]>,
+): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  if (!isAdminConfigured()) {
+    for (const [key, ids] of Object.entries(groups)) {
+      out[key] = SAMPLE_LISTINGS.filter((l) => l.status === "active" && ids.includes(l.category)).length;
+    }
+    return out;
+  }
+  await Promise.all(
+    Object.entries(groups).map(async ([key, ids]) => {
+      try {
+        const snap = await adminDb()
+          .collection(COLLECTION)
+          .where("status", "==", "active")
+          .where("category", "in", ids.slice(0, 30))
+          .count()
+          .get();
+        out[key] = snap.data().count;
+      } catch {
+        out[key] = 0;
+      }
+    }),
+  );
+  return out;
+}
+
 async function fetchFeaturedListings(): Promise<Listing[]> {
   if (!isAdminConfigured()) {
     return SAMPLE_LISTINGS.filter((l) => l.featured && l.status === "active");

@@ -15,6 +15,7 @@ export function Logo({
   showWordmark = true,
   size = "md",
   full = false,
+  subtitle = false,
 }: {
   /** Wrap in a link; pass null to render inline (no link). */
   href?: string | null;
@@ -22,6 +23,8 @@ export function Logo({
   size?: "sm" | "md" | "lg";
   /** Render the complete lockup image instead of the tile + text. */
   full?: boolean;
+  /** Show the "Buy • Sell • Connect Across Liberia" tagline under the wordmark. */
+  subtitle?: boolean;
 }) {
   let content: ReactNode;
   if (full) {
@@ -50,8 +53,15 @@ export function Logo({
           />
         </span>
         {showWordmark && (
-          <span className={`${textSize[size]} tracking-tight`}>
-            Afro<span className="text-brand">Smart</span>
+          <span className="flex flex-col leading-none">
+            <span className={`${textSize[size]} tracking-tight`}>
+              Afro<span className="text-brand">Smart</span>
+            </span>
+            {subtitle && (
+              <span className="mt-1 text-[10px] font-medium leading-none text-muted">
+                Buy • Sell • Connect Across Liberia
+              </span>
+            )}
           </span>
         )}
       </span>

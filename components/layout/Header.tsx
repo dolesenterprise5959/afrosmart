@@ -8,7 +8,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-        <Logo href="/" />
+        <Logo href="/" subtitle />
 
         {/* Desktop search — hidden on small screens where the home page shows it inline. */}
         <div className="hidden flex-1 md:block">

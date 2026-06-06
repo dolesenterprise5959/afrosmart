@@ -1,32 +1,33 @@
 import Link from "next/link";
-import { SearchBar } from "@/components/layout/SearchBar";
 import { MarketplaceHeader } from "@/components/layout/MarketplaceHeader";
-import { SponsoredAd } from "@/components/layout/SponsoredAd";
+import { HeroCarousel } from "@/components/layout/HeroCarousel";
 import { CategoryArt } from "@/components/layout/CategoryArt";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { Button } from "@/components/ui/Button";
-import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings";
+import { getFeaturedListings, getRecentListings, getCategoryCounts } from "@/lib/firestore/listings";
 
 // Always reflect the latest listings from Firestore.
 export const dynamic = "force-dynamic";
 
 // The top categories shown on the homepage as a horizontal swipe row. Everything
 // else lives on the dedicated /categories page ("View All Categories").
+// `count` groups the category ids whose active listings are tallied for the badge.
 const TOP_CATEGORIES = [
-  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
-  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
-  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental" },
-  { id: "land", label: "Land", icon: "🌍", href: "/properties" },
-  { id: "restaurants", label: "Shops", icon: "🛍️", href: "/marketplace/restaurants" },
-  { id: "sports-fields", label: "Sports", icon: "⚽", href: "/marketplace/sports-fields" },
-  { id: "clothing", label: "Fashion", icon: "👗", href: "/marketplace/clothing" },
-  { id: "services", label: "Services", icon: "🛠️", href: "/services" },
+  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles", count: ["cars"] },
+  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties", count: ["property"] },
+  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental", count: ["car-rental", "equipment-rental", "house-rental", "bicycle-rental", "motorbike-rental", "truck-rental"] },
+  { id: "land", label: "Land", icon: "🌍", href: "/properties", count: ["land"] },
+  { id: "restaurants", label: "Shops", icon: "🛍️", href: "/marketplace/restaurants", count: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
+  { id: "sports-fields", label: "Sports", icon: "⚽", href: "/marketplace/sports-fields", count: ["sports-fields", "football", "tournaments"] },
+  { id: "clothing", label: "Fashion", icon: "👗", href: "/marketplace/clothing", count: ["clothing", "shoes"] },
+  { id: "services", label: "Services", icon: "🛠️", href: "/services", count: ["barber", "hair-braiding", "beauty-salon", "phone-repair", "carpentry", "plumbing", "cleaning", "tailor"] },
 ];
 
 export default async function Home() {
-  const [featured, recent] = await Promise.all([
+  const [featured, recent, counts] = await Promise.all([
     getFeaturedListings(),
     getRecentListings(),
+    getCategoryCounts(Object.fromEntries(TOP_CATEGORIES.map((c) => [c.id, c.count]))),
   ]);
   const recentTop = recent.slice(0, 8);
 
@@ -37,30 +38,25 @@ export default async function Home() {
         <MarketplaceHeader />
       </section>
 
-      {/* Search — the primary focus of the home screen */}
+      {/* Search-first hero (rotating Liberia photos + search + quick chips) */}
       <section className="mt-3">
-        <SearchBar />
+        <HeroCarousel />
       </section>
 
-      {/* Sponsored advertisement slot */}
-      <section className="mt-3">
-        <SponsoredAd />
-      </section>
-
-      {/* Top categories — horizontal swipe row; full list on /categories */}
-      <section className="mt-6">
+      {/* Top categories — ~4 visible on mobile, horizontal swipe; full list on /categories */}
+      <section className="mt-7">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Browse by category</h2>
           <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>
         </div>
-        <div className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TOP_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
-              className="group block w-[78px] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-24"
+              className="group block w-[calc((100vw-3.75rem)/4)] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-32"
             >
-              <CategoryArt category={c.id} icon={c.icon} label={c.label} />
+              <CategoryArt category={c.id} icon={c.icon} label={c.label} count={counts[c.id]} />
             </Link>
           ))}
         </div>

@@ -12,6 +12,13 @@ import { getListingsByCategory } from "@/lib/firestore/listings";
 
 export const dynamic = "force-dynamic";
 
+// Group aliases — virtual category pages that aggregate several real categories
+// (used by the hero banner links so /marketplace/land and /marketplace/shops work).
+const CATEGORY_ALIASES: Record<string, { id: string; label: string; icon: string; ids: string[] }> = {
+  land: { id: "land", label: "Land for Sale", icon: "🌍", ids: ["property"] },
+  shops: { id: "shops", label: "Shops & Retail", icon: "🛍️", ids: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
+};
+
 // Define the known category routes; listings are fetched per request.
 export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ category: c.id }));
@@ -24,12 +31,15 @@ export default async function CategoryPage({
 }: PageProps<"/marketplace/[category]">) {
   const { category } = await params;
   const { county, currency } = await searchParams;
-  const meta = getCategory(category);
+  const alias = CATEGORY_ALIASES[category];
+  const meta = alias ?? getCategory(category);
   if (!meta) notFound();
 
   const countyFilter = typeof county === "string" ? county : "";
   const currencyFilter = typeof currency === "string" ? currency : "";
-  let listings = await getListingsByCategory(category);
+  let listings = alias
+    ? (await Promise.all(alias.ids.map((id) => getListingsByCategory(id)))).flat()
+    : await getListingsByCategory(category);
   if (countyFilter) listings = listings.filter((l) => l.county === countyFilter);
   if (currencyFilter) listings = listings.filter((l) => (l.currency ?? "LRD") === currencyFilter);
 
