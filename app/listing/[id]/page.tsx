@@ -92,7 +92,7 @@ export default async function ListingDetailPage({
               <div className="min-w-0">
                 <p className="flex flex-wrap items-center gap-1.5 font-medium">
                   {seller.displayName}
-                  {isFounder(seller.id) ? (
+                  {me?.admin && isFounder(seller.id) ? (
                     <VerifiedBadge kind="founder" label="Founder" />
                   ) : seller.verified ? (
                     <VerifiedBadge

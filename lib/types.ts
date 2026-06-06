@@ -2,19 +2,15 @@
 // in the architecture doc, so Phase 1 mock data slots straight into the real
 // data layer later without changing component props.
 
-export type CategoryId =
-  | "cars"
-  | "phones"
-  | "electronics"
-  | "property"
-  | "services"
-  | "jobs"
-  | "general";
+// Category ids are catalog-driven (see lib/categories.ts), so this is an open
+// string. The special-cased ids "cars" and "property" have dedicated
+// marketplaces (/vehicles, /properties).
+export type CategoryId = string;
 
 export interface Category {
   id: CategoryId;
   label: string;
-  /** Emoji used as a lightweight, offline-friendly icon for Phase 1. */
+  /** Emoji used as a lightweight, offline-friendly icon. */
   icon: string;
 }
 

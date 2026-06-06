@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
-import { FOUNDER } from "@/lib/founder";
+import { Logo } from "@/components/ui/Logo";
 
 const cols: { heading: string; links: { href: string; label: string }[] }[] = [
   {
@@ -17,7 +16,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     heading: "Company",
     links: [
       { href: "/about", label: "About AfroSmart" },
-      { href: "/founder", label: "Founder" },
+      { href: "/categories", label: "Browse categories" },
       { href: "/pricing", label: "Pricing & Plans" },
       { href: "/verify", label: "Get verified" },
       { href: "/contact", label: "Contact us" },
@@ -40,15 +39,11 @@ export function Footer() {
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <Link href="/" className="flex items-center gap-2 font-bold">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand text-brand-foreground">A</span>
-              <span className="text-lg tracking-tight">Afro<span className="text-brand">Smart</span></span>
-            </Link>
+            <Logo href="/" />
             <p className="mt-3 text-sm text-muted">Buy. Sell. Connect Across Africa.</p>
-            <Link href="/founder" className="mt-4 inline-flex items-center gap-2 text-sm text-foreground hover:text-brand">
-              <span className="font-medium">{FOUNDER.name}</span>
-              <VerifiedBadge kind="founder" label="Founder" />
-            </Link>
+            <p className="mt-3 text-sm text-muted">
+              Liberia&apos;s community marketplace — food, services, retail, transport and more.
+            </p>
           </div>
 
           {cols.map((col) => (

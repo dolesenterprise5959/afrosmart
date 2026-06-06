@@ -48,3 +48,9 @@ body {
   background: var(--surface);
   color: var(--foreground);
 }
+
+/* Indeterminate loading bar used by the splash screen (app/loading.tsx). */
+@keyframes loading {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}

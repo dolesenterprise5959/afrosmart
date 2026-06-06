@@ -2,17 +2,12 @@
 // is replaced by Firestore reads in Phase 4. Photo fields hold Tailwind gradient
 // classes so listings render as colourful placeholders with no remote images.
 
-import type { Category, County, Listing, User } from "@/lib/types";
+import type { County, Listing, User } from "@/lib/types";
+import { ALL_CATEGORIES, getCategory } from "@/lib/categories";
 
-export const CATEGORIES: Category[] = [
-  { id: "cars", label: "Cars", icon: "🚗" },
-  { id: "phones", label: "Phones", icon: "📱" },
-  { id: "electronics", label: "Electronics", icon: "💻" },
-  { id: "property", label: "Property", icon: "🏠" },
-  { id: "services", label: "Services", icon: "🛠️" },
-  { id: "jobs", label: "Jobs", icon: "💼" },
-  { id: "general", label: "General", icon: "📦" },
-];
+// The category catalog now lives in lib/categories.ts (grouped taxonomy).
+export const CATEGORIES = ALL_CATEGORIES;
+export { getCategory };
 
 export const COUNTIES: County[] = [
   { id: "montserrado", name: "Montserrado", cities: ["Monrovia", "Paynesville", "Bensonville"] },
@@ -201,10 +196,6 @@ export function getListing(id: string): Listing | undefined {
 
 export function getUser(id: string): User | undefined {
   return USERS.find((u) => u.id === id);
-}
-
-export function getCategory(id: string): Category | undefined {
-  return CATEGORIES.find((c) => c.id === id);
 }
 
 export function getListingsByCategory(category: string): Listing[] {

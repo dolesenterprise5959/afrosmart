@@ -3,10 +3,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { FOUNDER } from "@/lib/founder";
+import { verifyAdmin } from "@/lib/auth/dal";
+
+// Founder information is internal — visible to admin accounts only.
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Founder — Emmett Doles | AfroSmart",
-  description: FOUNDER.bio,
+  title: "Founder (Admin)",
+  robots: { index: false, follow: false },
 };
 
 const pillars = [
@@ -15,7 +19,9 @@ const pillars = [
   { icon: "🌍", title: "Connected", text: "Bringing buyers and sellers together across Liberia — and, in time, across Africa." },
 ];
 
-export default function FounderPage() {
+export default async function FounderPage() {
+  await verifyAdmin(); // admins only — redirects everyone else
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <section className="overflow-hidden rounded-3xl border border-border bg-card">

@@ -33,8 +33,8 @@ export default function AboutPage() {
 
       <h2>Get started</h2>
       <p>
-        <Link href="/marketplace">Browse the marketplace</Link>, <Link href="/listing/new">post a listing</Link>,
-        or read about <Link href="/founder">our founder</Link>.
+        <Link href="/categories">Browse all categories</Link>, <Link href="/marketplace">explore the marketplace</Link>,
+        or <Link href="/listing/new">post a listing</Link>.
       </p>
     </ArticlePage>
   );

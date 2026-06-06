@@ -37,7 +37,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
         <div>
           <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold">
             {user.displayName}
-            {isFounder(user.id) ? (
+            {me?.admin && isFounder(user.id) ? (
               <VerifiedBadge kind="founder" />
             ) : user.verified ? (
               <VerifiedBadge kind={user.verifiedType === "business" ? "business" : "seller"} />

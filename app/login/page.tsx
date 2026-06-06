@@ -4,6 +4,7 @@ import { Suspense, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Logo } from "@/components/ui/Logo";
 import { createRecaptcha, sendOtp, confirmOtp, toE164 } from "@/lib/firebase/auth-client";
 
 export default function LoginPage() {
@@ -75,9 +76,9 @@ function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-sm px-4 py-10">
       <div className="text-center">
-        <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-brand text-xl font-bold text-brand-foreground">
-          A
-        </span>
+        <div className="flex justify-center">
+          <Logo href={null} showWordmark={false} size="lg" />
+        </div>
         <h1 className="mt-4 text-xl font-bold">Sign in to AfroSmart</h1>
         <p className="mt-1 text-sm text-muted">
           {step === "phone"

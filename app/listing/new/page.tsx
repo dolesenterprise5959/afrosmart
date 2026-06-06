@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
-import { CATEGORIES, COUNTIES } from "@/lib/mock";
+import { COUNTIES } from "@/lib/mock";
+import { CATEGORY_GROUPS } from "@/lib/categories";
 import {
   FUEL_TYPES,
   POPULAR_MAKES,
@@ -160,10 +161,14 @@ export default function NewListingPage() {
               <option value="" disabled>
                 Select
               </option>
-              {CATEGORIES.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
+              {CATEGORY_GROUPS.map((g) => (
+                <optgroup key={g.id} label={`${g.icon} ${g.label}`}>
+                  {g.categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>

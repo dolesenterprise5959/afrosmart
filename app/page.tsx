@@ -2,8 +2,6 @@ import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { Button } from "@/components/ui/Button";
-import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
-import { FOUNDER } from "@/lib/founder";
 import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings";
 
 // Always reflect the latest listings from Firestore.
@@ -56,7 +54,10 @@ export default async function Home() {
 
       {/* Category cards */}
       <section className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold">Browse by category</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Browse by category</h2>
+          <Link href="/categories" className="text-sm font-medium text-brand">All categories →</Link>
+        </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {FEATURED_CATEGORIES.map((c) => (
             <Link
@@ -89,27 +90,6 @@ export default async function Home() {
           <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
         </div>
         <ListingGrid listings={recentTop} />
-      </section>
-
-      {/* Founder card */}
-      <section className="mt-12">
-        <Link
-          href="/founder"
-          className="flex flex-col items-start gap-4 rounded-3xl border border-border bg-card p-6 transition-colors hover:border-brand sm:flex-row sm:items-center sm:gap-6"
-        >
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark text-xl font-bold text-brand-foreground">
-            {FOUNDER.initials}
-          </span>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold">{FOUNDER.name}</span>
-              <VerifiedBadge kind="founder" />
-            </div>
-            <p className="text-sm text-muted">{FOUNDER.title}</p>
-            <p className="mt-1.5 line-clamp-2 text-sm text-foreground/80">{FOUNDER.bio}</p>
-          </div>
-          <span className="ml-auto hidden shrink-0 text-sm font-medium text-brand sm:inline">Meet the founder →</span>
-        </Link>
       </section>
 
       {/* Sell CTA */}
