@@ -3,16 +3,17 @@
 These are **fallback** images shown only when a listing/category has no real
 photo. **User-uploaded photos always take priority.**
 
-## How to add an image (drop-in)
+## How to add images (automatic install)
 
-1. Generate the image using the shared style + the subject for its key (below).
-2. Save it here as `<key>.webp` — **4:3, ~1200×900, WebP, < 150 KB**, no text/logos.
-3. Add `"<key>"` to `AVAILABLE_PLACEHOLDERS` in `lib/placeholders.ts`.
-4. Rebuild/redeploy. Until a key is listed there, the app shows the neutral
-   category placeholder (no broken images).
-
-Optimize quickly with:
-`cwebp -q 80 input.jpg -o <key>.webp` (or any image tool that exports WebP).
+1. Drop your image files in **`public/placeholders/_incoming/`**, named by either:
+   - an **image key**: `barber.webp`, `car-sedan.jpg`, `food-market.png` …
+   - a **category**: `services.webp`, `cars.jpg`, `food.png`, `real-estate.webp` …
+     (a category file fills every key in that category)
+   Any format works — **.webp / .jpg / .png** (next/image serves optimized WebP).
+2. Run: **`node scripts/install-placeholders.mjs`**
+   → places them as `public/placeholders/<key>.<ext>` and rewrites the
+   `PLACEHOLDER_FILES` registry in `lib/placeholders.ts` automatically.
+3. Rebuild / redeploy. User-uploaded photos always override these placeholders.
 
 ## Shared style (prepend to every prompt)
 
