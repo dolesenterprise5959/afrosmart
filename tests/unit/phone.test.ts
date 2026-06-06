@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toE164, toLocalPhone, validateLiberianMobile } from "@/lib/utils/phone";
+import { toE164, toE164For, toLocalPhone, validateLiberianMobile, validateMobile } from "@/lib/utils/phone";
 
 describe("toE164 (Liberia phone normalisation)", () => {
   it("prefixes a local number with the country code", () => {
@@ -67,5 +67,20 @@ describe("validateLiberianMobile", () => {
   });
   it("asks for a number when empty", () => {
     expect(validateLiberianMobile("")).toMatch(/enter/i);
+  });
+});
+
+describe("toE164For / validateMobile (international)", () => {
+  it("formats local numbers for various dial codes", () => {
+    expect(toE164For("0770000000", "+231")).toBe("+231770000000");
+    expect(toE164For("2015550123", "+1")).toBe("+12015550123");
+    expect(toE164For("0241234567", "+233")).toBe("+233241234567");
+  });
+  it("validates national length per country", () => {
+    const US = { code: "US", name: "United States", dialCode: "+1", minLen: 10, maxLen: 10 };
+    expect(validateMobile("2015550123", US)).toBeNull();
+    expect(validateMobile("20155", US)).toMatch(/too short/i);
+    const LR = { code: "LR", name: "Liberia", dialCode: "+231", minLen: 8, maxLen: 9 };
+    expect(validateMobile("770000000", LR)).toBeNull();
   });
 });

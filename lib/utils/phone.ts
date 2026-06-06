@@ -64,3 +64,31 @@ export function validateLiberianMobile(raw: string): string | null {
   }
   return null;
 }
+
+// --- Generic (international) helpers ---
+
+/** Normalise a local number to E.164 for a given dial code (e.g. "+233"). */
+export function toE164For(raw: string, dialCode: string): string {
+  const cc = dialCode.replace(/\D/g, ""); // e.g. "233"
+  const s = raw.trim().replace(/^00/, "+");
+  if (s.startsWith("+")) return "+" + s.slice(1).replace(/\D/g, "");
+  let digits = s.replace(/\D/g, "");
+  if (cc && digits.startsWith(cc)) digits = digits.slice(cc.length); // dial code typed without "+"
+  digits = digits.replace(/^0+/, ""); // drop national trunk 0
+  return `${dialCode}${digits}`;
+}
+
+/** Validate a local number for a country. Returns a friendly error, or null. */
+export function validateMobile(
+  raw: string,
+  country: { code: string; name: string; dialCode: string; minLen: number; maxLen: number },
+): string | null {
+  const national = toE164For(raw, country.dialCode).slice(country.dialCode.length);
+  if (national.length === 0) return "Please enter your phone number.";
+  if (national.length < country.minLen) return `That number looks too short for ${country.name}.`;
+  if (national.length > country.maxLen) return `That number looks too long for ${country.name}.`;
+  if (country.code === "LR" && !/^[2-9]/.test(national)) {
+    return "Liberian mobile numbers start with 7, 8 or 5 — e.g. Lonestar 77…, Orange 88…";
+  }
+  return null;
+}

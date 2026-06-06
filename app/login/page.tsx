@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
-import { createRecaptcha, sendOtp, confirmOtp, toE164 } from "@/lib/firebase/auth-client";
-import { validateLiberianMobile } from "@/lib/utils/phone";
-import { DEFAULT_COUNTRY } from "@/lib/countries";
+import { createRecaptcha, sendOtp, confirmOtp } from "@/lib/firebase/auth-client";
+import { validateMobile, toE164For } from "@/lib/utils/phone";
+import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
 
 const RESEND_COOLDOWN = 30; // seconds between code sends (anti-spam)
 const MAX_ATTEMPTS = 5; // wrong codes before a lockout
@@ -26,6 +26,11 @@ function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
   const { configured } = useAuth();
+
+  // Country — Liberia by default; a deep-link (?country=US) preselects another.
+  const initialCountry = findCountry(params.get("country") ?? "") ?? DEFAULT_COUNTRY;
+  const [country, setCountry] = useState(initialCountry);
+  const [showCountry, setShowCountry] = useState(initialCountry.code !== DEFAULT_COUNTRY.code);
 
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
@@ -52,7 +57,7 @@ function LoginForm() {
 
   async function send() {
     setError(null);
-    const localError = validateLiberianMobile(phone);
+    const localError = validateMobile(phone, country);
     if (localError) {
       setError(localError);
       return;
@@ -62,8 +67,8 @@ function LoginForm() {
     setPending(true);
     try {
       verifierRef.current ??= createRecaptcha("recaptcha-container");
-      // sendOtp normalises the local number to E.164 (+231…) automatically.
-      confirmationRef.current = await sendOtp(phone, verifierRef.current);
+      // Convert the local number to E.164 using the selected country's dial code.
+      confirmationRef.current = await sendOtp(toE164For(phone, country.dialCode), verifierRef.current);
       attemptsRef.current = 0;
       setResendIn(RESEND_COOLDOWN);
       setStep("otp");
@@ -71,7 +76,7 @@ function LoginForm() {
       const c = (err as { code?: string } | null)?.code;
       setError(
         c === "auth/invalid-phone-number" || c === "auth/missing-phone-number"
-          ? "That doesn't look like a valid Liberian number. Enter your local number, e.g. 77 000 0000."
+          ? `That doesn't look like a valid ${country.name} number. Enter your local number, e.g. ${country.example}.`
           : c === "auth/too-many-requests"
             ? "Too many attempts from this device. Please wait a few minutes and try again."
             : err instanceof Error
@@ -122,7 +127,7 @@ function LoginForm() {
         <p className="mt-1 text-sm text-muted">
           {step === "phone"
             ? "Enter your phone number and we'll text you a code. New here? This also creates your account."
-            : `Enter the 6-digit code sent to ${toE164(phone)}.`}
+            : `Enter the 6-digit code sent to ${toE164For(phone, country.dialCode)}.`}
         </p>
       </div>
 
@@ -137,22 +142,48 @@ function LoginForm() {
         <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-6 flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Phone number</span>
+
+            {/* Country picker — hidden by default (Liberia); revealed on demand. */}
+            {showCountry && (
+              <select
+                aria-label="Country"
+                value={country.code}
+                onChange={(e) => setCountry(findCountry(e.target.value) ?? DEFAULT_COUNTRY)}
+                className="h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-brand"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.dialCode})</option>
+                ))}
+              </select>
+            )}
+
             <div className="flex h-12 items-center rounded-xl border border-border bg-card focus-within:border-brand">
-              <span className="pl-3 pr-1 text-xl" aria-hidden>{DEFAULT_COUNTRY.flag}</span>
+              <span className="pl-3 pr-1 text-xl" aria-hidden>{country.flag}</span>
+              {showCountry && <span className="pr-1 text-base text-muted">{country.dialCode}</span>}
               <input
                 className="h-12 min-w-0 flex-1 rounded-r-xl bg-transparent px-2 text-base outline-none"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel-national"
-                placeholder={DEFAULT_COUNTRY.example}
+                placeholder={country.example}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
-            <span className="text-xs text-muted">
-              Enter your Liberian mobile number — we add {DEFAULT_COUNTRY.dialCode} automatically (Lonestar 77…, Orange 88…).
-            </span>
+
+            {showCountry ? (
+              <span className="text-xs text-muted">
+                {country.name} — we add {country.dialCode} automatically. Enter your local number.
+              </span>
+            ) : (
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-muted">Liberian mobile — Lonestar 77…, Orange 88…</span>
+                <button type="button" onClick={() => setShowCountry(true)} className="shrink-0 font-medium text-brand">
+                  🌍 Change country
+                </button>
+              </div>
+            )}
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button type="submit" className={submit} disabled={pending || !configured}>
