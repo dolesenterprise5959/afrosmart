@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
+import { MarketplaceHeader } from "@/components/layout/MarketplaceHeader";
+import { SponsoredAd } from "@/components/layout/SponsoredAd";
 import { CategoryArt } from "@/components/layout/CategoryArt";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { Button } from "@/components/ui/Button";
@@ -30,22 +32,22 @@ export default async function Home() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-10">
-      {/* Hero — compact on mobile (search-first below) */}
-      <section className="mt-4 rounded-3xl bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-8 sm:py-10">
-        <h1 className="max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
-          AfroSmart — Liberia&apos;s community marketplace
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-white/75 sm:text-base">
-          For food, services, transport, businesses, real estate, jobs, and everyday commerce.
-        </p>
+      {/* Compact, expandable marketplace header (collapsed by default) */}
+      <section className="mt-3">
+        <MarketplaceHeader />
       </section>
 
-      {/* Search — the primary action */}
-      <section className="mt-4">
+      {/* Search — the primary focus of the home screen */}
+      <section className="mt-3">
         <SearchBar />
       </section>
 
-      {/* Category cards — high on the page so users browse immediately */}
+      {/* Sponsored advertisement slot */}
+      <section className="mt-3">
+        <SponsoredAd />
+      </section>
+
+      {/* Category cards — real AI photos, high on the page */}
       <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Browse by category</h2>
@@ -65,7 +67,7 @@ export default async function Home() {
       </section>
 
       {/* Featured */}
-      <section className="mt-10">
+      <section className="mt-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">⭐ Featured listings</h2>
           <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
@@ -73,17 +75,17 @@ export default async function Home() {
         <ListingGrid listings={featured} />
       </section>
 
-      {/* Recent */}
-      <section className="mt-10">
+      {/* Latest */}
+      <section className="mt-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">🆕 Recent listings</h2>
+          <h2 className="text-lg font-semibold">🆕 Latest listings</h2>
           <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
         </div>
         <ListingGrid listings={recentTop} />
       </section>
 
       {/* Sell CTA */}
-      <section className="mt-10 flex flex-col items-center gap-3 rounded-3xl border border-border bg-card px-6 py-8 text-center">
+      <section className="mt-8 flex flex-col items-center gap-3 rounded-3xl border border-border bg-card px-6 py-8 text-center">
         <h2 className="text-lg font-semibold">Got something to sell?</h2>
         <p className="max-w-sm text-sm text-muted">
           Post your item in minutes and reach buyers across Liberia. It&apos;s free.

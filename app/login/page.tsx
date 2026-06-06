@@ -175,14 +175,12 @@ function LoginForm() {
             </div>
 
             {showCountry ? (
-              <span className="text-xs text-muted">
-                {country.name} — we add {country.dialCode} automatically. Enter your local number.
-              </span>
+              <span className="text-xs text-muted">{country.flag} {country.name} ({country.dialCode})</span>
             ) : (
               <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="text-muted">Liberian mobile — Lonestar 77…, Orange 88…</span>
+                <span className="text-muted">{country.flag} {country.name}</span>
                 <button type="button" onClick={() => setShowCountry(true)} className="shrink-0 font-medium text-brand">
-                  🌍 Change country
+                  Change country
                 </button>
               </div>
             )}
