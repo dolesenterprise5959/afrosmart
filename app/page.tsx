@@ -13,14 +13,14 @@ export const dynamic = "force-dynamic";
 // The top categories shown on the homepage as a horizontal swipe row. Everything
 // else lives on the dedicated /categories page ("View All Categories").
 const TOP_CATEGORIES = [
-  { id: "rice", label: "Food", icon: "🍚", href: "/marketplace/rice" },
   { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles" },
-  { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
   { id: "property", label: "Real Estate", icon: "🏠", href: "/properties" },
-  { id: "barber", label: "Services", icon: "💈", href: "/services" },
-  { id: "motorbike", label: "Transport", icon: "🛵", href: "/marketplace/motorbike" },
-  { id: "restaurants", label: "Shops", icon: "🍽️", href: "/marketplace/restaurants" },
   { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental" },
+  { id: "land", label: "Land", icon: "🌍", href: "/properties" },
+  { id: "restaurants", label: "Shops", icon: "🛍️", href: "/marketplace/restaurants" },
+  { id: "sports-fields", label: "Sports", icon: "⚽", href: "/marketplace/sports-fields" },
+  { id: "clothing", label: "Fashion", icon: "👗", href: "/marketplace/clothing" },
+  { id: "services", label: "Services", icon: "🛠️", href: "/services" },
 ];
 
 export default async function Home() {
