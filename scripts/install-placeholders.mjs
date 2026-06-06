@@ -29,7 +29,7 @@ const KEYS = new Set([
 // A single category image fans out to every key in that category.
 const CATEGORY_KEYS = {
   food: ["food-dishes", "food-vegetables", "food-market"],
-  services: ["barber", "beauty-salon", "phone-repair", "carpenter"],
+  services: ["barber", "phone-repair", "carpenter"],
   transport: ["motorbike-taxi", "taxi", "cargo-truck"],
   shops: ["shop-storefront", "shop-market", "shop-retail"],
   "real-estate": ["home-modern", "apartment", "land"],
