@@ -25,6 +25,8 @@ export const PLACEHOLDER_KEYS = [
   "car-sedan", "car-suv", "car-pickup",
   "smartphone", "electronics",
   "rental-home", "rental-equipment", "rental-vehicle",
+  // Newly-requested top-level categories (Beauty reuses "beauty-salon")
+  "jobs", "agriculture", "construction",
 ] as const;
 
 /** Category id → placeholder image key. Unmapped categories use the neutral fallback. */
@@ -53,6 +55,11 @@ const CATEGORY_IMAGE: Record<string, string> = {
   // Rentals
   "car-rental": "rental-vehicle", "equipment-rental": "rental-equipment",
   "house-rental": "rental-home", "bicycle-rental": "rental-vehicle",
+  // Jobs / Agriculture / Construction / Beauty
+  jobs: "jobs", "job-listings": "jobs",
+  agriculture: "agriculture", farm: "agriculture", livestock: "agriculture", "farm-produce": "agriculture",
+  construction: "construction", "building-materials": "construction", plumbing: "construction", "electrical-repair": "construction",
+  beauty: "beauty-salon", cosmetics: "beauty-salon",
 };
 
 /** Returns the placeholder image path for a category, or null to use the fallback. */

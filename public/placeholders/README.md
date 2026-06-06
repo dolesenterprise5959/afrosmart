@@ -49,3 +49,7 @@ Optimize quickly with:
 | rental-home | a furnished home interior for rent |
 | rental-equipment | rental tools/equipment (generator, ladder) |
 | rental-vehicle | a vehicle for rent with keys |
+| jobs | people working in an office / job-fair setting |
+| agriculture | a farmer in a green field with crops |
+| construction | a construction site with workers and materials |
+
