@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
+import { PlanControls } from "@/components/admin/PlanControls";
 import { isFounder } from "@/lib/founder";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -41,6 +42,12 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
             ) : user.verified ? (
               <VerifiedBadge kind={user.verifiedType === "business" ? "business" : "seller"} />
             ) : null}
+            {user.plan === "premium" && (
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ Premium</span>
+            )}
+            {user.plan === "business" && (
+              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-700">🏢 Business</span>
+            )}
           </h1>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
             <StarRating value={user.ratingAvg} />
@@ -52,6 +59,12 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
           </p>
         </div>
       </div>
+
+      {me?.admin && (
+        <div className="mt-4">
+          <PlanControls uid={user.id} current={user.plan ?? "free"} />
+        </div>
+      )}
 
       <h2 className="mb-3 mt-8 text-lg font-semibold">
         Listings ({listings.length})

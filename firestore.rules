@@ -38,7 +38,7 @@ service cloud.firestore {
             && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
               'verified', 'verifiedType', 'verificationStatus',
               'verificationRequestedType', 'verificationNote', 'verificationRequestedAt',
-              'suspended', 'ratingAvg', 'ratingCount', 'ratingSum'
+              'suspended', 'plan', 'ratingAvg', 'ratingCount', 'ratingSum'
             ]));
       allow delete: if isAdmin();
     }

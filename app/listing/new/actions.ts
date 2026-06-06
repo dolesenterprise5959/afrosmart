@@ -5,6 +5,8 @@ import { verifySession } from "@/lib/auth/dal";
 import { createListing } from "@/lib/firestore/listings";
 import { ensureUserProfile, isSuspended } from "@/lib/firestore/users";
 import { checkRateLimit, rateLimitMessage } from "@/lib/firestore/ratelimit";
+import { getPlan } from "@/lib/firestore/premium";
+import { isFeaturedEligible } from "@/lib/premium";
 import { validateListingFields, validatePropertyFields, validateVehicleFields } from "@/lib/validation";
 import { FUEL_TYPES, TRANSMISSIONS, VEHICLE_CONDITIONS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
@@ -122,6 +124,8 @@ export async function createListingAction(
   }
 
   await ensureUserProfile(session.uid, { phone: session.phone, county, city });
+  // Premium/Business sellers get featured placement automatically.
+  const featured = isFeaturedEligible(await getPlan(session.uid));
   const id = await createListing(session.uid, {
     title,
     description,
@@ -132,6 +136,7 @@ export async function createListingAction(
     photos,
     vehicle,
     property,
+    featured,
   });
 
   redirect(`/listing/${id}`);

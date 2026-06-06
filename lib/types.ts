@@ -28,6 +28,8 @@ export interface County {
 export type VerifiedType = "seller" | "business";
 /** Lifecycle of a verification request. */
 export type VerificationStatus = "none" | "pending" | "verified" | "rejected";
+/** Seller subscription tier. */
+export type SellerPlan = "free" | "premium" | "business";
 
 export interface User {
   id: string;
@@ -46,6 +48,8 @@ export interface User {
   verified?: boolean;
   verifiedType?: VerifiedType | null;
   verificationStatus?: VerificationStatus;
+  /** Seller subscription tier (server-controlled). Defaults to "free". */
+  plan?: SellerPlan;
 }
 
 export type ListingStatus = "active" | "sold" | "removed";

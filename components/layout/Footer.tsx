@@ -18,6 +18,7 @@ const cols: { heading: string; links: { href: string; label: string }[] }[] = [
     links: [
       { href: "/about", label: "About AfroSmart" },
       { href: "/founder", label: "Founder" },
+      { href: "/pricing", label: "Pricing & Plans" },
       { href: "/verify", label: "Get verified" },
       { href: "/contact", label: "Contact us" },
     ],

@@ -15,8 +15,8 @@ export type PublicProfile = Omit<User, "phone">;
 
 function stripPhone(user: User): PublicProfile {
   // Explicitly pick public fields so the private phone can never leak.
-  const { id, displayName, photoURL, county, city, isBusiness, ratingAvg, ratingCount, joinedAt, verified, verifiedType } = user;
-  return { id, displayName, photoURL, county, city, isBusiness, ratingAvg, ratingCount, joinedAt, verified, verifiedType };
+  const { id, displayName, photoURL, county, city, isBusiness, ratingAvg, ratingCount, joinedAt, verified, verifiedType, plan } = user;
+  return { id, displayName, photoURL, county, city, isBusiness, ratingAvg, ratingCount, joinedAt, verified, verifiedType, plan };
 }
 
 function docToProfile(
@@ -36,6 +36,7 @@ function docToProfile(
     joinedAt: typeof d.joinedAt === "string" ? d.joinedAt : "",
     verified: d.verified === true,
     verifiedType: (d.verifiedType as PublicProfile["verifiedType"]) ?? null,
+    plan: (d.plan as PublicProfile["plan"]) ?? "free",
   };
 }
 

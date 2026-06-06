@@ -36,6 +36,8 @@ export interface NewListingInput {
   photos: string[];
   vehicle?: Vehicle;
   property?: Property;
+  /** Premium/Business sellers get featured placement. */
+  featured?: boolean;
 }
 
 type FirestoreDoc = FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore.DocumentSnapshot;
@@ -197,7 +199,7 @@ export async function createListing(
       city: input.city,
       photos: input.photos,
       status: "active",
-      featured: false,
+      featured: input.featured ?? false,
       createdAt: Timestamp.now(),
       // Firestore rejects `undefined`, so only include the maps when present.
       ...(input.vehicle ? { vehicle: input.vehicle } : {}),
