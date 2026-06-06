@@ -39,10 +39,13 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="flex items-center gap-4">
-        <Avatar name={user.displayName} size="lg" />
+        <span className="rounded-full ring-2 ring-accent/30">
+          <Avatar name={user.displayName} photoURL={user.photoURL} size="lg" />
+        </span>
         <div>
-          <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold">
-            {user.displayName}
+          <h1 className="text-xl font-bold">{user.displayName}</h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {user.phoneVerified && <VerifiedBadge kind="phone" label="Phone Verified" />}
             {me?.admin && isFounder(user.id) ? (
               <VerifiedBadge kind="founder" />
             ) : user.verified ? (
@@ -52,16 +55,16 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
               <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-amber-700">⭐ Premium</span>
             )}
             {user.plan === "business" && (
-              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-700">🏢 Business</span>
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-semibold text-amber-700">🏢 Business</span>
             )}
-          </h1>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+          </div>
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted">
             <StarRating value={user.ratingAvg} />
             {user.ratingAvg.toFixed(1)} · {user.ratingCount} ratings
           </p>
           <p className="text-sm text-muted">
             {sellerTypeLabel(sellerType(user))} · 📍 {user.city}, {user.county}
-            {user.joinedAt && <> · Joined {new Date(user.joinedAt).getFullYear()}</>}
+            {user.joinedAt && <> · Member since {new Date(user.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}</>}
           </p>
         </div>
       </div>

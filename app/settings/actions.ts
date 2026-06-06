@@ -2,6 +2,7 @@
 
 import { verifySession } from "@/lib/auth/dal";
 import { adminDb } from "@/lib/firebase/admin";
+import { setProfilePhoto } from "@/lib/firestore/users";
 
 export interface UpdateProfileResult {
   ok?: boolean;
@@ -36,5 +37,15 @@ export async function updateProfileAction(
       { merge: true },
     );
 
+  return { ok: true };
+}
+
+/** Set or clear the signed-in user's profile photo. Pass null to remove it. */
+export async function setProfilePhotoAction(
+  photoURL: string | null,
+): Promise<UpdateProfileResult> {
+  const session = await verifySession();
+  if (photoURL && !/^https:\/\//.test(photoURL)) return { error: "Invalid photo URL." };
+  await setProfilePhoto(session.uid, photoURL);
   return { ok: true };
 }

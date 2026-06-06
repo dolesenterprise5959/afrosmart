@@ -43,8 +43,8 @@ describe("formatPrice", () => {
     expect(formatPrice(78000)).toBe("L$ 78,000");
     expect(formatPrice(950000, "LRD")).toBe("L$ 950,000");
   });
-  it("formats USD with a $ sign", () => {
-    expect(formatPrice(1850, "USD")).toBe("$1,850");
+  it("formats USD with a US$ sign", () => {
+    expect(formatPrice(1850, "USD")).toBe("US$ 1,850");
   });
   it("shows Free for a zero/empty price", () => {
     expect(formatPrice(0)).toBe("Free");

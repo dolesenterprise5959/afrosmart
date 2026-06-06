@@ -16,6 +16,7 @@ export default async function SettingsPage() {
       <SettingsForm
         initial={{
           displayName: profile?.displayName ?? "",
+          photoURL: profile?.photoURL,
           county: profile?.county ?? "",
           city: profile?.city ?? "",
           isBusiness: profile?.isBusiness ?? false,

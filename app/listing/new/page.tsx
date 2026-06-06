@@ -18,7 +18,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { uploadListingPhotos } from "@/lib/firebase/storage-client";
 import { createListingAction } from "@/app/listing/new/actions";
 
-const MAX_PHOTOS = 6;
+const MAX_PHOTOS = 10;
 
 export default function NewListingPage() {
   const { user, configured } = useAuth();
@@ -38,6 +38,13 @@ export default function NewListingPage() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+
+    // Require at least one photo (the first becomes the cover image).
+    if (files.length === 0) {
+      setError("Please add at least one photo of your item.");
+      return;
+    }
+
     setPending(true);
     try {
       const form = new FormData(e.currentTarget);
@@ -118,7 +125,7 @@ export default function NewListingPage() {
       <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium">
-            Photos <span className="text-muted">(up to {MAX_PHOTOS})</span>
+            Photos <span className="text-muted">(1–{MAX_PHOTOS} required · first photo is the cover)</span>
           </span>
           <input
             type="file"
@@ -130,8 +137,8 @@ export default function NewListingPage() {
           {files.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-2">
               {files.map((f, i) => (
-                <Badge key={i} tone="neutral">
-                  🖼️ {f.name.length > 18 ? `${f.name.slice(0, 16)}…` : f.name}
+                <Badge key={i} tone={i === 0 ? "accent" : "neutral"}>
+                  {i === 0 ? "⭐ Cover · " : "🖼️ "}{f.name.length > 16 ? `${f.name.slice(0, 14)}…` : f.name}
                 </Badge>
               ))}
             </div>

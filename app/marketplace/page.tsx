@@ -1,11 +1,14 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { CountyFilter } from "@/components/layout/CountyFilter";
 import { CurrencyFilter } from "@/components/layout/CurrencyFilter";
+import { CurrencyPreference } from "@/components/layout/CurrencyPreference";
 import { CategoryBrowser } from "@/components/layout/CategoryBrowser";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { searchListings } from "@/lib/firestore/listings";
+import type { Currency } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +26,7 @@ export default async function MarketplacePage({
   if (currencyFilter) listings = listings.filter((l) => (l.currency ?? "LRD") === currencyFilter);
 
   const browsing = !query && !countyFilter && !currencyFilter;
+  const displayCurrency: Currency = (await cookies()).get("afm_ccy")?.value === "USD" ? "USD" : "LRD";
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
@@ -45,6 +49,7 @@ export default async function MarketplacePage({
         {!browsing && (
           <Button href="/marketplace" variant="outline" size="sm">Clear</Button>
         )}
+        <span className="ml-auto"><CurrencyPreference current={displayCurrency} /></span>
       </div>
 
       {/* One unified place to reach every category (shown when not searching). */}

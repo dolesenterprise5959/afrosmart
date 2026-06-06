@@ -7,6 +7,15 @@
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { getFirebaseApp } from "@/lib/firebase/client";
 
+/** Upload a single profile photo and return its public URL. */
+export async function uploadProfilePhoto(file: File, uid: string): Promise<string> {
+  const storage = getStorage(getFirebaseApp());
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  const path = `avatars/${uid}/${Date.now()}-${safeName}`;
+  const snapshot = await uploadBytes(ref(storage, path), file);
+  return getDownloadURL(snapshot.ref);
+}
+
 export async function uploadListingPhotos(
   files: File[],
   uid: string,

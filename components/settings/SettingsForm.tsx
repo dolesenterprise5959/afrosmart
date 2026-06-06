@@ -4,12 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { COUNTIES } from "@/lib/mock";
 import { logout } from "@/lib/firebase/auth-client";
+import { uploadProfilePhoto } from "@/lib/firebase/storage-client";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { updateProfileAction } from "@/app/settings/actions";
+import { updateProfileAction, setProfilePhotoAction } from "@/app/settings/actions";
 
 interface Props {
   initial: {
     displayName: string;
+    photoURL?: string;
     county: string;
     city: string;
     isBusiness: boolean;
@@ -19,7 +23,10 @@ interface Props {
 
 export function SettingsForm({ initial }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
   const [displayName, setDisplayName] = useState(initial.displayName);
+  const [photoURL, setPhotoURL] = useState<string | undefined>(initial.photoURL);
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [county, setCounty] = useState(initial.county);
   const [city, setCity] = useState(initial.city);
   const [isBusiness, setIsBusiness] = useState(initial.isBusiness);
@@ -29,6 +36,33 @@ export function SettingsForm({ initial }: Props) {
 
   const field =
     "h-11 w-full rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-brand";
+
+  async function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setError(null);
+    setPhotoBusy(true);
+    try {
+      const url = await uploadProfilePhoto(file, user.uid);
+      const res = await setProfilePhotoAction(url);
+      if (res.error) throw new Error(res.error);
+      setPhotoURL(url);
+      router.refresh();
+    } catch {
+      setError("Could not upload that photo. Please try a different image.");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
+  async function onRemovePhoto() {
+    setPhotoBusy(true);
+    setError(null);
+    await setProfilePhotoAction(null);
+    setPhotoURL(undefined);
+    setPhotoBusy(false);
+    router.refresh();
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +87,28 @@ export function SettingsForm({ initial }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-4">
+      {/* Profile photo */}
+      <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+        <span className="rounded-full ring-2 ring-accent/30">
+          <Avatar name={displayName || "AfroSmart user"} photoURL={photoURL} size="lg" />
+        </span>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Profile photo</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex h-9 cursor-pointer items-center rounded-full bg-brand px-4 text-sm font-medium text-brand-foreground hover:bg-brand-dark">
+              {photoBusy ? "Uploading…" : photoURL ? "Change" : "Upload"}
+              <input type="file" accept="image/*" onChange={onPickPhoto} disabled={photoBusy} className="hidden" />
+            </label>
+            {photoURL && (
+              <Button type="button" variant="outline" size="sm" onClick={onRemovePhoto} disabled={photoBusy}>
+                Remove
+              </Button>
+            )}
+          </div>
+          <span className="text-xs text-muted">A clear photo builds trust. JPG or PNG.</span>
+        </div>
+      </div>
+
       <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Name</span>
         <input className={field} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />

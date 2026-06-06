@@ -8,7 +8,7 @@ import { ServiceContact } from "@/components/listing/ServiceContact";
 import { sellerType, sellerTypeLabel } from "@/lib/sellers";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { incrementListingView } from "@/lib/firestore/analytics";
-import { PriceTag } from "@/components/ui/PriceTag";
+import { ConvertedPrice } from "@/components/listing/ConvertedPrice";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
@@ -63,10 +63,9 @@ export default async function ListingDetailPage({
           <div>
             {category && <Badge tone="brand">{category.icon} {category.label}</Badge>}
             <h1 className="mt-2 text-2xl font-bold leading-tight">{listing.title}</h1>
-            <span className="mt-1 flex items-baseline gap-2">
-              <PriceTag amount={listing.price} currency={listing.currency} className="text-2xl" />
-              {listing.price > 0 && <Badge tone="neutral">{listing.currency ?? "LRD"}</Badge>}
-            </span>
+            <div className="mt-1">
+              <ConvertedPrice amount={listing.price} currency={listing.currency} className="text-2xl" />
+            </div>
             <p className="mt-1 text-sm text-muted">
               📍 {listing.city}, {listing.county} County
             </p>
@@ -100,30 +99,40 @@ export default async function ListingDetailPage({
             </div>
           )}
 
-          {/* Seller */}
+          {/* Seller + trust */}
           {seller && (
             <Link
               href={`/u/${seller.id}`}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 hover:bg-surface"
+              className="block rounded-2xl border border-border bg-card p-3 hover:bg-surface"
             >
-              <Avatar name={seller.displayName} />
-              <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-1.5 font-medium">
-                  {seller.displayName}
-                  {me?.admin && isFounder(seller.id) ? (
-                    <VerifiedBadge kind="founder" label="Founder" />
-                  ) : seller.verified ? (
-                    <VerifiedBadge
-                      kind={seller.verifiedType === "business" ? "business" : "seller"}
-                      label={seller.verifiedType === "business" ? "Business" : "Verified"}
-                    />
-                  ) : null}
-                </p>
-                <p className="text-xs text-muted">
-                  {sellerTypeLabel(sellerType(seller))} · ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}
-                </p>
+              <div className="flex items-center gap-3">
+                <Avatar name={seller.displayName} photoURL={seller.photoURL} />
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-1.5 font-medium">
+                    {seller.displayName}
+                    {me?.admin && isFounder(seller.id) ? (
+                      <VerifiedBadge kind="founder" label="Founder" />
+                    ) : seller.verified ? (
+                      <VerifiedBadge
+                        kind={seller.verifiedType === "business" ? "business" : "seller"}
+                        label={seller.verifiedType === "business" ? "Business" : "Verified"}
+                      />
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {sellerTypeLabel(sellerType(seller))} · ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}
+                  </p>
+                </div>
+                <span className="ml-auto text-muted">›</span>
               </div>
-              <span className="ml-auto text-muted">›</span>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-border pt-2">
+                {seller.phoneVerified && <VerifiedBadge kind="phone" label="Phone Verified" />}
+                {seller.joinedAt && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-xs text-muted">
+                    📅 Member since {new Date(seller.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
+                  </span>
+                )}
+              </div>
             </Link>
           )}
 

@@ -227,5 +227,5 @@ export function formatPrice(amount: number, currency: Currency = "LRD"): string 
   // Community listings (churches, beaches, free events) post at no price.
   if (!amount || amount <= 0) return "Free";
   const n = amount.toLocaleString("en-US");
-  return currency === "USD" ? `$${n}` : `L$ ${n}`;
+  return currency === "USD" ? `US$ ${n}` : `L$ ${n}`;
 }

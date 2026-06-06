@@ -95,7 +95,9 @@ function LoginForm() {
     setPending(true);
     try {
       await confirmOtp(confirmationRef.current, code);
-      router.replace(next);
+      // Route through onboarding — new users enter their name, returning users
+      // with a name are passed straight through to `next`.
+      router.replace(`/welcome?next=${encodeURIComponent(next)}`);
       router.refresh();
     } catch {
       attemptsRef.current += 1;

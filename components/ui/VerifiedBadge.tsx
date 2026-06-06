@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
-export type VerificationKind = "founder" | "business" | "seller";
+export type VerificationKind = "founder" | "business" | "seller" | "phone";
 
 // Verification is a positive signal → green. Founder is the brand gold accent.
 const styles: Record<VerificationKind, { label: string; cls: string }> = {
   founder: { label: "Verified Founder", cls: "bg-accent/15 text-amber-700 ring-1 ring-accent/40" },
   business: { label: "Verified Business", cls: "bg-success/10 text-success ring-1 ring-success/25" },
   seller: { label: "Verified Seller", cls: "bg-success/10 text-success ring-1 ring-success/25" },
+  phone: { label: "Phone Verified", cls: "bg-success/10 text-success ring-1 ring-success/25" },
 };
 
 /** Small badge shown next to a verified user's name (profiles, listings, cards). */

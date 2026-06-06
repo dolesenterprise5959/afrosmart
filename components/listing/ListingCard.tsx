@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ListingImage } from "@/components/listing/ListingImage";
-import { PriceTag } from "@/components/ui/PriceTag";
+import { ConvertedPrice } from "@/components/listing/ConvertedPrice";
 import { Badge } from "@/components/ui/Badge";
 import type { Listing } from "@/lib/types";
 
@@ -27,14 +27,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
         <h3 className="line-clamp-2 text-sm font-medium text-foreground group-hover:text-brand-dark">
           {listing.title}
         </h3>
-        <div className="flex items-baseline gap-1.5">
-          <PriceTag amount={listing.price} currency={listing.currency} className="text-base" />
-          {listing.price > 0 && (
-            <span className="rounded bg-surface px-1 text-[10px] font-semibold text-muted">
-              {listing.currency ?? "LRD"}
-            </span>
-          )}
-        </div>
+        <ConvertedPrice amount={listing.price} currency={listing.currency} className="text-base" />
         <p className="mt-auto flex items-center gap-1.5 pt-1 text-xs text-muted">
           <span className="truncate">📍 {listing.city}, {listing.county}</span>
           {listing.sellerType === "business" && (

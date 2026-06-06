@@ -22,7 +22,8 @@ export default async function DashboardPage() {
   ]);
 
   const me = profile ?? {
-    displayName: session.phone ? `User ${session.phone.slice(-4)}` : "AfroSmart user",
+    displayName: "AfroSmart user",
+    firstName: "", photoURL: undefined as string | undefined, phoneVerified: true,
     city: "", county: "", isBusiness: false, ratingAvg: 0, ratingCount: 0,
     verified: false, verifiedType: null, plan: "free" as const, joinedAt: "",
   };
@@ -48,11 +49,16 @@ export default async function DashboardPage() {
         <div className="bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-7">
           <div className="flex items-center gap-4">
             <span className="rounded-full ring-2 ring-accent/40">
-              <Avatar name={me.displayName} size="lg" />
+              <Avatar name={me.displayName} photoURL={me.photoURL} size="lg" />
             </span>
             <div className="min-w-0 flex-1">
-              <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold leading-tight">
-                {me.displayName}
+              <h1 className="truncate text-xl font-bold leading-tight">{me.displayName}</h1>
+              <p className="mt-0.5 truncate text-sm text-white/70">
+                📍 {me.city || "Liberia"}{me.county ? `, ${me.county}` : ""}
+                {memberSince && <> · Member since {memberSince}</>}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {me.phoneVerified && <VerifiedBadge kind="phone" label="Phone Verified" />}
                 {me.verified && (
                   <VerifiedBadge kind={me.verifiedType === "business" ? "business" : "seller"} />
                 )}
@@ -61,28 +67,24 @@ export default async function DashboardPage() {
                     {planInfo(plan).name}
                   </span>
                 )}
-              </h1>
-              <p className="mt-0.5 truncate text-sm text-white/70">
-                📍 {me.city || "Liberia"}{me.county ? `, ${me.county}` : ""}
-                {memberSince && <> · Member since {memberSince}</>}
-              </p>
+              </div>
             </div>
             <Button href="/settings" variant="secondary" size="sm">Settings</Button>
           </div>
 
-          {/* Key counts */}
+          {/* Key counts — listings, saved, messages */}
           <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
             <div>
               <p className="text-xl font-bold">{analytics.activeListings.toLocaleString()}</p>
               <p className="text-[11px] uppercase tracking-wide text-white/55">Listings</p>
             </div>
             <div>
-              <p className="text-xl font-bold">{analytics.messagesReceived.toLocaleString()}</p>
-              <p className="text-[11px] uppercase tracking-wide text-white/55">Messages</p>
+              <p className="text-xl font-bold">{analytics.savedCount.toLocaleString()}</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/55">Saved</p>
             </div>
             <div>
-              <p className="text-xl font-bold">{analytics.profileViews.toLocaleString()}</p>
-              <p className="text-[11px] uppercase tracking-wide text-white/55">Profile views</p>
+              <p className="text-xl font-bold">{analytics.messagesReceived.toLocaleString()}</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/55">Messages</p>
             </div>
           </div>
         </div>

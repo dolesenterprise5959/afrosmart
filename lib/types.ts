@@ -30,9 +30,14 @@ export type SellerPlan = "free" | "premium" | "business";
 export interface User {
   id: string;
   displayName: string;
+  /** Name parts captured at onboarding (first required, last optional). */
+  firstName?: string;
+  lastName?: string;
   /** Stored only on the seller; never exposed publicly (call-unlock protects it). */
   phone: string;
   photoURL?: string;
+  /** True once the user completed OTP sign-in (every account is phone-verified). */
+  phoneVerified?: boolean;
   county: string;
   city: string;
   isBusiness: boolean;
