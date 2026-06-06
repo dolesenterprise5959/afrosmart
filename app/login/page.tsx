@@ -77,7 +77,7 @@ function LoginForm() {
     <div className="mx-auto w-full max-w-sm px-4 py-10">
       <div className="text-center">
         <div className="flex justify-center">
-          <Logo href={null} showWordmark={false} size="lg" />
+          <Logo href={null} full size="lg" />
         </div>
         <h1 className="mt-4 text-xl font-bold">Sign in to AfroSmart</h1>
         <p className="mt-1 text-sm text-muted">

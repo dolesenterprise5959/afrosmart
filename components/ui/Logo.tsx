@@ -1,33 +1,62 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
-// Central AfroSmart logo. Currently renders the brand mark + wordmark; when the
-// official asset is added at public/afrosmart-logo.png, swap the mark `<span>`
-// for an <Image src="/afrosmart-logo.png" …> here and it updates everywhere.
+// Central AfroSmart logo, backed by the official asset at public/afrosmart-logo.png.
+//  - default (mark): a compact dark tile of the gold "A" + the wordmark text.
+//  - full: the complete lockup image (mark + wordmark), for login & splash.
 
-const boxSize = { sm: "h-8 w-8 rounded-lg text-base", md: "h-9 w-9 rounded-xl text-lg", lg: "h-12 w-12 rounded-2xl text-2xl" };
+const tileSize = { sm: "h-8 w-8 rounded-lg", md: "h-9 w-9 rounded-xl", lg: "h-12 w-12 rounded-2xl" };
+const fullPx = { sm: 72, md: 104, lg: 160 };
 const textSize = { sm: "text-base", md: "text-lg", lg: "text-2xl" };
 
 export function Logo({
   href = "/",
   showWordmark = true,
   size = "md",
+  full = false,
 }: {
   /** Wrap in a link; pass null to render inline (no link). */
   href?: string | null;
   showWordmark?: boolean;
   size?: "sm" | "md" | "lg";
+  /** Render the complete lockup image instead of the tile + text. */
+  full?: boolean;
 }) {
-  const content: ReactNode = (
-    <span className="inline-flex items-center gap-2 font-bold">
-      <span className={`grid place-items-center bg-brand font-bold text-brand-foreground ${boxSize[size]}`}>A</span>
-      {showWordmark && (
-        <span className={`${textSize[size]} tracking-tight`}>
-          Afro<span className="text-brand">Smart</span>
+  let content: ReactNode;
+  if (full) {
+    const px = fullPx[size];
+    content = (
+      <Image
+        src="/afrosmart-logo.png"
+        alt="AfroSmart"
+        width={px}
+        height={px}
+        priority
+        className="rounded-2xl"
+      />
+    );
+  } else {
+    content = (
+      <span className="inline-flex items-center gap-2 font-bold">
+        <span className={`relative shrink-0 overflow-hidden bg-black ${tileSize[size]}`}>
+          <Image
+            src="/afrosmart-logo.png"
+            alt="AfroSmart"
+            fill
+            sizes="48px"
+            className="scale-[1.35] object-contain"
+            priority
+          />
         </span>
-      )}
-    </span>
-  );
+        {showWordmark && (
+          <span className={`${textSize[size]} tracking-tight`}>
+            Afro<span className="text-brand">Smart</span>
+          </span>
+        )}
+      </span>
+    );
+  }
 
   if (href === null) return content;
   return (

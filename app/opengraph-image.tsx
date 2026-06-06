@@ -1,11 +1,17 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const alt = "AfroSmart — Buy. Sell. Connect Across Africa.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Social sharing preview, generated at build/request time (no external assets).
-export default function OpengraphImage() {
+// Social sharing preview built from the official logo (embedded as a data URI so
+// it resolves on any host, including before the custom domain is live).
+export default async function OpengraphImage() {
+  const logo = await readFile(join(process.cwd(), "public/afrosmart-logo.png"));
+  const src = `data:image/png;base64,${logo.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -13,38 +19,21 @@ export default function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          alignItems: "center",
+          gap: "56px",
+          background: "#0a0a0a",
           padding: "80px",
-          background: "linear-gradient(135deg, #15803d 0%, #166534 100%)",
           color: "#ffffff",
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "110px",
-              height: "110px",
-              borderRadius: "28px",
-              background: "rgba(255,255,255,0.18)",
-              fontSize: "70px",
-              fontWeight: 800,
-            }}
-          >
-            A
+        <img src={src} width={380} height={380} style={{ borderRadius: 32 }} alt="" />
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ fontSize: 62, fontWeight: 800, lineHeight: 1.1 }}>Buy. Sell.</div>
+          <div style={{ fontSize: 62, fontWeight: 800, lineHeight: 1.1 }}>Connect Across Africa.</div>
+          <div style={{ marginTop: 28, fontSize: 30, color: "rgba(255,255,255,0.82)" }}>
+            Liberia&apos;s trusted marketplace
           </div>
-          <div style={{ fontSize: "64px", fontWeight: 800 }}>AfroSmart</div>
-        </div>
-        <div style={{ marginTop: "48px", fontSize: "72px", fontWeight: 800, lineHeight: 1.05 }}>
-          Buy. Sell. Connect
-        </div>
-        <div style={{ fontSize: "72px", fontWeight: 800, lineHeight: 1.05 }}>Across Africa.</div>
-        <div style={{ marginTop: "32px", fontSize: "30px", color: "rgba(255,255,255,0.85)" }}>
-          Liberia&apos;s trusted marketplace · vehicles · real estate · electronics · jobs · services
         </div>
       </div>
     ),
