@@ -53,6 +53,9 @@ export type ListingStatus = "active" | "sold" | "removed";
 /** Listings are priced in Liberian Dollars (LRD) or US Dollars (USD). */
 export type Currency = "LRD" | "USD";
 
+/** Whether a listing's seller is an individual or a business. */
+export type SellerType = "individual" | "business";
+
 export type VehicleCondition = "new" | "used" | "certified";
 export type FuelType = "petrol" | "diesel" | "hybrid" | "electric" | "other";
 export type Transmission = "automatic" | "manual";
@@ -96,6 +99,8 @@ export interface Listing {
   price: number;
   /** Currency of `price`. Defaults to LRD for legacy listings. */
   currency?: Currency;
+  /** Seller type, denormalised from the seller's account at post time. */
+  sellerType?: SellerType;
   category: CategoryId;
   county: string;
   city: string;

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { CategoryChips } from "@/components/layout/CategoryChips";
 import { CountyFilter } from "@/components/layout/CountyFilter";
+import { CurrencyFilter } from "@/components/layout/CurrencyFilter";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -22,13 +23,15 @@ export default async function CategoryPage({
   searchParams,
 }: PageProps<"/marketplace/[category]">) {
   const { category } = await params;
-  const { county } = await searchParams;
+  const { county, currency } = await searchParams;
   const meta = getCategory(category);
   if (!meta) notFound();
 
   const countyFilter = typeof county === "string" ? county : "";
+  const currencyFilter = typeof currency === "string" ? currency : "";
   let listings = await getListingsByCategory(category);
   if (countyFilter) listings = listings.filter((l) => l.county === countyFilter);
+  if (currencyFilter) listings = listings.filter((l) => (l.currency ?? "LRD") === currencyFilter);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
@@ -47,12 +50,15 @@ export default async function CategoryPage({
         {countyFilter ? ` in ${countyFilter}` : ""}
       </p>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1 basis-full sm:basis-auto">
           <CategoryChips active={meta.id} />
         </div>
         <Suspense fallback={null}>
           <CountyFilter />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CurrencyFilter />
         </Suspense>
       </div>
 

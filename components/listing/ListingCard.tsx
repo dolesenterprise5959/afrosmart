@@ -35,8 +35,11 @@ export function ListingCard({ listing }: { listing: Listing }) {
             </span>
           )}
         </div>
-        <p className="mt-auto pt-1 text-xs text-muted">
-          📍 {listing.city}, {listing.county}
+        <p className="mt-auto flex items-center gap-1.5 pt-1 text-xs text-muted">
+          <span className="truncate">📍 {listing.city}, {listing.county}</span>
+          {listing.sellerType === "business" && (
+            <span className="shrink-0 rounded bg-brand/10 px-1 font-medium text-brand-dark">🏢</span>
+          )}
         </p>
       </div>
     </Link>

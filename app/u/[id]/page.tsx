@@ -4,6 +4,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { PlanControls } from "@/components/admin/PlanControls";
 import { isFounder } from "@/lib/founder";
+import { sellerType, sellerTypeLabel } from "@/lib/sellers";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StarRating } from "@/components/rating/StarRating";
@@ -59,7 +60,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
             {user.ratingAvg.toFixed(1)} · {user.ratingCount} ratings
           </p>
           <p className="text-sm text-muted">
-            📍 {user.city}, {user.county}
+            {sellerTypeLabel(sellerType(user))} · 📍 {user.city}, {user.county}
             {user.joinedAt && <> · Joined {new Date(user.joinedAt).getFullYear()}</>}
           </p>
         </div>

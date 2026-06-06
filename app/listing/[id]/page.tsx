@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { VehicleSpecs } from "@/components/listing/VehicleSpecs";
 import { PropertySpecs } from "@/components/listing/PropertySpecs";
+import { sellerType, sellerTypeLabel } from "@/lib/sellers";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { incrementListingView } from "@/lib/firestore/analytics";
 import { PriceTag } from "@/components/ui/PriceTag";
@@ -111,7 +112,7 @@ export default async function ListingDetailPage({
                   ) : null}
                 </p>
                 <p className="text-xs text-muted">
-                  ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}
+                  {sellerTypeLabel(sellerType(seller))} · ⭐ {seller.ratingAvg.toFixed(1)} ({seller.ratingCount}) · {seller.city}
                 </p>
               </div>
               <span className="ml-auto text-muted">›</span>
