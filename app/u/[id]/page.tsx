@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
@@ -13,6 +14,7 @@ import { getListingsBySeller } from "@/lib/firestore/listings";
 import { getRatings } from "@/lib/firestore/ratings";
 import { hasUnlockedThreadBetween } from "@/lib/firestore/threads";
 import { getCurrentUser } from "@/lib/auth/dal";
+import { incrementProfileView } from "@/lib/firestore/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,9 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
   // Eligible to rate only if the viewer has an unlocked conversation with them.
   const canRate =
     me && me.uid !== user.id ? await hasUnlockedThreadBetween(me.uid, user.id) : false;
+
+  // Count a profile view (after the response; not the owner's own visits).
+  if (me?.uid !== user.id) after(() => incrementProfileView(user.id));
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">

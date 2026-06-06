@@ -38,6 +38,7 @@ export function SaveButton({ listing }: { listing: SaveSummary }) {
       return;
     }
     const ref = doc(getDb(), "saved", user.uid, "items", listing.id);
+    const nowSaved = !saved;
     if (saved) {
       await deleteDoc(ref);
     } else {
@@ -52,6 +53,12 @@ export function SaveButton({ listing }: { listing: SaveSummary }) {
         savedAt: serverTimestamp(),
       });
     }
+    // Maintain the seller's saved-count for analytics (best-effort).
+    fetch(`/api/listings/${listing.id}/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ saved: nowSaved }),
+    }).catch(() => {});
   }
 
   return (

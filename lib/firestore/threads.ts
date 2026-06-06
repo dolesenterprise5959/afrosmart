@@ -4,7 +4,7 @@ import "server-only";
 // (Admin SDK), so the client can never forge a sender id, flip callUnlocked, or
 // read a phone number it shouldn't. Used by the /api/threads route handlers.
 
-import { Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
 import { getListing } from "@/lib/firestore/listings";
 import { getPublicProfile, ensureUserProfile, isSuspended } from "@/lib/firestore/users";
@@ -75,6 +75,11 @@ export async function createOrGetThread(
       createdAt: now,
     });
   }
+
+  // Count the contact intent for the seller's analytics (best-effort).
+  ref.firestore.collection("listings").doc(listingId)
+    .update({ contactClicks: FieldValue.increment(1) })
+    .catch(() => {});
 
   return { ok: true, data: { threadId } };
 }

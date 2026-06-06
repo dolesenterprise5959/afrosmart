@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import { ListingGallery } from "@/components/listing/ListingGallery";
 import { VehicleSpecs } from "@/components/listing/VehicleSpecs";
 import { PropertySpecs } from "@/components/listing/PropertySpecs";
+import { ShareButton } from "@/components/listing/ShareButton";
+import { incrementListingView } from "@/lib/firestore/analytics";
 import { PriceTag } from "@/components/ui/PriceTag";
 import { Badge } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
@@ -32,6 +35,9 @@ export default async function ListingDetailPage({
   ]);
   const category = getCategory(listing.category);
   const isOwner = me?.uid === listing.sellerId;
+
+  // Count a view (after the response; don't count the owner's own views).
+  if (!isOwner) after(() => incrementListingView(listing.id));
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-5">
@@ -114,19 +120,18 @@ export default async function ListingDetailPage({
 
           {/* Actions */}
           {isOwner ? (
-            <div className="rounded-2xl border border-border bg-surface p-4 text-sm text-muted">
-              This is your listing.{" "}
-              <Link href="/dashboard" className="font-medium text-brand">
-                Manage it →
-              </Link>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4">
+              <p className="text-sm text-muted">
+                This is your listing.{" "}
+                <Link href="/dashboard" className="font-medium text-brand">Manage it →</Link>
+              </p>
+              <ShareButton title={listing.title} path={`/listing/${listing.id}`} className="w-full" />
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <MessageSellerButton listingId={listing.id} />
               <div className="flex gap-2">
-                <span className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-border bg-surface text-sm font-medium text-muted">
-                  🔒 Call unlocks in chat
-                </span>
+                <ShareButton title={listing.title} path={`/listing/${listing.id}`} className="flex-1" />
                 <SaveButton
                   listing={{
                     id: listing.id,
