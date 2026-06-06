@@ -41,3 +41,26 @@ export function toLocalPhone(e164: string): string {
   const m = local.match(/^(\d{3})(\d{3})(\d{0,4})$/);
   return m ? `${m[1]} ${m[2]}${m[3] ? ` ${m[3]}` : ""}` : local;
 }
+
+/**
+ * Validate a user-typed Liberian mobile number (local or otherwise). Returns a
+ * friendly error message, or null when it's a valid Liberian mobile number.
+ * Liberian mobile numbers are the national 8–9 digits after +231, starting with
+ * a mobile prefix (e.g. Lonestar 77…, Orange 88…, also 55/33/99…).
+ */
+export function validateLiberianMobile(raw: string): string | null {
+  const e164 = toE164(raw);
+  if (!e164.startsWith(LIBERIA_CC)) return "Please enter a Liberian mobile number.";
+  const national = e164.slice(LIBERIA_CC.length);
+  if (national.length === 0) return "Please enter your phone number.";
+  if (national.length < 8) {
+    return "That number looks too short — Liberian mobile numbers are 8–9 digits (e.g. 77 000 0000).";
+  }
+  if (national.length > 9) {
+    return "That number looks too long — enter just your local number (e.g. 77 000 0000).";
+  }
+  if (!/^[2-9]/.test(national)) {
+    return "Liberian mobile numbers start with 7, 8 or 5 — e.g. Lonestar 77…, Orange 88…";
+  }
+  return null;
+}

@@ -1,11 +1,16 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
 import { createRecaptcha, sendOtp, confirmOtp, toE164 } from "@/lib/firebase/auth-client";
+import { validateLiberianMobile } from "@/lib/utils/phone";
+
+const RESEND_COOLDOWN = 30; // seconds between code sends (anti-spam)
+const MAX_ATTEMPTS = 5; // wrong codes before a lockout
+const LOCKOUT_SECONDS = 60;
 
 export default function LoginPage() {
   return (
@@ -27,25 +32,50 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  // Anti-spam (resend cooldown) + brute-force lockout countdowns.
+  const [resendIn, setResendIn] = useState(0);
+  const [lockedFor, setLockedFor] = useState(0);
+  const attemptsRef = useRef(0);
+
   const verifierRef = useRef<RecaptchaVerifier | null>(null);
   const confirmationRef = useRef<ConfirmationResult | null>(null);
 
-  async function handleSendOtp(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+    if (resendIn <= 0 && lockedFor <= 0) return;
+    const t = setInterval(() => {
+      setResendIn((s) => Math.max(0, s - 1));
+      setLockedFor((s) => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [resendIn, lockedFor]);
+
+  async function send() {
     setError(null);
+    const localError = validateLiberianMobile(phone);
+    if (localError) {
+      setError(localError);
+      return;
+    }
+    if (resendIn > 0) return;
+
     setPending(true);
     try {
       verifierRef.current ??= createRecaptcha("recaptcha-container");
+      // sendOtp normalises the local number to E.164 (+231…) automatically.
       confirmationRef.current = await sendOtp(phone, verifierRef.current);
+      attemptsRef.current = 0;
+      setResendIn(RESEND_COOLDOWN);
       setStep("otp");
     } catch (err) {
-      const code = (err as { code?: string } | null)?.code;
+      const c = (err as { code?: string } | null)?.code;
       setError(
-        code === "auth/invalid-phone-number" || code === "auth/missing-phone-number"
-          ? "That doesn't look like a valid Liberian number. Enter it as +231 followed by your 8–9 digit number, e.g. 0770000000."
-          : err instanceof Error
-            ? err.message
-            : "Could not send code. Try again.",
+        c === "auth/invalid-phone-number" || c === "auth/missing-phone-number"
+          ? "That doesn't look like a valid Liberian number. Enter your local number, e.g. 77 000 0000."
+          : c === "auth/too-many-requests"
+            ? "Too many attempts from this device. Please wait a few minutes and try again."
+            : err instanceof Error
+              ? err.message
+              : "Could not send code. Try again.",
       );
     } finally {
       setPending(false);
@@ -54,7 +84,7 @@ function LoginForm() {
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirmationRef.current) return;
+    if (!confirmationRef.current || lockedFor > 0) return;
     setError(null);
     setPending(true);
     try {
@@ -62,13 +92,21 @@ function LoginForm() {
       router.replace(next);
       router.refresh();
     } catch {
-      setError("That code didn't work. Please check it and try again.");
+      attemptsRef.current += 1;
+      if (attemptsRef.current >= MAX_ATTEMPTS) {
+        attemptsRef.current = 0;
+        setLockedFor(LOCKOUT_SECONDS);
+        setError(`Too many incorrect codes. Please wait ${LOCKOUT_SECONDS}s, then request a new code.`);
+      } else {
+        const left = MAX_ATTEMPTS - attemptsRef.current;
+        setError(`That code didn't work. ${left} attempt${left === 1 ? "" : "s"} left before a short lockout.`);
+      }
     } finally {
       setPending(false);
     }
   }
 
-  const field =
+  const inputBox =
     "h-12 w-full rounded-xl border border-border bg-card px-4 text-base outline-none focus:border-brand";
   const submit =
     "inline-flex h-12 w-full items-center justify-center rounded-full bg-brand text-base font-medium text-brand-foreground hover:bg-brand-dark disabled:opacity-50";
@@ -82,7 +120,7 @@ function LoginForm() {
         <h1 className="mt-4 text-xl font-bold">Sign in to AfroSmart</h1>
         <p className="mt-1 text-sm text-muted">
           {step === "phone"
-            ? "Enter your phone number and we'll text you a code."
+            ? "Enter your phone number and we'll text you a code. New here? This also creates your account."
             : `Enter the 6-digit code sent to ${toE164(phone)}.`}
         </p>
       </div>
@@ -95,21 +133,30 @@ function LoginForm() {
       )}
 
       {step === "phone" ? (
-        <form onSubmit={handleSendOtp} className="mt-6 flex flex-col gap-3">
+        <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-6 flex flex-col gap-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Phone number</span>
-            <input
-              className={field}
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder="+231 77 000 0000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
+            <div className="flex gap-2">
+              <select
+                aria-label="Country"
+                defaultValue="LR"
+                className="h-12 shrink-0 rounded-xl border border-border bg-card px-2 text-base outline-none focus:border-brand"
+              >
+                <option value="LR">🇱🇷 +231</option>
+              </select>
+              <input
+                className="h-12 min-w-0 flex-1 rounded-xl border border-border bg-card px-4 text-base outline-none focus:border-brand"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel-national"
+                placeholder="77 000 0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
             <span className="text-xs text-muted">
-              Liberian numbers — a leading 0 is replaced with +231 automatically.
+              Enter your local number — e.g. Lonestar 77…, Orange 88…
             </span>
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -122,7 +169,7 @@ function LoginForm() {
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium">Verification code</span>
             <input
-              className={`${field} tracking-[0.4em]`}
+              className={`${inputBox} tracking-[0.4em]`}
               inputMode="numeric"
               autoComplete="one-time-code"
               maxLength={6}
@@ -133,20 +180,26 @@ function LoginForm() {
             />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" className={submit} disabled={pending}>
-            {pending ? "Verifying…" : "Verify & continue"}
+          <button type="submit" className={submit} disabled={pending || lockedFor > 0}>
+            {pending ? "Verifying…" : lockedFor > 0 ? `Locked — wait ${lockedFor}s` : "Verify & continue"}
           </button>
-          <button
-            type="button"
-            className="text-sm text-muted hover:text-foreground"
-            onClick={() => {
-              setStep("phone");
-              setCode("");
-              setError(null);
-            }}
-          >
-            ← Use a different number
-          </button>
+          <div className="flex items-center justify-between text-sm">
+            <button
+              type="button"
+              className="text-muted hover:text-foreground"
+              onClick={() => { setStep("phone"); setCode(""); setError(null); }}
+            >
+              ← Use a different number
+            </button>
+            <button
+              type="button"
+              disabled={resendIn > 0 || pending}
+              className="font-medium text-brand disabled:text-muted"
+              onClick={() => void send()}
+            >
+              {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+            </button>
+          </div>
         </form>
       )}
 

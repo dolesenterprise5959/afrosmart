@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { toE164, toLocalPhone } from "@/lib/utils/phone";
+import { toE164, toLocalPhone, validateLiberianMobile } from "@/lib/utils/phone";
 
 describe("toE164 (Liberia phone normalisation)", () => {
   it("prefixes a local number with the country code", () => {
@@ -41,5 +41,24 @@ describe("toLocalPhone (display format)", () => {
   });
   it("leaves a non-Liberian number unchanged", () => {
     expect(toLocalPhone("+15551234567")).toBe("+15551234567");
+  });
+});
+
+describe("validateLiberianMobile", () => {
+  it("accepts valid local mobile numbers (Lonestar 77, Orange 88)", () => {
+    expect(validateLiberianMobile("770000001")).toBeNull();
+    expect(validateLiberianMobile("881234567")).toBeNull();
+    expect(validateLiberianMobile("0770000001")).toBeNull(); // leading 0
+    expect(validateLiberianMobile("77 000 0000")).toBeNull(); // spaces
+  });
+  it("rejects too-short / too-long numbers", () => {
+    expect(validateLiberianMobile("7700")).toMatch(/too short/i);
+    expect(validateLiberianMobile("7700000000")).toMatch(/too long/i);
+  });
+  it("rejects numbers that don't start with a mobile prefix", () => {
+    expect(validateLiberianMobile("110000000")).toMatch(/start with/i);
+  });
+  it("asks for a number when empty", () => {
+    expect(validateLiberianMobile("")).toMatch(/enter/i);
   });
 });

@@ -6,6 +6,7 @@ import { verifyAdmin } from "@/lib/auth/dal";
 import { getAdminStats } from "@/lib/firestore/admin";
 import { listReports } from "@/lib/firestore/reports";
 import { listPendingVerifications } from "@/lib/firestore/verification";
+import { TEST_PHONE_NUMBERS } from "@/lib/testNumbers";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,38 @@ export default async function AdminPage() {
           </div>
         ))}
       </div>
+
+      {/* Tester access — test login without real SMS */}
+      <h2 className="mb-1 mt-8 text-lg font-semibold">🔑 Tester access (test login)</h2>
+      <p className="mb-3 text-sm text-muted">
+        These are Firebase <strong>test phone numbers</strong> — they don&apos;t send a real SMS and
+        always accept the fixed code below. Real OTP codes are sent by Firebase and never exposed,
+        so use these to verify the login flow.
+      </p>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-surface text-left text-xs text-muted">
+            <tr>
+              <th className="px-3 py-2">Enter in login</th>
+              <th className="px-3 py-2">Stored number</th>
+              <th className="px-3 py-2">Code</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {TEST_PHONE_NUMBERS.map((t) => (
+              <tr key={t.phone}>
+                <td className="px-3 py-2 font-medium">{t.local}</td>
+                <td className="px-3 py-2 text-muted">{t.phone}</td>
+                <td className="px-3 py-2 font-mono font-semibold text-brand-dark">{t.code}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-2 text-xs text-muted">
+        To test with a <strong>real</strong> Liberian number, just enter it on the login page — a
+        real SMS is sent (billed on the Blaze plan). Login &amp; sign-up are the same page: <code>/login</code>.
+      </p>
 
       {/* Verification requests */}
       <h2 className="mb-3 mt-8 text-lg font-semibold">Verification requests</h2>
