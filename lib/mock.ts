@@ -214,5 +214,7 @@ export function getRecentListings(): Listing[] {
 
 /** Format an LRD amount the way Liberian sellers write it: "L$ 78,000". */
 export function formatPrice(amount: number): string {
+  // Community listings (churches, beaches, free events) post at no price.
+  if (!amount || amount <= 0) return "Free";
   return `L$ ${amount.toLocaleString("en-US")}`;
 }
