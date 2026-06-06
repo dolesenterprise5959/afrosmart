@@ -9,13 +9,23 @@ import { ALL_CATEGORIES, getCategory } from "@/lib/categories";
 export const CATEGORIES = ALL_CATEGORIES;
 export { getCategory };
 
+// All 15 counties of Liberia (Montserrado first; the rest alphabetical).
 export const COUNTIES: County[] = [
   { id: "montserrado", name: "Montserrado", cities: ["Monrovia", "Paynesville", "Bensonville"] },
-  { id: "nimba", name: "Nimba", cities: ["Ganta", "Sanniquellie", "Saclepea"] },
+  { id: "bomi", name: "Bomi", cities: ["Tubmanburg", "Klay"] },
   { id: "bong", name: "Bong", cities: ["Gbarnga", "Totota", "Salala"] },
-  { id: "lofa", name: "Lofa", cities: ["Voinjama", "Foya", "Zorzor"] },
+  { id: "gbarpolu", name: "Gbarpolu", cities: ["Bopolu", "Belle Yella"] },
   { id: "grand-bassa", name: "Grand Bassa", cities: ["Buchanan", "Edina", "Compound #3"] },
+  { id: "grand-cape-mount", name: "Grand Cape Mount", cities: ["Robertsport", "Sinje"] },
+  { id: "grand-gedeh", name: "Grand Gedeh", cities: ["Zwedru", "Toe Town"] },
+  { id: "grand-kru", name: "Grand Kru", cities: ["Barclayville", "Grand Cess"] },
+  { id: "lofa", name: "Lofa", cities: ["Voinjama", "Foya", "Zorzor"] },
   { id: "margibi", name: "Margibi", cities: ["Kakata", "Harbel", "Marshall"] },
+  { id: "maryland", name: "Maryland", cities: ["Harper", "Pleebo"] },
+  { id: "nimba", name: "Nimba", cities: ["Ganta", "Sanniquellie", "Saclepea"] },
+  { id: "river-cess", name: "River Cess", cities: ["Cestos City"] },
+  { id: "river-gee", name: "River Gee", cities: ["Fish Town"] },
+  { id: "sinoe", name: "Sinoe", cities: ["Greenville"] },
 ];
 
 export const USERS: User[] = [
