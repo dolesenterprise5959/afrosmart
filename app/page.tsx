@@ -30,11 +30,11 @@ export default async function Home() {
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-10">
       {/* Hero — compact on mobile (search-first below) */}
-      <section className="mt-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-5 py-6 text-brand-foreground sm:px-8 sm:py-10">
+      <section className="mt-4 rounded-3xl bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-8 sm:py-10">
         <h1 className="max-w-2xl text-2xl font-bold leading-tight sm:text-4xl">
           AfroSmart — Liberia&apos;s community marketplace
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-brand-foreground/85 sm:text-base">
+        <p className="mt-2 max-w-2xl text-sm text-white/75 sm:text-base">
           For food, services, transport, businesses, real estate, jobs, and everyday commerce.
         </p>
       </section>
@@ -57,7 +57,7 @@ export default async function Home() {
               href={c.href}
               className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-2 py-4 text-center transition-colors hover:border-brand hover:bg-surface"
             >
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand/10 text-xl transition-transform group-hover:scale-110">
+              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-xl ring-1 ring-accent/20 transition-transform group-hover:scale-110">
                 {c.icon}
               </span>
               <span className="text-xs font-medium">{c.label}</span>

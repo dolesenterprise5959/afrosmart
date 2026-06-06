@@ -56,9 +56,9 @@ export default async function ServicesPage({ searchParams }: PageProps<"/service
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
       {/* Hero */}
-      <section className="rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-5 py-6 text-brand-foreground sm:px-8 sm:py-8">
+      <section className="rounded-3xl bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-8 sm:py-8">
         <h1 className="text-2xl font-bold sm:text-3xl">🛠️ Services & Businesses</h1>
-        <p className="mt-1 max-w-xl text-sm text-brand-foreground/85">
+        <p className="mt-1 max-w-xl text-sm text-white/75">
           Find trusted barbers, salons, mechanics, caterers, cleaners and more — near you in Liberia.
         </p>
       </section>

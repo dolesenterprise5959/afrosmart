@@ -25,14 +25,14 @@ export default async function FounderPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       <section className="overflow-hidden rounded-3xl border border-border bg-card">
-        <div className="bg-gradient-to-br from-brand to-brand-dark px-6 py-8 text-brand-foreground sm:px-8">
+        <div className="bg-gradient-to-br from-neutral-900 to-black px-6 py-8 text-white sm:px-8">
           <div className="flex items-center gap-4">
-            <span className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-brand-foreground/15 text-2xl font-bold ring-1 ring-brand-foreground/25">
+            <span className="grid h-20 w-20 shrink-0 place-items-center rounded-2xl bg-white/10 text-2xl font-bold ring-1 ring-white/20">
               {FOUNDER.initials}
             </span>
             <div>
               <h1 className="text-2xl font-bold leading-tight sm:text-3xl">{FOUNDER.name}</h1>
-              <p className="mt-0.5 text-sm text-brand-foreground/85 sm:text-base">{FOUNDER.title}</p>
+              <p className="mt-0.5 text-sm text-white/75 sm:text-base">{FOUNDER.title}</p>
               <span className="mt-2 inline-block">
                 <VerifiedBadge kind="founder" />
               </span>

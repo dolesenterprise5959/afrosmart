@@ -24,9 +24,12 @@ export default async function DashboardPage() {
   const me = profile ?? {
     displayName: session.phone ? `User ${session.phone.slice(-4)}` : "AfroSmart user",
     city: "", county: "", isBusiness: false, ratingAvg: 0, ratingCount: 0,
-    verified: false, verifiedType: null, plan: "free" as const,
+    verified: false, verifiedType: null, plan: "free" as const, joinedAt: "",
   };
   const plan = me.plan ?? "free";
+  const memberSince = me.joinedAt
+    ? new Date(me.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })
+    : null;
   const showAnalytics = plan === "business" || plan === "premium";
 
   const metrics = [
@@ -40,35 +43,65 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <div className="flex items-center gap-4">
-        <Avatar name={me.displayName} size="lg" />
-        <div className="flex-1">
-          <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold">
-            {me.displayName}
-            {me.verified && (
-              <VerifiedBadge kind={me.verifiedType === "business" ? "business" : "seller"} />
-            )}
-          </h1>
-          <p className="text-sm text-muted">
-            📍 {me.city}, {me.county}
-          </p>
-        </div>
-        <Button href="/settings" variant="outline" size="sm">Settings</Button>
-      </div>
+      {/* Premium profile header */}
+      <section className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+        <div className="bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-7">
+          <div className="flex items-center gap-4">
+            <span className="rounded-full ring-2 ring-accent/40">
+              <Avatar name={me.displayName} size="lg" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold leading-tight">
+                {me.displayName}
+                {me.verified && (
+                  <VerifiedBadge kind={me.verifiedType === "business" ? "business" : "seller"} />
+                )}
+                {plan !== "free" && (
+                  <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-semibold text-accent ring-1 ring-accent/30">
+                    {planInfo(plan).name}
+                  </span>
+                )}
+              </h1>
+              <p className="mt-0.5 truncate text-sm text-white/70">
+                📍 {me.city || "Liberia"}{me.county ? `, ${me.county}` : ""}
+                {memberSince && <> · Member since {memberSince}</>}
+              </p>
+            </div>
+            <Button href="/settings" variant="secondary" size="sm">Settings</Button>
+          </div>
 
-      {/* Status row */}
-      <div className="mt-5 flex flex-wrap gap-3">
-        <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm">
-          <span className="text-muted">Verification: </span>
-          <span className="font-semibold">{me.verified ? "Verified ✓" : "Not verified"}</span>
-          {!me.verified && <Link href="/verify" className="ml-2 text-brand">Get verified</Link>}
+          {/* Key counts */}
+          <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/10 pt-4 text-center">
+            <div>
+              <p className="text-xl font-bold">{analytics.activeListings.toLocaleString()}</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/55">Listings</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold">{analytics.messagesReceived.toLocaleString()}</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/55">Messages</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold">{analytics.profileViews.toLocaleString()}</p>
+              <p className="text-[11px] uppercase tracking-wide text-white/55">Profile views</p>
+            </div>
+          </div>
         </div>
-        <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm">
-          <span className="text-muted">Membership: </span>
-          <span className="font-semibold">{planInfo(plan).name}</span>
-          {plan === "free" && <Link href="/pricing" className="ml-2 text-brand">Upgrade</Link>}
+
+        {/* Status strip */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-5 py-3 text-sm sm:px-7">
+          <span>
+            <span className="text-muted">Verification: </span>
+            <span className="font-semibold">{me.verified ? "Verified ✓" : "Not verified"}</span>
+            {!me.verified && <Link href="/verify" className="ml-2 font-medium text-brand">Get verified</Link>}
+          </span>
+          <span>
+            <span className="text-muted">Membership: </span>
+            <span className="font-semibold">{planInfo(plan).name}</span>
+            {plan === "free" && <Link href="/pricing" className="ml-2 font-medium text-brand">Upgrade</Link>}
+          </span>
+          <span className="ml-auto text-muted">⭐ {me.ratingAvg.toFixed(1)} ({me.ratingCount})</span>
         </div>
-      </div>
+      </section>
 
       {/* Business analytics */}
       <div className="mt-8 flex items-center gap-2">
@@ -80,9 +113,9 @@ export default async function DashboardPage() {
         <>
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {metrics.map((m) => (
-              <div key={m.label} className="rounded-2xl border border-border bg-card p-4">
+              <div key={m.label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                 <p className="text-2xl font-bold">{m.value.toLocaleString()}</p>
-                <p className="text-xs text-muted">{m.icon} {m.label}</p>
+                <p className="mt-0.5 text-xs text-muted">{m.icon} {m.label}</p>
               </div>
             ))}
           </div>

@@ -2,17 +2,20 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #141414;
 
-  /* AfroSmart brand palette — warm, trustworthy, high-contrast for sunlight
-     and low-end screens common in Liberia. */
-  --brand: #15803d;        /* green — growth, trust */
-  --brand-dark: #166534;
+  /* AfroSmart premium palette — black primary, gold accent, white surfaces.
+     Green is reserved for success/verification only (--success). */
+  --brand: #161616;        /* near-black — primary buttons, emphasis */
+  --brand-dark: #000000;
   --brand-foreground: #ffffff;
-  --accent: #f59e0b;       /* amber — energy, highlights */
-  --surface: #f8fafc;      /* page background behind cards */
+  --accent: #c79a2b;       /* gold — the AfroSmart accent (highlights, featured) */
+  --accent-foreground: #1a1a1a;
+  --success: #15803d;      /* green — success states, verification, positive */
+  --success-foreground: #ffffff;
+  --surface: #f5f5f6;      /* page background behind cards */
   --card: #ffffff;
-  --border: #e5e7eb;
+  --border: #e6e6e8;
   --muted: #6b7280;
 }
 
@@ -23,6 +26,9 @@
   --color-brand-dark: var(--brand-dark);
   --color-brand-foreground: var(--brand-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-surface: var(--surface);
   --color-card: var(--card);
   --color-border: var(--border);
@@ -34,13 +40,17 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
-    --brand: #22c55e;
-    --brand-dark: #16a34a;
-    --surface: #0f0f0f;
-    --card: #161616;
-    --border: #262626;
-    --muted: #9ca3af;
+    --foreground: #f1f1f2;
+    /* On dark surfaces the primary becomes light so buttons stay visible. */
+    --brand: #f4f4f5;
+    --brand-dark: #ffffff;
+    --brand-foreground: #0a0a0a;
+    --accent: #d8af3c;
+    --success: #22c55e;
+    --surface: #0c0c0d;
+    --card: #161618;
+    --border: #28282b;
+    --muted: #9b9ba3;
   }
 }
 
