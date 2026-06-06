@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { getCategory } from "@/lib/mock";
+import { placeholderImage } from "@/lib/placeholders";
 import type { CategoryId } from "@/lib/types";
 
-// A listing photo is either a real image URL (Firebase Storage) or, for sample
-// data without a photo, a clean neutral category placeholder. Real photos go
-// through next/image (resized/WebP — important on Liberian bandwidth).
+// Priority: user's uploaded photo → category AI placeholder image (if available)
+// → clean neutral fallback. Real photos go through next/image (resized/WebP —
+// important on Liberian bandwidth) and lazy-load below the fold.
 function isImageUrl(photo: string): boolean {
   return photo.startsWith("http") || photo.startsWith("/");
 }
@@ -27,6 +28,7 @@ export function ListingImage({
   const meta = getCategory(category);
   const icon = meta?.icon ?? "📦";
 
+  // 1) The user's own uploaded photo always wins.
   if (photo && isImageUrl(photo)) {
     return (
       <div className={["relative overflow-hidden", className].filter(Boolean).join(" ")}>
@@ -35,8 +37,17 @@ export function ListingImage({
     );
   }
 
-  // Clean, consistent neutral placeholder (no bright gradients) until a real
-  // photo is uploaded — keeps photos as the visual focus across the marketplace.
+  // 2) Professional category placeholder image, when one exists for this category.
+  const art = placeholderImage(category);
+  if (art) {
+    return (
+      <div className={["relative overflow-hidden", className].filter(Boolean).join(" ")}>
+        <Image src={art} alt={alt ?? meta?.label ?? ""} fill sizes={sizes} loading="lazy" className="object-cover" />
+      </div>
+    );
+  }
+
+  // 3) Clean neutral fallback (no bright gradients) — keeps photos as the focus.
   return (
     <div
       aria-hidden

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
+import { CategoryArt } from "@/components/layout/CategoryArt";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { Button } from "@/components/ui/Button";
 import { getFeaturedListings, getRecentListings } from "@/lib/firestore/listings";
@@ -55,12 +56,9 @@ export default async function Home() {
             <Link
               key={c.id}
               href={c.href}
-              className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-2 py-4 text-center transition-colors hover:border-brand hover:bg-surface"
+              className="group block overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface"
             >
-              <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-xl ring-1 ring-accent/20 transition-transform group-hover:scale-110">
-                {c.icon}
-              </span>
-              <span className="text-xs font-medium">{c.label}</span>
+              <CategoryArt category={c.id} icon={c.icon} label={c.label} />
             </Link>
           ))}
         </div>
