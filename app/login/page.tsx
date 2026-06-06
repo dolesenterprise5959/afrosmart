@@ -30,7 +30,6 @@ function LoginForm() {
   // Country — Liberia by default; a deep-link (?country=US) preselects another.
   const initialCountry = findCountry(params.get("country") ?? "") ?? DEFAULT_COUNTRY;
   const [country, setCountry] = useState(initialCountry);
-  const [showCountry, setShowCountry] = useState(initialCountry.code !== DEFAULT_COUNTRY.code);
 
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
@@ -73,15 +72,15 @@ function LoginForm() {
       setResendIn(RESEND_COOLDOWN);
       setStep("otp");
     } catch (err) {
+      // Log the technical detail for debugging; never show raw Firebase errors.
+      console.error("[login] sendOtp failed:", err);
       const c = (err as { code?: string } | null)?.code;
       setError(
         c === "auth/invalid-phone-number" || c === "auth/missing-phone-number"
           ? `That doesn't look like a valid ${country.name} number. Enter your local number, e.g. ${country.example}.`
           : c === "auth/too-many-requests"
             ? "Too many attempts from this device. Please wait a few minutes and try again."
-            : err instanceof Error
-              ? err.message
-              : "Could not send code. Try again.",
+            : "Unable to send verification code. Please try again.",
       );
     } finally {
       setPending(false);
@@ -99,7 +98,8 @@ function LoginForm() {
       // with a name are passed straight through to `next`.
       router.replace(`/welcome?next=${encodeURIComponent(next)}`);
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("[login] confirmOtp failed:", err);
       attemptsRef.current += 1;
       if (attemptsRef.current >= MAX_ATTEMPTS) {
         attemptsRef.current = 0;
@@ -142,48 +142,32 @@ function LoginForm() {
 
       {step === "phone" ? (
         <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-6 flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium">Phone number</span>
+          <label className="flex flex-col gap-2">
+            <span className="text-sm font-medium">Phone Number</span>
 
-            {/* Country picker — hidden by default (Liberia); revealed on demand. */}
-            {showCountry && (
-              <select
-                aria-label="Country"
-                value={country.code}
-                onChange={(e) => setCountry(findCountry(e.target.value) ?? DEFAULT_COUNTRY)}
-                className="h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-brand"
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.dialCode})</option>
-                ))}
-              </select>
-            )}
+            {/* One country selector — the only place a flag appears. */}
+            <select
+              aria-label="Country"
+              value={country.code}
+              onChange={(e) => setCountry(findCountry(e.target.value) ?? DEFAULT_COUNTRY)}
+              className="h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-brand"
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.flag} {c.name} ({c.dialCode})</option>
+              ))}
+            </select>
 
-            <div className="flex h-12 items-center rounded-xl border border-border bg-card focus-within:border-brand">
-              <span className="pl-3 pr-1 text-xl" aria-hidden>{country.flag}</span>
-              {showCountry && <span className="pr-1 text-base text-muted">{country.dialCode}</span>}
-              <input
-                className="h-12 min-w-0 flex-1 rounded-r-xl bg-transparent px-2 text-base outline-none"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel-national"
-                placeholder={country.example}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </div>
-
-            {showCountry ? (
-              <span className="text-xs text-muted">{country.flag} {country.name} ({country.dialCode})</span>
-            ) : (
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="text-muted">{country.flag} {country.name}</span>
-                <button type="button" onClick={() => setShowCountry(true)} className="shrink-0 font-medium text-brand">
-                  Change country
-                </button>
-              </div>
-            )}
+            {/* Plain phone input — no flag, no dial-code prefix. */}
+            <input
+              className="h-12 w-full rounded-xl border border-border bg-card px-4 text-base outline-none focus:border-brand"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
+              placeholder={`Phone number (e.g. ${country.example})`}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button type="submit" className={submit} disabled={pending || !configured}>
