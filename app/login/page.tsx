@@ -5,9 +5,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Logo } from "@/components/ui/Logo";
-import { createRecaptcha, sendOtp, confirmOtp } from "@/lib/firebase/auth-client";
+import { createRecaptcha, sendOtp, confirmOtp, signInWithCustomTokenAndSession } from "@/lib/firebase/auth-client";
 import { validateMobile, toE164For } from "@/lib/utils/phone";
 import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
+import { describeAuthError } from "@/lib/auth/otp-errors";
+import { logLoginEvent } from "@/app/login/actions";
+
+type FallbackChannel = "whatsapp" | "sms";
+
+// Paid WhatsApp/SMS fallback stays OFF until a provider is configured. Until then
+// production runs Firebase Phone Auth + visible-reCAPTCHA fallback only.
+const FALLBACK_ENABLED = process.env.NEXT_PUBLIC_OTP_FALLBACK_ENABLED === "true";
 
 const RESEND_COOLDOWN = 30; // seconds between code sends (anti-spam)
 const MAX_ATTEMPTS = 5; // wrong codes before a lockout
@@ -36,9 +44,12 @@ function LoginForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  // TEMP: surfaces the exact Firebase error to diagnose the Liberia SMS blocker.
-  // Remove once the root cause is confirmed.
-  const [debugInfo, setDebugInfo] = useState<{ code: string; message: string; phone: string; country: string; ts: string } | null>(null);
+  // Reliability state: count reCAPTCHA failures, escalate invisible→visible, and
+  // expose the WhatsApp/SMS fallback after 2 failures. method drives the verify step.
+  const [method, setMethod] = useState<"firebase" | FallbackChannel>("firebase");
+  const [captchaFails, setCaptchaFails] = useState(0);
+  const [recaptchaSize, setRecaptchaSize] = useState<"invisible" | "normal">("invisible");
+  const [showFallback, setShowFallback] = useState(false);
 
   // Anti-spam (resend cooldown) + brute-force lockout countdowns.
   const [resendIn, setResendIn] = useState(0);
@@ -68,34 +79,63 @@ function LoginForm() {
 
     setPending(true);
     const e164 = toE164For(phone, country.dialCode);
-    setDebugInfo(null);
     try {
-      verifierRef.current ??= createRecaptcha("recaptcha-container");
+      verifierRef.current ??= createRecaptcha("recaptcha-container", recaptchaSize);
       // Convert the local number to E.164 using the selected country's dial code.
       confirmationRef.current = await sendOtp(e164, verifierRef.current);
       attemptsRef.current = 0;
       setResendIn(RESEND_COOLDOWN);
+      setMethod("firebase");
+      void logLoginEvent({ status: "sent", phone: e164, country: `${country.code} ${country.dialCode}`, code: "ok", provider: "firebase" });
       setStep("otp");
     } catch (err) {
-      // TEMP debug capture — exact Firebase error code/message + submitted format.
-      const ex = err as { code?: string; message?: string } | null;
-      const dbg = {
-        code: ex?.code ?? "unknown",
-        message: ex?.message ?? String(err),
-        phone: e164,
-        country: `${country.code} ${country.dialCode}`,
-        ts: new Date().toISOString(),
-      };
-      console.error("[login][debug] sendOtp failed:", dbg);
-      setDebugInfo(dbg);
-      const c = ex?.code;
-      setError(
-        c === "auth/invalid-phone-number" || c === "auth/missing-phone-number"
-          ? `That doesn't look like a valid ${country.name} number. Enter your local number, e.g. ${country.example}.`
-          : c === "auth/too-many-requests"
-            ? "Too many attempts from this device. Please wait a few minutes and try again."
-            : "Unable to send verification code. Please try again.",
-      );
+      const ex = err as { code?: string } | null;
+      const code = ex?.code ?? "unknown";
+      const { reason, message } = describeAuthError(code);
+      console.error("[login] sendOtp failed:", code);
+      void logLoginEvent({ status: "failed", phone: e164, country: `${country.code} ${country.dialCode}`, code, provider: "firebase" });
+      setError(message);
+
+      // reCAPTCHA/network/unknown → escalate: invisible → visible, then offer fallback.
+      if (reason === "captcha" || reason === "network" || reason === "unknown") {
+        const fails = captchaFails + 1;
+        setCaptchaFails(fails);
+        if (fails === 1) {
+          // Switch to a VISIBLE checkbox reCAPTCHA for the next attempt.
+          try { verifierRef.current?.clear(); } catch { /* ignore */ }
+          verifierRef.current = null;
+          setRecaptchaSize("normal");
+        }
+        if (fails >= 2 && FALLBACK_ENABLED) setShowFallback(true); // offer WhatsApp/SMS after 2 fails (when enabled)
+      } else if ((reason === "quota" || reason === "too-many") && FALLBACK_ENABLED) {
+        setShowFallback(true);
+      }
+    } finally {
+      setPending(false);
+    }
+  }
+
+  // ---- Fallback OTP (WhatsApp / SMS) ----
+  async function sendFallback(channel: FallbackChannel) {
+    setError(null);
+    const localError = validateMobile(phone, country);
+    if (localError) { setError(localError); return; }
+    setPending(true);
+    const e164 = toE164For(phone, country.dialCode);
+    try {
+      const res = await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: e164, channel, country: `${country.code} ${country.dialCode}` }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setError(data.error ?? "Couldn't send the code. Try the other method."); return; }
+      attemptsRef.current = 0;
+      setMethod(channel);
+      setResendIn(RESEND_COOLDOWN);
+      setStep("otp");
+    } catch {
+      setError("Network problem. Please check your connection and try again.");
     } finally {
       setPending(false);
     }
@@ -103,17 +143,32 @@ function LoginForm() {
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
-    if (!confirmationRef.current || lockedFor > 0) return;
+    if (lockedFor > 0) return;
     setError(null);
     setPending(true);
     try {
-      await confirmOtp(confirmationRef.current, code);
+      if (method === "firebase") {
+        if (!confirmationRef.current) { setPending(false); return; }
+        await confirmOtp(confirmationRef.current, code);
+      } else {
+        // Fallback: verify the custom OTP → custom token → session.
+        const e164 = toE164For(phone, country.dialCode);
+        const res = await fetch("/api/auth/otp/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: e164, code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.token) throw new Error(data.error ?? "Verification failed.");
+        await signInWithCustomTokenAndSession(data.token);
+      }
+      void logLoginEvent({ status: "verified", phone: toE164For(phone, country.dialCode), country: `${country.code} ${country.dialCode}`, code: "ok", provider: method });
       // Route through onboarding — new users enter their name, returning users
       // with a name are passed straight through to `next`.
       router.replace(`/welcome?next=${encodeURIComponent(next)}`);
       router.refresh();
     } catch (err) {
-      console.error("[login] confirmOtp failed:", err);
+      console.error("[login] verify failed:", err);
       attemptsRef.current += 1;
       if (attemptsRef.current >= MAX_ATTEMPTS) {
         attemptsRef.current = 0;
@@ -143,7 +198,7 @@ function LoginForm() {
         <p className="mt-1 text-sm text-muted">
           {step === "phone"
             ? "Enter your phone number and we'll text you a code. New here? This also creates your account."
-            : `Enter the 6-digit code sent to ${toE164For(phone, country.dialCode)}.`}
+            : `Enter the 6-digit code sent ${method === "whatsapp" ? "via WhatsApp" : method === "sms" ? "by SMS" : ""} to ${toE164For(phone, country.dialCode)}.`}
         </p>
       </div>
 
@@ -184,19 +239,33 @@ function LoginForm() {
             />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {debugInfo && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-[11px] leading-relaxed text-amber-900">
-              <p className="font-semibold">Diagnostics (temporary — please screenshot &amp; send):</p>
-              <p className="mt-1 break-all font-mono">code: {debugInfo.code}</p>
-              <p className="break-all font-mono">msg: {debugInfo.message}</p>
-              <p className="break-all font-mono">phone: {debugInfo.phone}</p>
-              <p className="font-mono">country: {debugInfo.country}</p>
-              <p className="font-mono">time: {debugInfo.ts}</p>
-            </div>
+
+          {recaptchaSize === "normal" && (
+            <p className="text-xs text-muted">Please tick the verification box below, then tap “Send code”.</p>
           )}
+          {/* reCAPTCHA renders here (invisible by default; visible checkbox after a failure). */}
+          <div id="recaptcha-container" className={recaptchaSize === "normal" ? "flex justify-center" : ""} />
+
           <button type="submit" className={submit} disabled={pending || !configured}>
             {pending ? "Sending…" : "Send code"}
           </button>
+
+          {showFallback && FALLBACK_ENABLED && (
+            <div className="mt-1 rounded-xl border border-border bg-card p-3">
+              <p className="text-sm font-medium">Having trouble getting the SMS?</p>
+              <p className="mt-0.5 text-xs text-muted">Get your verification code another way:</p>
+              <div className="mt-2 flex gap-2">
+                <button type="button" onClick={() => void sendFallback("whatsapp")} disabled={pending}
+                  className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50">
+                  💬 WhatsApp
+                </button>
+                <button type="button" onClick={() => void sendFallback("sms")} disabled={pending}
+                  className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-border text-sm font-semibold hover:bg-surface disabled:opacity-50">
+                  📩 SMS
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       ) : (
         <form onSubmit={handleVerify} className="mt-6 flex flex-col gap-3">
@@ -221,7 +290,7 @@ function LoginForm() {
             <button
               type="button"
               className="text-muted hover:text-foreground"
-              onClick={() => { setStep("phone"); setCode(""); setError(null); }}
+              onClick={() => { setStep("phone"); setCode(""); setError(null); setMethod("firebase"); }}
             >
               ← Use a different number
             </button>
@@ -229,7 +298,7 @@ function LoginForm() {
               type="button"
               disabled={resendIn > 0 || pending}
               className="font-medium text-brand disabled:text-muted"
-              onClick={() => void send()}
+              onClick={() => (method === "firebase" ? void send() : void sendFallback(method))}
             >
               {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
             </button>
@@ -240,9 +309,6 @@ function LoginForm() {
       <p className="mt-6 text-center text-xs text-muted">
         By continuing you agree to AfroSmart’s Terms and Privacy Policy.
       </p>
-
-      {/* Invisible reCAPTCHA mounts here (required by Firebase phone auth). */}
-      <div id="recaptcha-container" />
     </div>
   );
 }

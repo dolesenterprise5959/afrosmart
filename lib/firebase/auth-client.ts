@@ -6,6 +6,7 @@
 
 import {
   RecaptchaVerifier,
+  signInWithCustomToken,
   signInWithPhoneNumber,
   signOut,
   type ConfirmationResult,
@@ -15,11 +16,24 @@ import { toE164 } from "@/lib/utils/phone";
 
 export { toE164 };
 
-/** Create an invisible reCAPTCHA bound to a container element id. */
-export function createRecaptcha(containerId: string): RecaptchaVerifier {
-  return new RecaptchaVerifier(getFirebaseAuth(), containerId, {
-    size: "invisible",
+/**
+ * Create a reCAPTCHA bound to a container id. Defaults to invisible; pass
+ * "normal" for a visible checkbox fallback when invisible fails for a user.
+ */
+export function createRecaptcha(containerId: string, size: "invisible" | "normal" = "invisible"): RecaptchaVerifier {
+  return new RecaptchaVerifier(getFirebaseAuth(), containerId, { size });
+}
+
+/** Sign in with a fallback custom token (WhatsApp/SMS path), then set the session cookie. */
+export async function signInWithCustomTokenAndSession(token: string): Promise<void> {
+  const cred = await signInWithCustomToken(getFirebaseAuth(), token);
+  const idToken = await cred.user.getIdToken();
+  const res = await fetch("/api/auth/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ idToken }),
   });
+  if (!res.ok) throw new Error("Could not establish session");
 }
 
 /** Send an OTP SMS. Returns a confirmation handle for the verify step. */
