@@ -15,7 +15,7 @@ import {
   LISTINGS as SAMPLE_LISTINGS,
   getListing as sampleGetListing,
 } from "@/lib/mock";
-import type { CategoryId, Currency, Listing, Property, SellerType, ServiceInfo, Vehicle } from "@/lib/types";
+import type { CategoryId, Currency, Listing, ListingStatus, Property, SellerType, ServiceInfo, Vehicle } from "@/lib/types";
 
 const COLLECTION = "listings";
 const FETCH_LIMIT = 60;
@@ -238,9 +238,25 @@ async function fetchListingsBySeller(sellerId: string): Promise<Listing[]> {
     .where("sellerId", "==", sellerId)
     .limit(FETCH_LIMIT)
     .get();
-  return snap.docs.map(docToListing).sort(byNewest);
+  return snap.docs.map(docToListing).filter((l) => l.status !== "removed").sort(byNewest);
 }
 export const getListingsBySeller = cached(fetchListingsBySeller, ["listings:seller"]);
+
+/** Owner-scoped writes (the caller must verify ownership first). */
+export async function setListingStatus(id: string, status: ListingStatus): Promise<void> {
+  if (!isAdminConfigured()) return;
+  await adminDb().collection(COLLECTION).doc(id).set({ status }, { merge: true });
+  revalidateTag(LISTINGS_TAG, "max");
+}
+export async function updateListingFields(
+  id: string,
+  patch: Partial<Pick<Listing, "title" | "description" | "price" | "currency" | "county" | "city">>,
+): Promise<void> {
+  if (!isAdminConfigured()) return;
+  const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+  await adminDb().collection(COLLECTION).doc(id).set(clean, { merge: true });
+  revalidateTag(LISTINGS_TAG, "max");
+}
 
 export async function getListing(id: string): Promise<Listing | null> {
   if (!isAdminConfigured()) {

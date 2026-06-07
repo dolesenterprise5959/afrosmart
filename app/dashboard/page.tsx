@@ -3,7 +3,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
-import { ListingGrid } from "@/components/listing/ListingGrid";
+import { ListingManageCard } from "@/components/listing/ListingManageCard";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { verifySession } from "@/lib/auth/dal";
 import { getListingsBySeller } from "@/lib/firestore/listings";
@@ -136,12 +136,21 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* My listings */}
-      <div className="mt-8 mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">My listings ({analytics.activeListings})</h2>
+      {/* My listings — manage each via the ⋮ menu */}
+      <div className="mt-8 mb-1 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">My listings ({myListings.length})</h2>
         <Button href="/listing/new" size="sm">+ Post</Button>
       </div>
-      <ListingGrid listings={myListings} />
+      <p className="mb-3 text-xs text-muted">Tap ⋮ on a listing to edit, mark as sold, pause, or delete.</p>
+      {myListings.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+          {myListings.map((l) => <ListingManageCard key={l.id} listing={l} />)}
+        </div>
+      ) : (
+        <p className="rounded-xl border border-border bg-card p-6 text-center text-sm text-muted">
+          You haven&apos;t posted anything yet. <Link href="/listing/new" className="font-medium text-brand">Post your first listing →</Link>
+        </p>
+      )}
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
         <Link href="/saved" className="text-brand">♡ Saved listings</Link>

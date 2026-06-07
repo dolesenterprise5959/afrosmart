@@ -53,7 +53,7 @@ export interface User {
   plan?: SellerPlan;
 }
 
-export type ListingStatus = "active" | "sold" | "removed";
+export type ListingStatus = "active" | "paused" | "sold" | "removed";
 
 /** Listings are priced in Liberian Dollars (LRD) or US Dollars (USD). */
 export type Currency = "LRD" | "USD";
