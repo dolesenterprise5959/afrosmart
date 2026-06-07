@@ -39,11 +39,11 @@ export function EditListingForm({ id, initial }: { id: string; initial: Initial 
     <form onSubmit={onSubmit} className="mt-5 flex flex-col gap-3">
       <input className={field} placeholder="Title" value={f.title} onChange={(e) => set("title", e.target.value)} />
       <div className="flex gap-2">
-        <select className={`${field} w-24 shrink-0`} value={f.currency} onChange={(e) => set("currency", e.target.value)}>
+        <select className={`${field} shrink-0 basis-1/4 px-2`} value={f.currency} onChange={(e) => set("currency", e.target.value)}>
           <option value="LRD">L$</option>
           <option value="USD">US$</option>
         </select>
-        <input className={field} type="number" inputMode="numeric" placeholder="Price" value={f.price} onChange={(e) => set("price", e.target.value)} />
+        <input className={`${field} min-w-0 flex-1`} type="text" inputMode="numeric" autoComplete="off" placeholder="Price" value={f.price} onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))} />
       </div>
       <div className="flex gap-2">
         <select className={`${field} flex-1`} value={f.county} onChange={(e) => set("county", e.target.value)}>

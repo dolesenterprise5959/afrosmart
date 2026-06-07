@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { uploadListingPhotos } from "@/lib/firebase/storage-client";
 import { createListingAction } from "@/app/listing/new/actions";
 import { COUNTIES, formatPrice } from "@/lib/mock";
+import { townsForCounty, OTHER_TOWN } from "@/lib/liberia-towns";
 import { VEHICLE_CONDITIONS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
@@ -34,6 +35,7 @@ const emptyData = {
   ph_condition: "",
   s_businessName: "", s_phone: "", s_whatsapp: "",
   showPhone: false,
+  manualCity: false,
 };
 type Data = typeof emptyData;
 
@@ -87,7 +89,12 @@ export function ListingWizard() {
           const j = await res.json();
           const sub = String(j.principalSubdivision ?? "").replace(/ County$/i, "").trim();
           const match = COUNTIES.find((c) => c.name.toLowerCase() === sub.toLowerCase());
-          setData((d) => ({ ...d, county: match ? match.name : d.county, city: j.city || j.locality || d.city }));
+          setData((d) => {
+            const county = match ? match.name : d.county;
+            const city = j.city || j.locality || d.city;
+            const known = townsForCounty(county).includes(city);
+            return { ...d, county, city, manualCity: Boolean(city) && !known };
+          });
         } catch { /* ignore */ } finally { setDetecting(false); }
       },
       () => setDetecting(false),
@@ -344,30 +351,60 @@ export function ListingWizard() {
         <div className="flex flex-col gap-3">
           <h1 className="text-xl font-bold">Details</h1>
           <input className={field} placeholder="Title (e.g. Toyota Corolla 2014)" value={data.title} onChange={(e) => set("title", e.target.value)} />
+          {/* Price is the primary field: currency ~25%, amount ~75% */}
           <div className="flex gap-2">
-            <select className={`${field} w-24 shrink-0`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
+            <select className={`${field} shrink-0 basis-1/4 px-2`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
               <option value="LRD">L$</option>
               <option value="USD">US$</option>
             </select>
-            <input className={field} type="number" inputMode="numeric" placeholder="Price" value={data.price} onChange={(e) => set("price", e.target.value)} />
+            <input
+              className={`${field} min-w-0 flex-1`}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="Price"
+              value={data.price}
+              onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
+            />
           </div>
           <button type="button" onClick={detectLocation} disabled={detecting} className="inline-flex h-10 w-fit items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium hover:border-brand disabled:opacity-50">
             📍 {detecting ? "Detecting…" : "Use my location"}
           </button>
+          {/* County → City/Town: pick from a list (less typing), or Other for manual */}
           <div className="flex gap-2">
-            <select className={`${field} flex-1`} value={data.county} onChange={(e) => set("county", e.target.value)}>
+            <select
+              className={`${field} min-w-0 flex-1`}
+              value={data.county}
+              onChange={(e) => setData((d) => ({ ...d, county: e.target.value, city: "", manualCity: false }))}
+            >
               <option value="">County</option>
               {COUNTIES.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
-            <input className={`${field} flex-1`} placeholder="City / Town" value={data.city} onChange={(e) => set("city", e.target.value)} />
+            <select
+              className={`${field} min-w-0 flex-1`}
+              disabled={!data.county}
+              value={data.manualCity ? OTHER_TOWN : data.city}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === OTHER_TOWN) setData((d) => ({ ...d, manualCity: true, city: "" }));
+                else setData((d) => ({ ...d, manualCity: false, city: v }));
+              }}
+            >
+              <option value="">{data.county ? "City / Town" : "Select county first"}</option>
+              {townsForCounty(data.county).map((t) => <option key={t} value={t}>{t}</option>)}
+              {data.county && <option value={OTHER_TOWN}>Other Town/Village…</option>}
+            </select>
           </div>
+          {data.manualCity && (
+            <input className={field} placeholder="Enter your town or village" value={data.city} onChange={(e) => set("city", e.target.value)} />
+          )}
           <textarea className="min-h-[88px] w-full rounded-xl border border-border bg-card px-4 py-3 text-base outline-none focus:border-brand" placeholder="Description (condition, details, contact…)" value={data.description} onChange={(e) => set("description", e.target.value)} />
 
           {data.kind === "vehicle" && (
             <div className="grid grid-cols-2 gap-2">
               <input className={field} placeholder="Make (Toyota)" value={data.v_make} onChange={(e) => set("v_make", e.target.value)} />
               <input className={field} placeholder="Model (Corolla)" value={data.v_model} onChange={(e) => set("v_model", e.target.value)} />
-              <input className={field} type="number" inputMode="numeric" placeholder="Year" value={data.v_year} onChange={(e) => set("v_year", e.target.value)} />
+              <input className={field} type="text" inputMode="numeric" placeholder="Year" value={data.v_year} onChange={(e) => set("v_year", e.target.value.replace(/[^\d]/g, ""))} />
               <select className={field} value={data.v_condition} onChange={(e) => set("v_condition", e.target.value)}>
                 {VEHICLE_CONDITIONS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
               </select>
@@ -381,7 +418,7 @@ export function ListingWizard() {
               <select className={field} value={data.p_propertyType} onChange={(e) => set("p_propertyType", e.target.value)}>
                 {PROPERTY_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
-              <input className={`${field} col-span-2`} type="number" inputMode="numeric" placeholder="Bedrooms (optional)" value={data.p_bedrooms} onChange={(e) => set("p_bedrooms", e.target.value)} />
+              <input className={`${field} col-span-2`} type="text" inputMode="numeric" placeholder="Bedrooms (optional)" value={data.p_bedrooms} onChange={(e) => set("p_bedrooms", e.target.value.replace(/[^\d]/g, ""))} />
             </div>
           )}
           {data.kind === "service" && (
