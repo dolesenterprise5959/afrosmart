@@ -36,6 +36,9 @@ function LoginForm() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // TEMP: surfaces the exact Firebase error to diagnose the Liberia SMS blocker.
+  // Remove once the root cause is confirmed.
+  const [debugInfo, setDebugInfo] = useState<{ code: string; message: string; phone: string; country: string; ts: string } | null>(null);
 
   // Anti-spam (resend cooldown) + brute-force lockout countdowns.
   const [resendIn, setResendIn] = useState(0);
@@ -64,17 +67,28 @@ function LoginForm() {
     if (resendIn > 0) return;
 
     setPending(true);
+    const e164 = toE164For(phone, country.dialCode);
+    setDebugInfo(null);
     try {
       verifierRef.current ??= createRecaptcha("recaptcha-container");
       // Convert the local number to E.164 using the selected country's dial code.
-      confirmationRef.current = await sendOtp(toE164For(phone, country.dialCode), verifierRef.current);
+      confirmationRef.current = await sendOtp(e164, verifierRef.current);
       attemptsRef.current = 0;
       setResendIn(RESEND_COOLDOWN);
       setStep("otp");
     } catch (err) {
-      // Log the technical detail for debugging; never show raw Firebase errors.
-      console.error("[login] sendOtp failed:", err);
-      const c = (err as { code?: string } | null)?.code;
+      // TEMP debug capture — exact Firebase error code/message + submitted format.
+      const ex = err as { code?: string; message?: string } | null;
+      const dbg = {
+        code: ex?.code ?? "unknown",
+        message: ex?.message ?? String(err),
+        phone: e164,
+        country: `${country.code} ${country.dialCode}`,
+        ts: new Date().toISOString(),
+      };
+      console.error("[login][debug] sendOtp failed:", dbg);
+      setDebugInfo(dbg);
+      const c = ex?.code;
       setError(
         c === "auth/invalid-phone-number" || c === "auth/missing-phone-number"
           ? `That doesn't look like a valid ${country.name} number. Enter your local number, e.g. ${country.example}.`
@@ -170,6 +184,16 @@ function LoginForm() {
             />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {debugInfo && (
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-[11px] leading-relaxed text-amber-900">
+              <p className="font-semibold">Diagnostics (temporary — please screenshot &amp; send):</p>
+              <p className="mt-1 break-all font-mono">code: {debugInfo.code}</p>
+              <p className="break-all font-mono">msg: {debugInfo.message}</p>
+              <p className="break-all font-mono">phone: {debugInfo.phone}</p>
+              <p className="font-mono">country: {debugInfo.country}</p>
+              <p className="font-mono">time: {debugInfo.ts}</p>
+            </div>
+          )}
           <button type="submit" className={submit} disabled={pending || !configured}>
             {pending ? "Sending…" : "Send code"}
           </button>
