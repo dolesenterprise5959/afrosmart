@@ -173,6 +173,32 @@ export async function getCategoryCounts(
   return out;
 }
 
+/** Minimal listing index for instant client-side search autocomplete. */
+export interface SearchIndexItem {
+  id: string;
+  title: string;
+  category: string;
+  price: number;
+  currency: string;
+  photo: string;
+}
+const toIndex = (l: Listing): SearchIndexItem => ({
+  id: l.id,
+  title: l.title,
+  category: l.category,
+  price: l.price,
+  currency: l.currency ?? "LRD",
+  photo: l.photos?.[0] ?? "",
+});
+async function fetchSearchIndex(): Promise<SearchIndexItem[]> {
+  if (!isAdminConfigured()) {
+    return SAMPLE_LISTINGS.filter((l) => l.status === "active").map(toIndex);
+  }
+  const snap = await adminDb().collection(COLLECTION).orderBy("createdAt", "desc").limit(300).get();
+  return snap.docs.map(docToListing).filter((l) => l.status === "active").map(toIndex);
+}
+export const getSearchIndex = cached(fetchSearchIndex, ["listings:search-index"]);
+
 async function fetchFeaturedListings(): Promise<Listing[]> {
   if (!isAdminConfigured()) {
     return SAMPLE_LISTINGS.filter((l) => l.featured && l.status === "active");

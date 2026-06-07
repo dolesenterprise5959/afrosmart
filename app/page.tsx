@@ -55,12 +55,12 @@ export default async function Home() {
           <h2 className="text-lg font-semibold">Browse by category</h2>
           <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>
         </div>
-        <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex snap-x gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TOP_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
-              className="group block w-28 shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-36"
+              className="group block w-32 shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-40"
             >
               <CategoryArt category={c.id} icon={c.icon} label={c.label} count={counts[c.id]} />
             </Link>
