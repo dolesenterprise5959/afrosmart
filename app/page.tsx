@@ -49,8 +49,8 @@ export default async function Home() {
         <HeroCarousel />
       </section>
 
-      {/* Top categories — exactly 3 visible on mobile, horizontal swipe */}
-      <section className="mt-6">
+      {/* Top categories — ~1.8 visible on mobile, horizontal swipe */}
+      <section className="mt-4">
         <div className="mb-2.5 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Browse by category</h2>
           <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>

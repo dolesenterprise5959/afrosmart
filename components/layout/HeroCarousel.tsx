@@ -56,7 +56,7 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative h-44 w-full overflow-hidden rounded-xl sm:h-56"
+      className="relative h-36 w-full overflow-hidden rounded-xl sm:h-48"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={onTouchStart}
@@ -78,7 +78,7 @@ export function HeroCarousel() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
       {/* No text overlay — just the quick category chips along the bottom. */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4 pb-7">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-3 pb-6">
         <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CHIPS.map((c) => (
             <Link
