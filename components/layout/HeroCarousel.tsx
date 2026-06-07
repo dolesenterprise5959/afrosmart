@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { trackHeroEvent } from "@/lib/actions/hero";
 
-// Rotating Liberia photos as the backdrop for a search-first hero.
+// Rotating Liberia-photo advertisement banner with quick-search category chips.
+// (The main search bar lives above this banner on the homepage.)
 const BG = [
   { id: "cars", img: "/placeholders/car-suv.webp" },
   { id: "real-estate", img: "/placeholders/home-modern.webp" },
@@ -16,7 +16,6 @@ const BG = [
   { id: "services", img: "/placeholders/services.webp" },
 ];
 
-// Quick-search chips → direct category destinations.
 const CHIPS = [
   { id: "cars", label: "Cars", icon: "🚗", href: "/marketplace/cars" },
   { id: "real-estate", label: "Real Estate", icon: "🏠", href: "/properties" },
@@ -30,9 +29,7 @@ const ROTATE_MS = 6000;
 const SWIPE_PX = 40;
 
 export function HeroCarousel() {
-  const router = useRouter();
   const [i, setI] = useState(0);
-  const [q, setQ] = useState("");
   const [paused, setPaused] = useState(false);
   const seen = useRef<Set<number>>(new Set());
   const touchX = useRef<number | null>(null);
@@ -49,13 +46,6 @@ export function HeroCarousel() {
     void trackHeroEvent(BG[i].id, "impression");
   }, [i]);
 
-  function onSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const term = q.trim();
-    void trackHeroEvent("search", "click");
-    router.push(term ? `/marketplace?q=${encodeURIComponent(term)}` : "/marketplace");
-  }
-
   function onTouchStart(e: React.TouchEvent) { touchX.current = e.touches[0].clientX; }
   function onTouchEnd(e: React.TouchEvent) {
     const start = touchX.current; touchX.current = null;
@@ -66,13 +56,12 @@ export function HeroCarousel() {
 
   return (
     <div
-      className="relative h-56 w-full overflow-hidden rounded-3xl sm:h-64"
+      className="relative h-44 w-full overflow-hidden rounded-xl sm:h-56"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      {/* Rotating background photos + dark overlay for legibility */}
       {BG.map((b, idx) => (
         <Image
           key={b.id}
@@ -85,23 +74,10 @@ export function HeroCarousel() {
           className={`object-cover transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
         />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/30" />
 
-      {/* Foreground: search + quick chips (persistent over the rotation) */}
       <div className="absolute inset-0 flex flex-col justify-center gap-3 p-5 sm:p-8">
-        <h2 className="text-lg font-bold text-white sm:text-2xl">Find anything in Liberia</h2>
-        <form onSubmit={onSearch} className="flex max-w-xl gap-2">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="What are you looking for today?"
-            aria-label="Search the marketplace"
-            className="h-11 min-w-0 flex-1 rounded-full border border-white/20 bg-white/95 px-4 text-base text-[#1a1a1a] outline-none placeholder:text-neutral-500 focus:bg-white"
-          />
-          <button type="submit" className="h-11 shrink-0 rounded-full bg-accent px-5 text-sm font-semibold text-[#1a1a1a] hover:brightness-95">
-            Search
-          </button>
-        </form>
+        <h2 className="max-w-md text-xl font-bold text-white sm:text-2xl">Find anything in Liberia</h2>
         <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CHIPS.map((c) => (
             <Link
@@ -116,7 +92,6 @@ export function HeroCarousel() {
         </div>
       </div>
 
-      {/* Rotation dots */}
       <div className="absolute inset-x-0 bottom-2.5 z-10 flex justify-center gap-1.5">
         {BG.map((b, idx) => (
           <button

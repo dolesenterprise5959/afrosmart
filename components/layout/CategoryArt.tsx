@@ -20,7 +20,7 @@ export function CategoryArt({
 
   if (art) {
     return (
-      <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl">
         <Image
           src={art}
           alt={label}
@@ -39,7 +39,7 @@ export function CategoryArt({
 
   return (
     <div className="flex flex-col items-center gap-2 px-2 py-5">
-      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-accent/15 text-2xl ring-1 ring-accent/20 transition-transform group-hover:scale-110">
+      <span className="grid h-14 w-14 place-items-center rounded-xl bg-accent/15 text-2xl ring-1 ring-accent/20 transition-transform group-hover:scale-110">
         {icon}
       </span>
       <span className="text-sm font-medium">{label}{countLabel}</span>

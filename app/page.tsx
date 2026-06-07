@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SearchBar } from "@/components/layout/SearchBar";
 import { MarketplaceHeader } from "@/components/layout/MarketplaceHeader";
 import { HeroCarousel } from "@/components/layout/HeroCarousel";
 import { CategoryArt } from "@/components/layout/CategoryArt";
@@ -38,23 +39,28 @@ export default async function Home() {
         <MarketplaceHeader />
       </section>
 
-      {/* Search-first hero (rotating Liberia photos + search + quick chips) */}
+      {/* Search bar — above the hero banner */}
+      <section className="mt-3">
+        <SearchBar placeholder="What are you looking for today?" />
+      </section>
+
+      {/* Hero / advertisement banner (rotating Liberia photos + quick chips) */}
       <section className="mt-3">
         <HeroCarousel />
       </section>
 
-      {/* Top categories — ~4 visible on mobile, horizontal swipe; full list on /categories */}
-      <section className="mt-7">
-        <div className="mb-3 flex items-center justify-between">
+      {/* Top categories — exactly 3 visible on mobile, horizontal swipe */}
+      <section className="mt-6">
+        <div className="mb-2.5 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Browse by category</h2>
           <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>
         </div>
-        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TOP_CATEGORIES.map((c) => (
             <Link
               key={c.id}
               href={c.href}
-              className="group block w-[calc((100vw-3.75rem)/4)] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-32"
+              className="group block w-28 shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-36"
             >
               <CategoryArt category={c.id} icon={c.icon} label={c.label} count={counts[c.id]} />
             </Link>
@@ -63,7 +69,7 @@ export default async function Home() {
       </section>
 
       {/* Featured */}
-      <section className="mt-8">
+      <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">⭐ Featured listings</h2>
           <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
@@ -72,7 +78,7 @@ export default async function Home() {
       </section>
 
       {/* Latest */}
-      <section className="mt-8">
+      <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">🆕 Latest listings</h2>
           <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
