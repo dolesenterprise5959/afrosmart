@@ -21,8 +21,25 @@ import { getCategory } from "@/lib/mock";
 import { getListing } from "@/lib/firestore/listings";
 import { getPublicProfile } from "@/lib/firestore/users";
 import { getCurrentUser } from "@/lib/auth/dal";
+import { toLocalPhone } from "@/lib/utils/phone";
 
 export const dynamic = "force-dynamic";
+
+// Open Graph tags so WhatsApp/Facebook unfurl the link with the cover photo +
+// title + price when a seller shares it.
+export async function generateMetadata({ params }: PageProps<"/listing/[id]">): Promise<import("next").Metadata> {
+  const { id } = await params;
+  const l = await getListing(id);
+  if (!l) return { title: "Listing — AfroSmart" };
+  const img = l.photos.find((p) => p.startsWith("http") || p.startsWith("/")) ?? "/afrosmart-logo.png";
+  const desc = (l.description || "On AfroSmart — Liberia's marketplace.").slice(0, 150);
+  return {
+    title: l.title,
+    description: desc,
+    openGraph: { title: l.title, description: desc, type: "website", images: [{ url: img }] },
+    twitter: { card: "summary_large_image", title: l.title, description: desc, images: [img] },
+  };
+}
 
 export default async function ListingDetailPage({
   params,
@@ -147,6 +164,14 @@ export default async function ListingDetailPage({
             </div>
           ) : (
             <div className="flex flex-col gap-2">
+              {listing.publicPhone && (
+                <a
+                  href={`tel:${listing.publicPhone}`}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-success text-base font-semibold text-success-foreground hover:brightness-95"
+                >
+                  📞 Call {toLocalPhone(listing.publicPhone)}
+                </a>
+              )}
               <MessageSellerButton listingId={listing.id} />
               <div className="flex gap-2">
                 <ShareButton title={listing.title} path={`/listing/${listing.id}`} className="flex-1" />
@@ -162,10 +187,12 @@ export default async function ListingDetailPage({
                   }}
                 />
               </div>
-              <p className="text-center text-xs text-muted">
-                For your safety, the phone number unlocks inside the chat after you
-                message the seller and they reply.
-              </p>
+              {!listing.publicPhone && (
+                <p className="text-center text-xs text-muted">
+                  For your safety, the phone number unlocks inside the chat after you
+                  message the seller and they reply.
+                </p>
+              )}
             </div>
           )}
 

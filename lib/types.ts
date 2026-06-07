@@ -131,6 +131,8 @@ export interface Listing {
   property?: Property;
   /** Public business contact, present on service-category listings. */
   service?: ServiceInfo;
+  /** Seller's phone shown publicly on this listing when they opt in (E.164). */
+  publicPhone?: string;
 }
 
 // --- Messaging ---

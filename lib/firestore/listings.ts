@@ -39,6 +39,7 @@ export interface NewListingInput {
   vehicle?: Vehicle;
   property?: Property;
   service?: ServiceInfo;
+  publicPhone?: string;
   /** Premium/Business sellers get featured placement. */
   featured?: boolean;
 }
@@ -111,6 +112,7 @@ function docToListing(doc: FirestoreDoc): Listing {
     ...(d.vehicle ? { vehicle: docToVehicle(d.vehicle) } : {}),
     ...(d.property ? { property: docToProperty(d.property) } : {}),
     ...(d.service ? { service: docToService(d.service) } : {}),
+    ...(d.publicPhone ? { publicPhone: String(d.publicPhone) } : {}),
   };
 }
 
@@ -281,6 +283,7 @@ export async function createListing(
       ...(input.vehicle ? { vehicle: input.vehicle } : {}),
       ...(input.property ? { property: input.property } : {}),
       ...(input.service ? { service: input.service } : {}),
+      ...(input.publicPhone ? { publicPhone: input.publicPhone } : {}),
     });
   revalidateTag(LISTINGS_TAG, "max"); // refresh browse caches (stale-while-revalidate)
   return ref.id;

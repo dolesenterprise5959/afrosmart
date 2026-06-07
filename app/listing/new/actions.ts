@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { verifySession } from "@/lib/auth/dal";
 import { createListing } from "@/lib/firestore/listings";
 import { ensureUserProfile, getPublicProfile, isSuspended } from "@/lib/firestore/users";
@@ -51,6 +50,8 @@ const oneOf = <T extends string>(opts: { id: T }[], value: unknown, fallback: T)
 
 export interface CreateListingResult {
   error?: string;
+  ok?: boolean;
+  id?: string;
 }
 
 interface CreateListingPayload {
@@ -65,6 +66,8 @@ interface CreateListingPayload {
   vehicle?: VehiclePayload;
   property?: PropertyPayload;
   service?: ServicePayload;
+  /** When true, the seller's phone is shown publicly on the listing. */
+  showPhone?: boolean;
 }
 
 // Server-side create. Re-verifies the session (never trusts the client for the
@@ -154,6 +157,9 @@ export async function createListingAction(
   const profile = await getPublicProfile(session.uid);
   const sellerType = deriveSellerType(profile ?? {});
   const featured = isFeaturedEligible(profile?.plan);
+  // Seller opted to show their phone publicly on this listing.
+  const publicPhone = input.showPhone && session.phone ? toE164(session.phone) : undefined;
+
   const id = await createListing(session.uid, {
     title,
     description,
@@ -167,8 +173,9 @@ export async function createListingAction(
     vehicle,
     property,
     service,
+    publicPhone,
     featured,
   });
 
-  redirect(`/listing/${id}`);
+  return { ok: true, id };
 }
