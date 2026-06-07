@@ -34,13 +34,17 @@ const RECENT_KEY = "afrosmart:recent";
 const IMAGE_SEARCH_KEY = "afm:image-search";
 
 // Minimal Web Speech API typing (avoids `any`).
-interface SpeechResultLike { results: ArrayLike<ArrayLike<{ transcript: string }>>; }
+interface SpeechResult extends ArrayLike<{ transcript: string }> { isFinal: boolean }
+interface SpeechResultEvent { resultIndex: number; results: ArrayLike<SpeechResult> }
+interface SpeechErrorEvent { error: string }
 interface SR {
   lang: string;
+  continuous: boolean;
   interimResults: boolean;
-  onresult: ((e: SpeechResultLike) => void) | null;
+  maxAlternatives: number;
+  onresult: ((e: SpeechResultEvent) => void) | null;
   onend: (() => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((e: SpeechErrorEvent) => void) | null;
   start: () => void;
   stop: () => void;
 }
@@ -48,6 +52,30 @@ type SRCtor = new () => SR;
 function getSRCtor(): SRCtor | undefined {
   const w = window as unknown as { SpeechRecognition?: SRCtor; webkitSpeechRecognition?: SRCtor };
   return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+}
+
+// Clean line icons (Amazon-style) — monochrome, inherit currentColor.
+function IconSearch({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={className} aria-hidden>
+      <circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" />
+    </svg>
+  );
+}
+function IconMic({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <rect x="9" y="2.5" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><path d="M12 18v3" />
+    </svg>
+  );
+}
+function IconCamera({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M4 8h3l1.4-2h7.2L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  );
 }
 
 function highlight(text: string, q: string) {
@@ -75,29 +103,83 @@ export function SearchBar({
   const [index, setIndex] = useState<SearchIndexItem[] | null>(null);
   const [recent, setRecent] = useState<string[]>([]);
   const [listening, setListening] = useState(false);
+  const [micDenied, setMicDenied] = useState(false);
   const loadingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SR | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Voice-search session state that must survive `onend` (which fires often).
+  const listeningRef = useRef(false);
+  const finalText = useRef("");
+  const silenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Voice search (mobile speech-to-text) — fills the field; user can edit.
+  const SILENCE_MS = 2500;  // stop ~2.5s after the user stops speaking
+  const FIRST_MS = 7000;    // give the user time to start speaking
+  const MAX_MS = 30000;     // hard safety cap on a session
+
+  function clearVoiceTimers() {
+    if (silenceTimer.current) clearTimeout(silenceTimer.current);
+    if (maxTimer.current) clearTimeout(maxTimer.current);
+    silenceTimer.current = maxTimer.current = null;
+  }
+  function resetSilence(ms: number) {
+    if (silenceTimer.current) clearTimeout(silenceTimer.current);
+    silenceTimer.current = setTimeout(() => stopVoice(), ms);
+  }
+  function stopVoice() {
+    listeningRef.current = false;
+    clearVoiceTimers();
+    try { recognitionRef.current?.stop(); } catch { /* ignore */ }
+    setListening(false);
+  }
+
+  // Voice search: keeps listening through pauses, fills the field live, and stops
+  // when the user pauses (~2.5s) or taps the mic again. (continuous + interim are
+  // the fix for the "stops after a few seconds" cut-off.)
   function startVoice() {
     const Ctor = getSRCtor();
     if (!Ctor) return; // unsupported browser → no-op
-    if (!recognitionRef.current) {
-      const r = new Ctor();
-      r.lang = "en-US";
-      r.interimResults = false;
-      r.onresult = (e) => {
-        const t = e.results[0]?.[0]?.transcript ?? "";
-        if (t) { setQuery(t); setOpen(true); void ensureIndex(); }
-      };
-      r.onend = () => setListening(false);
-      r.onerror = () => setListening(false);
-      recognitionRef.current = r;
-    }
-    if (listening) { recognitionRef.current.stop(); setListening(false); }
-    else { try { recognitionRef.current.start(); setListening(true); } catch { setListening(false); } }
+    if (listeningRef.current) { stopVoice(); return; } // tap again = stop
+
+    const r = recognitionRef.current ?? new Ctor();
+    r.lang = "en-US";
+    r.continuous = true;       // don't end after the first utterance/pause
+    r.interimResults = true;   // live partial text → fill box + "Listening…"
+    r.maxAlternatives = 1;
+    finalText.current = query ? query.trim() + " " : "";
+
+    r.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i];
+        const txt = res[0]?.transcript ?? "";
+        if (res.isFinal) finalText.current += txt + " ";
+        else interim += txt;
+      }
+      setQuery((finalText.current + interim).replace(/\s+/g, " ").trim());
+      setOpen(true);
+      void ensureIndex();
+      resetSilence(SILENCE_MS); // user spoke → restart the stop countdown
+    };
+    r.onerror = (ev) => {
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") { setMicDenied(true); stopVoice(); }
+      // "no-speech"/"aborted" → let onend decide (restart if still active)
+    };
+    r.onend = () => {
+      // Browsers (esp. Android/iOS) end sessions periodically; restart while the
+      // user still intends to dictate, so it doesn't cut off mid-sentence.
+      if (listeningRef.current) { try { r.start(); } catch { stopVoice(); } }
+      else setListening(false);
+    };
+    recognitionRef.current = r;
+
+    setMicDenied(false);
+    listeningRef.current = true;
+    setListening(true);
+    try { r.start(); } catch { stopVoice(); return; }
+    resetSilence(FIRST_MS);
+    maxTimer.current = setTimeout(() => stopVoice(), MAX_MS);
   }
 
   // Image search — downscale the chosen photo, stash it, open the visual-search route.
@@ -188,45 +270,53 @@ export function SearchBar({
   return (
     <div ref={rootRef} className={["relative w-full", className].filter(Boolean).join(" ")}>
       <form onSubmit={(e) => { e.preventDefault(); runSearch(query); }} className="flex items-center gap-2" role="search">
-        <div className="flex h-11 flex-1 items-center gap-1 rounded-full border border-border bg-card pl-4 pr-2">
-          <span aria-hidden className="text-muted">🔍</span>
+        <div className="flex h-12 flex-1 items-center gap-2 rounded-2xl border border-border bg-card pl-4 pr-2 shadow-sm transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
+          <IconSearch className="h-5 w-5 shrink-0 text-muted" />
+          {listening && (
+            <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-red-600">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
+              Listening…
+            </span>
+          )}
           <input
             type="search"
             value={query}
             onChange={(e) => { setQuery(e.target.value); void ensureIndex(); setOpen(true); }}
             onFocus={() => { void ensureIndex(); loadRecent(); setOpen(true); }}
-            placeholder={placeholder}
+            placeholder={listening ? "Speak now…" : placeholder}
             aria-label="Search listings"
             autoComplete="off"
-            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted"
+            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
           />
           <button
             type="button"
             onClick={startVoice}
-            aria-label="Voice search"
-            title="Voice search"
-            className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-base hover:bg-surface ${listening ? "animate-pulse bg-brand/15" : ""}`}
+            aria-label={listening ? "Stop voice search" : "Voice search"}
+            title={listening ? "Tap to stop" : "Voice search"}
+            className={`grid h-9 w-9 shrink-0 place-items-center rounded-full transition ${listening ? "animate-pulse bg-red-100 text-red-600" : "text-muted hover:bg-surface hover:text-foreground"}`}
           >
-            🎤
+            <IconMic className="h-5 w-5" />
           </button>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             aria-label="Search by photo"
             title="Search by photo"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base hover:bg-surface"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface hover:text-foreground"
           >
-            📷
+            <IconCamera className="h-5 w-5" />
           </button>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onImagePick} />
         </div>
-        <button
-          type="submit"
-          className="inline-flex h-11 items-center rounded-full bg-brand px-5 text-sm font-medium text-brand-foreground hover:bg-brand-dark"
-        >
-          Search
-        </button>
+        {/* Hidden submit so Enter / the mobile keyboard's search key submits. */}
+        <button type="submit" aria-label="Search" className="sr-only">Search</button>
       </form>
+
+      {micDenied && (
+        <p className="mt-1 px-2 text-xs text-red-600">
+          Microphone access is blocked. Allow it in your browser/site settings to use voice search.
+        </p>
+      )}
 
       {/* Suggestions (typing ≥ 2 chars) */}
       {showSuggest && (
