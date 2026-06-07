@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { trackHeroEvent } from "@/lib/actions/hero";
 
-// Rotating Liberia-photo advertisement banner with quick-search category chips.
-// (The main search bar lives above this banner on the homepage.)
+// Clean rotating promotional banner (no category labels — categories live in the
+// "Browse by category" section below). The search bar sits above this banner.
 const BG = [
   { id: "cars", img: "/placeholders/car-suv.webp" },
   { id: "real-estate", img: "/placeholders/home-modern.webp" },
@@ -14,15 +13,6 @@ const BG = [
   { id: "land", img: "/placeholders/land.webp" },
   { id: "shops", img: "/placeholders/shop-storefront.webp" },
   { id: "services", img: "/placeholders/services.webp" },
-];
-
-const CHIPS = [
-  { id: "cars", label: "Cars", icon: "🚗", href: "/marketplace/cars" },
-  { id: "real-estate", label: "Real Estate", icon: "🏠", href: "/properties" },
-  { id: "rentals", label: "Rentals", icon: "🏘", href: "/marketplace/rentals" },
-  { id: "phones", label: "Phones", icon: "📱", href: "/marketplace/phones" },
-  { id: "shops", label: "Shops", icon: "🛍", href: "/marketplace/shops" },
-  { id: "services", label: "Services", icon: "🛠", href: "/services" },
 ];
 
 const ROTATE_MS = 6000;
@@ -74,24 +64,8 @@ export function HeroCarousel() {
           className={`object-cover transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
         />
       ))}
-      {/* Light bottom-only gradient so the chips stay legible; photos lead. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-      {/* No text overlay — just the quick category chips along the bottom. */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-3 pb-6">
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {CHIPS.map((c) => (
-            <Link
-              key={c.id}
-              href={c.href}
-              onClick={() => void trackHeroEvent(c.id, "cta")}
-              className="shrink-0 whitespace-nowrap rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium text-white backdrop-blur transition-colors hover:bg-white/30"
-            >
-              {c.icon} {c.label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* Subtle bottom shade only so the rotation dots stay legible. */}
+      <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
 
       <div className="absolute inset-x-0 bottom-2.5 z-10 flex justify-center gap-1.5">
         {BG.map((b, idx) => (
