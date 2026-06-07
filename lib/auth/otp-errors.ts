@@ -16,13 +16,13 @@ export function describeAuthError(code?: string): { reason: AuthFailReason; mess
     case "auth/captcha-check-failed":
     case "auth/invalid-app-credential":
     case "auth/missing-app-credential":
-      return { reason: "captcha", message: "Verification check failed. Try the checkbox below, or get your code by WhatsApp/SMS." };
+      return { reason: "captcha", message: "Verification couldn't complete in this browser. Open AfroSmart in Chrome or Safari to sign in." };
     case "auth/network-request-failed":
-      return { reason: "network", message: "Network problem reaching the verification service. Check your connection, or use WhatsApp/SMS." };
+      return { reason: "network", message: "Network problem reaching verification. Check your connection, or open AfroSmart in Chrome/Safari." };
     case "auth/too-many-requests":
-      return { reason: "too-many", message: "Too many attempts from this device. Wait a few minutes, or use WhatsApp/SMS." };
+      return { reason: "too-many", message: "Too many attempts from this device. Please wait a few minutes and try again." };
     case "auth/quota-exceeded":
-      return { reason: "quota", message: "The SMS limit was reached. Please use WhatsApp, or try again later." };
+      return { reason: "quota", message: "The SMS limit was reached. Please try again shortly." };
     case "auth/invalid-phone-number":
     case "auth/missing-phone-number":
       return { reason: "invalid-number", message: "That phone number doesn't look valid. Please check it and try again." };

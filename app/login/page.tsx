@@ -10,8 +10,43 @@ import { validateMobile, toE164For } from "@/lib/utils/phone";
 import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
 import { describeAuthError } from "@/lib/auth/otp-errors";
 import { logLoginEvent } from "@/app/login/actions";
+import { detectInApp, type InAppInfo } from "@/lib/utils/in-app-browser";
 
 type FallbackChannel = "whatsapp" | "sms";
+
+// In-app browsers (Messenger/Facebook/Instagram WebViews) block the cross-origin
+// storage reCAPTCHA + Firebase Phone Auth need, so verification can't complete —
+// the reliable fix is to open AfroSmart in Chrome/Safari.
+function OpenInBrowserCard({ info, heading }: { info: InAppInfo; heading?: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window !== "undefined" ? window.location.href : "";
+  const host = typeof window !== "undefined" ? window.location.host : "";
+  const path = typeof window !== "undefined" ? window.location.pathname + window.location.search : "";
+  const intentUrl = `intent://${host}${path}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
+  async function copy() {
+    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* ignore */ }
+  }
+  return (
+    <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-amber-900">
+      <p className="text-sm font-semibold">⚠️ {heading ?? "Sign-in needs Chrome or Safari"}</p>
+      <p className="mt-1 text-xs">
+        {info.name ? `${info.name}'s built-in browser` : "This in-app browser"} blocks phone verification.
+        Open AfroSmart in your normal browser to sign in.
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {info.android && (
+          <a href={intentUrl} className="inline-flex h-9 items-center rounded-full bg-amber-900 px-3 text-xs font-semibold text-white">Open in Chrome</a>
+        )}
+        <button type="button" onClick={copy} className="inline-flex h-9 items-center rounded-full border border-amber-400 px-3 text-xs font-semibold">
+          {copied ? "Link copied!" : "Copy link"}
+        </button>
+      </div>
+      {info.ios && (
+        <p className="mt-2 text-xs">On iPhone: tap the <strong>ᴬA</strong> or <strong>•••</strong> menu (top corner) → <strong>Open in Safari</strong>.</p>
+      )}
+    </div>
+  );
+}
 
 // Paid WhatsApp/SMS fallback stays OFF until a provider is configured. Until then
 // production runs Firebase Phone Auth + visible-reCAPTCHA fallback only.
@@ -50,6 +85,13 @@ function LoginForm() {
   const [captchaFails, setCaptchaFails] = useState(0);
   const [recaptchaSize, setRecaptchaSize] = useState<"invisible" | "normal">("invisible");
   const [showFallback, setShowFallback] = useState(false);
+  // In-app browser detection + an "open in Chrome/Safari" escape on reCAPTCHA failure.
+  const [inApp, setInApp] = useState<InAppInfo>({ inApp: false, name: "", ios: false, android: false });
+  const [showOpenInBrowser, setShowOpenInBrowser] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => setInApp(detectInApp()));
+  }, []);
 
   // Anti-spam (resend cooldown) + brute-force lockout countdowns.
   const [resendIn, setResendIn] = useState(0);
@@ -86,27 +128,31 @@ function LoginForm() {
       attemptsRef.current = 0;
       setResendIn(RESEND_COOLDOWN);
       setMethod("firebase");
-      void logLoginEvent({ status: "sent", phone: e164, country: `${country.code} ${country.dialCode}`, code: "ok", provider: "firebase" });
+      const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+      void logLoginEvent({ status: "sent", phone: e164, country: `${country.code} ${country.dialCode}`, code: "ok", provider: "firebase", ua, inApp: inApp.name });
       setStep("otp");
     } catch (err) {
       const ex = err as { code?: string } | null;
       const code = ex?.code ?? "unknown";
       const { reason, message } = describeAuthError(code);
       console.error("[login] sendOtp failed:", code);
-      void logLoginEvent({ status: "failed", phone: e164, country: `${country.code} ${country.dialCode}`, code, provider: "firebase" });
+      const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+      void logLoginEvent({ status: "failed", phone: e164, country: `${country.code} ${country.dialCode}`, code, provider: "firebase", ua, inApp: inApp.name });
       setError(message);
 
-      // reCAPTCHA/network/unknown → escalate: invisible → visible, then offer fallback.
+      // reCAPTCHA/network/unknown failed → always give a real escape (open in a
+      // proper browser — the reliable fix for in-app WebViews) so users aren't stuck.
       if (reason === "captcha" || reason === "network" || reason === "unknown") {
+        setShowOpenInBrowser(true);
         const fails = captchaFails + 1;
         setCaptchaFails(fails);
         if (fails === 1) {
-          // Switch to a VISIBLE checkbox reCAPTCHA for the next attempt.
+          // Also retry with a VISIBLE checkbox (helps real browsers; ignored by WebViews).
           try { verifierRef.current?.clear(); } catch { /* ignore */ }
           verifierRef.current = null;
           setRecaptchaSize("normal");
         }
-        if (fails >= 2 && FALLBACK_ENABLED) setShowFallback(true); // offer WhatsApp/SMS after 2 fails (when enabled)
+        if (fails >= 2 && FALLBACK_ENABLED) setShowFallback(true);
       } else if ((reason === "quota" || reason === "too-many") && FALLBACK_ENABLED) {
         setShowFallback(true);
       }
@@ -209,6 +255,13 @@ function LoginForm() {
         </div>
       )}
 
+      {/* Up-front warning for Messenger/Facebook/Instagram in-app browsers. */}
+      {inApp.inApp && (
+        <div className="mt-6">
+          <OpenInBrowserCard info={inApp} />
+        </div>
+      )}
+
       {step === "phone" ? (
         <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="mt-6 flex flex-col gap-3">
           <label className="flex flex-col gap-2">
@@ -240,8 +293,14 @@ function LoginForm() {
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          {recaptchaSize === "normal" && (
-            <p className="text-xs text-muted">Please tick the verification box below, then tap “Send code”.</p>
+          {/* On failure outside a detected in-app browser, still offer the escape. */}
+          {showOpenInBrowser && !inApp.inApp && (
+            <OpenInBrowserCard info={inApp} heading="Couldn't verify — open in Chrome or Safari" />
+          )}
+
+          {/* Visible checkbox only helps real browsers; never shown for Webviews. */}
+          {recaptchaSize === "normal" && !inApp.inApp && (
+            <p className="text-xs text-muted">If a verification box appears below, tick it, then tap “Send code” again.</p>
           )}
           {/* reCAPTCHA renders here (invisible by default; visible checkbox after a failure). */}
           <div id="recaptcha-container" className={recaptchaSize === "normal" ? "flex justify-center" : ""} />

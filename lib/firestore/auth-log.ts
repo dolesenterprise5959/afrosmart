@@ -13,6 +13,8 @@ export interface AuthLogEntry {
   code: string;        // Firebase error code, "ok", or provider/fallback reason
   provider: string;    // "firebase" | "whatsapp" | "sms"
   status?: AuthStatus; // defaults to "failed"
+  ua?: string;         // User-Agent (to spot in-app browsers like Messenger)
+  inApp?: string;      // detected in-app browser name, if any
 }
 
 export async function logAuthEvent(e: AuthLogEntry): Promise<void> {
@@ -25,6 +27,8 @@ export async function logAuthEvent(e: AuthLogEntry): Promise<void> {
       phoneMasked: maskPhone(e.phone),
       code: e.code || "unknown",
       provider: e.provider || "firebase",
+      ua: (e.ua || "").slice(0, 300),
+      inApp: e.inApp || "",
     });
   } catch {
     /* logging must never block login */
