@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { UnreadProvider } from "@/components/messaging/UnreadProvider";
+import { AssistantWidget } from "@/components/assistant/AssistantWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
             <BottomNav />
+            <AssistantWidget />
           </UnreadProvider>
         </AuthProvider>
       </body>

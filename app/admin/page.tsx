@@ -43,6 +43,10 @@ export default async function AdminPage() {
         <Badge tone="brand">Staff</Badge>
       </div>
 
+      <Link href="/admin/assistant" className="mt-3 inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm font-medium hover:bg-surface">
+        ✨ AI Assistant — knowledge base &amp; top questions
+      </Link>
+
       {/* Stats */}
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {statCards.map((s) => (
