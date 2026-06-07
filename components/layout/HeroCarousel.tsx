@@ -74,11 +74,12 @@ export function HeroCarousel() {
           className={`object-cover transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
         />
       ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/30" />
+      {/* Light bottom-only gradient so the chips stay legible; photos lead. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-      <div className="absolute inset-0 flex flex-col justify-center gap-3 p-5 sm:p-8">
-        <h2 className="max-w-md text-xl font-bold text-white sm:text-2xl">Find anything in Liberia</h2>
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* No text overlay — just the quick category chips along the bottom. */}
+      <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4 pb-7">
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CHIPS.map((c) => (
             <Link
               key={c.id}

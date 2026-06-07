@@ -1,9 +1,8 @@
 import Image from "next/image";
 import { placeholderImage } from "@/lib/placeholders";
 
-// Category-card artwork: a professional placeholder image with a subtle dark
-// overlay for text legibility when one exists, otherwise a gold-tinted icon tile.
-// Lazy-loaded + responsive for fast mobile performance.
+// Category-card artwork: a large square photo on top, with a bold title and a
+// "N Listings" count beneath. Falls back to a gold icon tile when no photo.
 export function CategoryArt({
   category,
   icon,
@@ -16,33 +15,31 @@ export function CategoryArt({
   count?: number;
 }) {
   const art = placeholderImage(category);
-  const countLabel = count && count > 0 ? ` (${count})` : "";
-
-  if (art) {
-    return (
-      <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-        <Image
-          src={art}
-          alt={label}
-          fill
-          sizes="(max-width: 640px) 30vw, 14vw"
-          loading="lazy"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <span className="absolute inset-x-1.5 bottom-2 text-center text-base font-semibold leading-tight text-white drop-shadow">
-          {label}{countLabel}
-        </span>
-      </div>
-    );
-  }
+  const countLine =
+    count && count > 0 ? `${count} ${count === 1 ? "Listing" : "Listings"}` : null;
 
   return (
-    <div className="flex flex-col items-center gap-2 px-2 py-5">
-      <span className="grid h-14 w-14 place-items-center rounded-lg bg-accent/15 text-2xl ring-1 ring-accent/20 transition-transform group-hover:scale-110">
-        {icon}
-      </span>
-      <span className="text-base font-medium">{label}{countLabel}</span>
+    <div>
+      {art ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden">
+          <Image
+            src={art}
+            alt={label}
+            fill
+            sizes="(max-width: 640px) 55vw, 240px"
+            loading="lazy"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+      ) : (
+        <div className="grid aspect-[4/3] w-full place-items-center bg-accent/15">
+          <span className="text-4xl transition-transform group-hover:scale-110">{icon}</span>
+        </div>
+      )}
+      <div className="px-3 py-2.5 text-left">
+        <p className="text-lg font-bold leading-tight">{label}</p>
+        {countLine && <p className="mt-0.5 text-xs text-muted">{countLine}</p>}
+      </div>
     </div>
   );
 }

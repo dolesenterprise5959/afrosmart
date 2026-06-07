@@ -60,7 +60,7 @@ export default async function Home() {
             <Link
               key={c.id}
               href={c.href}
-              className="group block w-32 shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card text-center transition-colors hover:border-brand hover:bg-surface sm:w-40"
+              className="group block w-[55vw] shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-brand hover:bg-surface sm:w-60"
             >
               <CategoryArt category={c.id} icon={c.icon} label={c.label} count={counts[c.id]} />
             </Link>
