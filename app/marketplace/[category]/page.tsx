@@ -33,7 +33,8 @@ export async function generateMetadata({
   const { category } = await params;
   const meta = CATEGORY_ALIASES[category] ?? getCategory(category);
   if (!meta) return { title: "Marketplace — AfroSmart" };
-  const title = `${meta.label} in Liberia — AfroSmart`;
+  // Bare title — the root layout's title template appends "· AfroSmart".
+  const title = `${meta.label} in Liberia`;
   const description = `Browse ${meta.label.toLowerCase()} listings across Liberia on AfroSmart. Buy, sell, and connect with people near you.`;
   const image = "/afrosmart-logo.png";
   return {
