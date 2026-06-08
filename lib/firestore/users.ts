@@ -7,6 +7,7 @@ import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
 import { USERS as SAMPLE_USERS, getUser as sampleGetUser } from "@/lib/mock";
+import { generateReferralCode } from "@/lib/referral";
 import type { User } from "@/lib/types";
 
 const COLLECTION = "users";
@@ -162,6 +163,11 @@ export async function ensureAccountDoc(uid: string, phone?: string | null): Prom
       ratingAvg: 0,
       ratingCount: 0,
       joinedAt: new Date().toISOString(),
+      // Referral & wallet (Phase 1): code assigned once, wallet starts at zero.
+      referralCode: generateReferralCode(uid),
+      referralCount: 0,
+      walletBalance: 0,
+      lifetimeEarnings: 0,
     },
     { merge: true },
   );

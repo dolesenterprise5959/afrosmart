@@ -51,6 +51,21 @@ export interface User {
   verificationStatus?: VerificationStatus;
   /** Seller subscription tier (server-controlled). Defaults to "free". */
   plan?: SellerPlan;
+
+  // --- Referral & wallet (Phase 1) ---
+  /** Unique shareable referral code, assigned once at account creation. */
+  referralCode?: string;
+  /** Referral code of the user who referred this account (set once at signup). */
+  referredBy?: string;
+  /** True once THIS account became a valid referral (phone+profile+first listing),
+   *  so the referrer is only ever credited once. Server-controlled. */
+  referralCredited?: boolean;
+  /** Count of this user's referrals that have become valid. Server-controlled. */
+  referralCount?: number;
+  /** Spendable wallet balance in USD. Server-controlled. */
+  walletBalance?: number;
+  /** Total rewards ever earned in USD. Server-controlled. */
+  lifetimeEarnings?: number;
 }
 
 export type ListingStatus = "active" | "paused" | "sold" | "removed";
