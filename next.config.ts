@@ -34,8 +34,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Lean, self-contained server bundle for the Docker image / Cloud Run.
-  output: "standalone",
+  // NOTE: do NOT set `output: "standalone"` here — Firebase App Hosting (the live
+  // deploy target) builds with its own Next.js adapter, and `standalone` makes it
+  // skip serving the `public/` folder, so every public asset (hero banners,
+  // category/placeholder images, ad creatives) 404s. The Dockerfile/Cloud Run path
+  // (Option B in DEPLOYMENT_GUIDE) sets standalone itself when needed.
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
