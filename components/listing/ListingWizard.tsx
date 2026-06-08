@@ -58,7 +58,6 @@ export function ListingWizard() {
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [boost, setBoost] = useState<string | null>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const hydrated = useRef(false);
@@ -229,31 +228,27 @@ export function ListingWizard() {
           </button>
         </div>
 
-        {/* Boost */}
+        {/* Boost — preview of upcoming paid placement (not yet purchasable, so we
+            show it as a clean roadmap preview rather than a dead-end selector). */}
         <div className="mt-6 rounded-xl border border-accent/40 bg-accent/5 p-4 text-left">
-          <p className="text-sm font-bold">🚀 Boost your listing — sell even faster</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-bold">🚀 Boost your listing</p>
+            <span className="shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+              Coming soon
+            </span>
+          </div>
           <div className="mt-3 flex flex-col gap-2">
             {BOOSTS.map((b) => (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => setBoost(b.id)}
-                className={`flex items-center gap-3 rounded-lg border bg-card p-3 text-left transition-colors ${boost === b.id ? "border-brand ring-1 ring-brand" : "border-border hover:border-brand"}`}
-              >
+              <div key={b.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
                 <span className="text-xl">{b.icon}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">{b.title}</span>
                   <span className="block text-xs text-muted">{b.desc}</span>
                 </span>
-                <span aria-hidden className="text-muted">{boost === b.id ? "●" : "○"}</span>
-              </button>
+              </div>
             ))}
           </div>
-          {boost && (
-            <p className="mt-3 rounded-lg bg-surface px-3 py-2 text-center text-xs text-muted">
-              Paid boosts launch soon — we&apos;ll notify you. Your listing stays live for free in the meantime.
-            </p>
-          )}
+          <p className="mt-3 text-center text-xs text-muted">Your listing stays live for free.</p>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
