@@ -24,6 +24,26 @@ export function generateStaticParams() {
   return CATEGORIES.map((c) => ({ category: c.id }));
 }
 
+// Per-category SEO: each category is its own landing page (e.g. "Free Stuff in
+// Liberia"), so give it a distinct title/description + Open Graph card instead of
+// inheriting the generic root metadata.
+export async function generateMetadata({
+  params,
+}: PageProps<"/marketplace/[category]">): Promise<import("next").Metadata> {
+  const { category } = await params;
+  const meta = CATEGORY_ALIASES[category] ?? getCategory(category);
+  if (!meta) return { title: "Marketplace — AfroSmart" };
+  const title = `${meta.label} in Liberia — AfroSmart`;
+  const description = `Browse ${meta.label.toLowerCase()} listings across Liberia on AfroSmart. Buy, sell, and connect with people near you.`;
+  const image = "/afrosmart-logo.png";
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website", images: [{ url: image }] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
+  };
+}
+
 // `params`/`searchParams` are Promises in Next.js 16.
 export default async function CategoryPage({
   params,
