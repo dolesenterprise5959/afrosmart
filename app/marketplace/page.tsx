@@ -30,7 +30,7 @@ export default async function MarketplacePage({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
-      <h1 className="text-xl font-bold">
+      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
         {query ? `Results for “${query}”` : "Marketplace"}
       </h1>
       <p className="mt-1 text-sm text-muted">
@@ -55,13 +55,13 @@ export default async function MarketplacePage({
       {/* One unified place to reach every category (shown when not searching). */}
       {browsing && (
         <section className="mt-6">
-          <h2 className="mb-3 text-lg font-semibold">Shop by category</h2>
+          <h2 className="mb-3 text-2xl font-bold tracking-tight">Shop by category</h2>
           <CategoryBrowser />
         </section>
       )}
 
       <section className="mt-8">
-        <h2 className="mb-3 text-lg font-semibold">
+        <h2 className="mb-3 text-2xl font-bold tracking-tight">
           {browsing ? "Latest listings" : "Results"}
         </h2>
         {listings.length > 0 ? (

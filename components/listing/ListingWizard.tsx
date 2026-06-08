@@ -11,7 +11,7 @@ import { VEHICLE_CONDITIONS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
-type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general";
+type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general" | "community";
 
 const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
   { id: "cars", label: "Cars", icon: "🚗", kind: "vehicle" },
@@ -20,6 +20,13 @@ const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
   { id: "phones", label: "Phones", icon: "📱", kind: "phone" },
   { id: "services", label: "Services", icon: "🛠", kind: "service" },
   { id: "general", label: "Other", icon: "📦", kind: "general" },
+  // Community board — these post without a price (handled as "Free").
+  { id: "free-stuff", label: "Free Stuff", icon: "🎁", kind: "community" },
+  { id: "wanted", label: "Wanted", icon: "🔎", kind: "community" },
+  { id: "events", label: "Events", icon: "🎟️", kind: "community" },
+  { id: "lost-found", label: "Lost & Found", icon: "🧭", kind: "community" },
+  { id: "donations", label: "Donations", icon: "🤝", kind: "community" },
+  { id: "volunteers", label: "Volunteers", icon: "🙌", kind: "community" },
 ];
 
 const DRAFT_KEY = "afm:listing-draft";
@@ -51,7 +58,6 @@ export function ListingWizard() {
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [boost, setBoost] = useState<string | null>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const hydrated = useRef(false);
@@ -121,7 +127,8 @@ export function ListingWizard() {
   function validateDetails(): string | null {
     if (data.title.trim().length < 3) return "Add a title (at least 3 characters).";
     if (data.description.trim().length < 10) return "Add a short description (at least 10 characters).";
-    if (!(Number(data.price) > 0)) return "Enter a valid price.";
+    // Community posts (free stuff, wanted, events…) don't need a price.
+    if (data.kind !== "community" && !(Number(data.price) > 0)) return "Enter a valid price.";
     if (!data.county) return "Choose a county.";
     if (!data.city.trim()) return "Enter your city or town.";
     if (data.kind === "vehicle") {
@@ -194,11 +201,6 @@ export function ListingWizard() {
   // ---- Success ----
   if (createdId) {
     const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/listing/${createdId}` : "";
-    const BOOSTS = [
-      { id: "featured", icon: "⭐", title: "Featured Listing", desc: "Show in the Featured row on the homepage." },
-      { id: "top", icon: "🔝", title: "Top Search Placement", desc: "Appear first in search & category results." },
-      { id: "7day", icon: "🚀", title: "7-Day Boost", desc: "Maximum visibility for a full week." },
-    ];
     async function copyLink() {
       try { await navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* ignore */ }
     }
@@ -219,33 +221,6 @@ export function ListingWizard() {
           <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-xs font-medium hover:bg-surface">
             <span className="text-xl">🔗</span> {copied ? "Copied!" : "Copy link"}
           </button>
-        </div>
-
-        {/* Boost */}
-        <div className="mt-6 rounded-xl border border-accent/40 bg-accent/5 p-4 text-left">
-          <p className="text-sm font-bold">🚀 Boost your listing — sell even faster</p>
-          <div className="mt-3 flex flex-col gap-2">
-            {BOOSTS.map((b) => (
-              <button
-                key={b.id}
-                type="button"
-                onClick={() => setBoost(b.id)}
-                className={`flex items-center gap-3 rounded-lg border bg-card p-3 text-left transition-colors ${boost === b.id ? "border-brand ring-1 ring-brand" : "border-border hover:border-brand"}`}
-              >
-                <span className="text-xl">{b.icon}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{b.title}</span>
-                  <span className="block text-xs text-muted">{b.desc}</span>
-                </span>
-                <span aria-hidden className="text-muted">{boost === b.id ? "●" : "○"}</span>
-              </button>
-            ))}
-          </div>
-          {boost && (
-            <p className="mt-3 rounded-lg bg-surface px-3 py-2 text-center text-xs text-muted">
-              Paid boosts launch soon — we&apos;ll notify you. Your listing stays live for free in the meantime.
-            </p>
-          )}
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
@@ -288,7 +263,7 @@ export function ListingWizard() {
       {/* Step 2 — Category */}
       {step === 1 && (
         <div>
-          <h1 className="text-xl font-bold">What are you selling?</h1>
+          <h1 className="text-xl font-bold">What are you posting?</h1>
           <div className="mt-4 grid grid-cols-2 gap-3">
             {QUICK.map((c) => (
               <button
@@ -302,9 +277,6 @@ export function ListingWizard() {
               </button>
             ))}
           </div>
-          <p className="mt-4 rounded-lg bg-success/5 px-3 py-2 text-center text-xs text-muted">
-            🛡️ <span className="font-medium text-foreground">Verified Seller</span> badges are coming soon — build buyer trust.
-          </p>
         </div>
       )}
 
@@ -351,22 +323,29 @@ export function ListingWizard() {
         <div className="flex flex-col gap-3">
           <h1 className="text-xl font-bold">Details</h1>
           <input className={field} placeholder="Title (e.g. Toyota Corolla 2014)" value={data.title} onChange={(e) => set("title", e.target.value)} />
-          {/* Price is the primary field: currency ~25%, amount ~75% */}
-          <div className="flex gap-2">
-            <select className={`${field} shrink-0 basis-1/4 px-2`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
-              <option value="LRD">L$</option>
-              <option value="USD">US$</option>
-            </select>
-            <input
-              className={`${field} min-w-0 flex-1`}
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="Price"
-              value={data.price}
-              onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
-            />
-          </div>
+          {/* Price — hidden for community posts (free stuff, wanted, events…), which are priceless. */}
+          {data.kind === "community" ? (
+            <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted">
+              💚 No price needed — this post is shown as <span className="font-medium text-foreground">Free</span>.
+            </p>
+          ) : (
+            /* Price is the primary field: currency ~25%, amount ~75% */
+            <div className="flex gap-2">
+              <select className={`${field} shrink-0 basis-1/4 px-2`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
+                <option value="LRD">L$</option>
+                <option value="USD">US$</option>
+              </select>
+              <input
+                className={`${field} min-w-0 flex-1`}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="Price"
+                value={data.price}
+                onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
+              />
+            </div>
+          )}
           <button type="button" onClick={detectLocation} disabled={detecting} className="inline-flex h-10 w-fit items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium hover:border-brand disabled:opacity-50">
             📍 {detecting ? "Detecting…" : "Use my location"}
           </button>

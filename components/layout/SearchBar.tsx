@@ -31,7 +31,6 @@ const CATEGORY_SUGGESTIONS = [
 const TRENDING = ["Toyota", "iPhone", "House", "Land", "Generator", "Honda"];
 const MAX_SUGGESTIONS = 8;
 const RECENT_KEY = "afrosmart:recent";
-const IMAGE_SEARCH_KEY = "afm:image-search";
 
 // Minimal Web Speech API typing (avoids `any`).
 interface SpeechResult extends ArrayLike<{ transcript: string }> { isFinal: boolean }
@@ -69,15 +68,6 @@ function IconMic({ className }: { className?: string }) {
     </svg>
   );
 }
-function IconCamera({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
-      <path d="M4 8h3l1.4-2h7.2L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
-      <circle cx="12" cy="13" r="3.2" />
-    </svg>
-  );
-}
-
 function highlight(text: string, q: string) {
   const i = text.toLowerCase().indexOf(q);
   if (i < 0) return text;
@@ -107,7 +97,6 @@ export function SearchBar({
   const loadingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<SR | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
   // Voice-search session state that must survive `onend` (which fires often).
   const listeningRef = useRef(false);
   const finalText = useRef("");
@@ -182,30 +171,6 @@ export function SearchBar({
     maxTimer.current = setTimeout(() => stopVoice(), MAX_MS);
   }
 
-  // Image search — downscale the chosen photo, stash it, open the visual-search route.
-  function onImagePick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new window.Image();
-      img.onload = () => {
-        const max = 1024;
-        const scale = Math.min(1, max / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        try { sessionStorage.setItem(IMAGE_SEARCH_KEY, canvas.toDataURL("image/jpeg", 0.8)); } catch { /* ignore */ }
-        setOpen(false);
-        router.push("/search/image");
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-
   function loadRecent() {
     try {
       const r = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
@@ -270,8 +235,8 @@ export function SearchBar({
   return (
     <div ref={rootRef} className={["relative w-full", className].filter(Boolean).join(" ")}>
       <form onSubmit={(e) => { e.preventDefault(); runSearch(query); }} className="flex items-center gap-2" role="search">
-        <div className="flex h-12 flex-1 items-center gap-2 rounded-2xl border border-border bg-card pl-4 pr-2 shadow-sm transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
-          <IconSearch className="h-5 w-5 shrink-0 text-muted" />
+        <div className="flex h-14 flex-1 items-center gap-2.5 rounded-2xl border border-border bg-card pl-4 pr-2 shadow-md transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
+          <IconSearch className="h-[22px] w-[22px] shrink-0 text-muted" />
           {listening && (
             <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-red-600">
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
@@ -286,7 +251,7 @@ export function SearchBar({
             placeholder={listening ? "Speak now…" : placeholder}
             aria-label="Search listings"
             autoComplete="off"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
           />
           <button
             type="button"
@@ -297,16 +262,6 @@ export function SearchBar({
           >
             <IconMic className="h-5 w-5" />
           </button>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            aria-label="Search by photo"
-            title="Search by photo"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface hover:text-foreground"
-          >
-            <IconCamera className="h-5 w-5" />
-          </button>
-          <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onImagePick} />
         </div>
         {/* Hidden submit so Enter / the mobile keyboard's search key submits. */}
         <button type="submit" aria-label="Search" className="sr-only">Search</button>

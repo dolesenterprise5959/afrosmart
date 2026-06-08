@@ -72,8 +72,21 @@ export const DEFAULT_KB: KBEntry[] = [
     title: "Marketplace categories",
     keywords: ["categories", "category", "what can i buy", "what can i sell", "sections"],
     answer:
-      "AfroSmart covers: Cars, Real Estate, Rentals, Land, Phones, Shops & Restaurants, Services, Fashion, Sports, Food & Agriculture, and more. Tell me what you're looking for and I'll point you to it.",
-    quickReplies: ["Find a car", "Find a house", "Find a phone", "Find services"],
+      "AfroSmart covers: Cars, Real Estate, Rentals, Land, Phones, Shops & Restaurants, Services, Fashion, Sports, Food & Agriculture — plus a Community board: *Free Stuff*, *Wanted / Looking For*, *Events*, *Lost & Found*, *Donations* and *Volunteers*. Tell me what you're looking for and I'll point you to it.",
+    quickReplies: ["Free stuff near me", "Post a 'Looking for' request", "Find an event", "Report a lost item"],
+  },
+  {
+    id: "community-board",
+    title: "Free Stuff, Wanted, Events, Lost & Found, Donations & Volunteers",
+    keywords: [
+      "free", "free stuff", "giveaway", "give away", "wanted", "looking for",
+      "i need", "request", "event", "events", "concert", "church program", "school activity",
+      "lost", "found", "lost and found", "missing", "donation", "donations", "charity",
+      "fundraiser", "fundraising", "volunteer", "volunteers", "community",
+    ],
+    answer:
+      "Besides buying and selling, AfroSmart has a free Community board — and posting to it never needs a price:\n• *Free Stuff* — give away items for free (shown with a green FREE badge).\n• *Wanted / Looking For* — request a car, land, house, job, or a worker like a carpenter.\n• *Events* — community events, church programs, concerts, school activities, business events.\n• *Lost & Found* — report lost phones/documents or post items you found.\n• *Donations* — charity requests, fundraisers, community support.\n• *Volunteers* — volunteer opportunities and nonprofit projects.\nTo post: tap *+ Post*, then pick the matching category — no price required.",
+    quickReplies: ["How to post an item", "Free stuff near me", "Find an event"],
   },
   {
     id: "safety",

@@ -3,6 +3,7 @@ import { SearchBar } from "@/components/layout/SearchBar";
 import { MarketplaceHeader } from "@/components/layout/MarketplaceHeader";
 import { HeroCarousel } from "@/components/layout/HeroCarousel";
 import { CategoryArt } from "@/components/layout/CategoryArt";
+import { SponsoredAd } from "@/components/layout/SponsoredAd";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { Button } from "@/components/ui/Button";
 import { getFeaturedListings, getRecentListings, getCategoryCounts } from "@/lib/firestore/listings";
@@ -14,6 +15,10 @@ export const dynamic = "force-dynamic";
 // else lives on the dedicated /categories page ("View All Categories").
 // `count` groups the category ids whose active listings are tallied for the badge.
 const TOP_CATEGORIES = [
+  { id: "free-stuff", label: "Free Stuff", icon: "🎁", href: "/marketplace/free-stuff", count: ["free-stuff"] },
+  { id: "wanted", label: "Wanted", icon: "🔎", href: "/marketplace/wanted", count: ["wanted"] },
+  { id: "events", label: "Events", icon: "🎟️", href: "/marketplace/events", count: ["events"] },
+  { id: "lost-found", label: "Lost & Found", icon: "🧭", href: "/marketplace/lost-found", count: ["lost-found"] },
   { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles", count: ["cars"] },
   { id: "property", label: "Real Estate", icon: "🏠", href: "/properties", count: ["property"] },
   { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental", count: ["car-rental", "equipment-rental", "house-rental", "bicycle-rental", "motorbike-rental", "truck-rental"] },
@@ -52,8 +57,8 @@ export default async function Home() {
       {/* Top categories — ~1.8 visible on mobile, horizontal swipe */}
       <section className="mt-4">
         <div className="mb-2.5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Browse by category</h2>
-          <Link href="/categories" className="text-sm font-medium text-brand">View All Categories →</Link>
+          <h2 className="text-2xl font-bold tracking-tight">Browse by category</h2>
+          <Link href="/categories" className="shrink-0 text-sm font-medium text-brand">View All →</Link>
         </div>
         <div className="-mx-4 flex snap-x gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TOP_CATEGORIES.map((c) => (
@@ -71,24 +76,29 @@ export default async function Home() {
       {/* Featured */}
       <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">⭐ Featured listings</h2>
-          <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
+          <h2 className="text-2xl font-bold tracking-tight">⭐ Featured listings</h2>
+          <Link href="/marketplace" className="shrink-0 text-sm font-medium text-brand">See all</Link>
         </div>
         <ListingGrid listings={featured} />
+      </section>
+
+      {/* Sponsored — minimalist native ad slot */}
+      <section className="mt-6">
+        <SponsoredAd />
       </section>
 
       {/* Latest */}
       <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">🆕 Latest listings</h2>
-          <Link href="/marketplace" className="text-sm font-medium text-brand">See all</Link>
+          <h2 className="text-2xl font-bold tracking-tight">🆕 Latest listings</h2>
+          <Link href="/marketplace" className="shrink-0 text-sm font-medium text-brand">See all</Link>
         </div>
         <ListingGrid listings={recentTop} />
       </section>
 
       {/* Sell CTA */}
       <section className="mt-8 flex flex-col items-center gap-3 rounded-3xl border border-border bg-card px-6 py-8 text-center">
-        <h2 className="text-lg font-semibold">Got something to sell?</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Got something to sell?</h2>
         <p className="max-w-sm text-sm text-muted">
           Post your item in minutes and reach buyers across Liberia. It&apos;s free.
         </p>

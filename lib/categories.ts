@@ -13,6 +13,19 @@ export interface CategoryGroup {
 
 export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
+    id: "community-board",
+    label: "Free, Wanted & Community",
+    icon: "📣",
+    categories: [
+      { id: "free-stuff", label: "Free Stuff", icon: "🎁" },
+      { id: "wanted", label: "Wanted / Looking For", icon: "🔎" },
+      { id: "events", label: "Events", icon: "🎟️" },
+      { id: "lost-found", label: "Lost & Found", icon: "🧭" },
+      { id: "donations", label: "Donations", icon: "🤝" },
+      { id: "volunteers", label: "Volunteers", icon: "🙌" },
+    ],
+  },
+  {
     id: "food",
     label: "Food & Agriculture",
     icon: "🌾",
@@ -125,7 +138,6 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
       { id: "beaches", label: "Beaches", icon: "🏖️" },
       { id: "sports-fields", label: "Sports Fields", icon: "🥅" },
       { id: "entertainment", label: "Entertainment Centers", icon: "🎬" },
-      { id: "events", label: "Events", icon: "🎉" },
       { id: "tournaments", label: "Tournaments", icon: "🏆" },
       { id: "football", label: "Football Tournaments", icon: "⚽" },
     ],
@@ -185,4 +197,26 @@ export function categoryHref(id: string): string {
   if (id === "cars") return "/vehicles";
   if (id === "property") return "/properties";
   return `/marketplace/${id}`;
+}
+
+// Community-board categories aren't sales: free giveaways, "looking for" requests,
+// events, lost & found, donations and volunteer calls all post without a price.
+// For these we allow a 0 price (rendered as "Free") instead of requiring one.
+export const PRICELESS_CATEGORIES = new Set<string>([
+  "free-stuff",
+  "wanted",
+  "events",
+  "lost-found",
+  "donations",
+  "volunteers",
+]);
+
+/** True for categories posted without a price (free giveaways, requests, events…). */
+export function isPricelessCategory(id: string): boolean {
+  return PRICELESS_CATEGORIES.has(id);
+}
+
+/** True for the Free Stuff category (drives the green FREE badge on cards). */
+export function isFreeStuffCategory(id: string): boolean {
+  return id === "free-stuff";
 }
