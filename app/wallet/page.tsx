@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
 import { verifySession } from "@/lib/auth/dal";
 import { getReferralSummary } from "@/lib/firestore/referrals";
+import { getRecentNotifications } from "@/lib/firestore/notifications";
 import { referralProgress, REFERRALS_PER_REWARD, REWARD_USD } from "@/lib/referral";
+import { CopyButton } from "@/components/ui/CopyButton";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Wallet" };
 
 // Display-only eligibility threshold — actual withdrawals are out of scope in Phase 1.
 const WITHDRAW_MIN = 10;
+const SITE = "https://afrosmart.app";
 
 export default async function WalletPage() {
   const session = await verifySession();
-  const s = await getReferralSummary(session.uid);
+  const [s, notes] = await Promise.all([
+    getReferralSummary(session.uid),
+    getRecentNotifications(session.uid, 8),
+  ]);
   const p = referralProgress(s.referralCount);
   const pct = Math.round((p.intoCurrent / REFERRALS_PER_REWARD) * 100);
   const eligible = s.walletBalance >= WITHDRAW_MIN;
+  const shareUrl = s.referralCode ? `${SITE}/welcome?ref=${s.referralCode}` : SITE;
+  const waText = `Join me on AfroSmart — Liberia's marketplace. Use my referral code ${s.referralCode} when you sign up: ${shareUrl}`;
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-6">
@@ -67,10 +75,43 @@ export default async function WalletPage() {
       <div className="mt-4 rounded-2xl border border-accent/40 bg-accent/5 p-4 text-center">
         <p className="text-xs text-muted">Your referral code</p>
         <p className="mt-1 text-2xl font-extrabold tracking-[0.3em] text-foreground">{s.referralCode || "—"}</p>
-        <p className="mt-2 text-xs text-muted">
-          Share it with friends. When they sign up and post their first listing, it counts toward your next reward.
+        {s.referralCode && (
+          <div className="mt-3 flex justify-center gap-2">
+            <CopyButton
+              text={s.referralCode}
+              label="📋 Copy code"
+              copiedLabel="Copied!"
+              className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold hover:bg-surface"
+            />
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#25D366] px-4 text-sm font-semibold text-white hover:brightness-95"
+            >
+              💬 Share
+            </a>
+          </div>
+        )}
+        <p className="mt-3 text-xs text-muted">
+          When a friend signs up with your code and posts their first listing, it counts toward your next reward.
         </p>
       </div>
+
+      {/* Recent referral activity (the referrer's notifications) */}
+      {notes.length > 0 && (
+        <div className="mt-4">
+          <h2 className="mb-2 text-sm font-semibold text-muted">Recent activity</h2>
+          <ul className="flex flex-col gap-2">
+            {notes.map((n) => (
+              <li key={n.id} className="rounded-xl border border-border bg-card p-3">
+                <p className="text-sm font-semibold">{n.title}</p>
+                <p className="mt-0.5 text-xs text-muted">{n.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

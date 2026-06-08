@@ -45,6 +45,12 @@ service cloud.firestore {
               'referralCount', 'walletBalance', 'lifetimeEarnings'
             ]));
       allow delete: if isAdmin();
+
+      // In-app notifications: a user reads their own; only the Admin SDK writes.
+      match /notifications/{notificationId} {
+        allow read: if isSelf(uid);
+        allow write: if false;
+      }
     }
 
     // --- Listings ---
