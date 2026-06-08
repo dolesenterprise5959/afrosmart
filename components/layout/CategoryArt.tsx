@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { placeholderImage } from "@/lib/placeholders";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 // Category-card artwork: a large square photo on top, with a bold title and a
 // "N Listings" count beneath. Falls back to a gold icon tile when no photo.
@@ -33,7 +34,11 @@ export function CategoryArt({
         </div>
       ) : (
         <div className="grid aspect-[4/3] w-full place-items-center bg-accent/15">
-          <span className="text-4xl transition-transform group-hover:scale-110">{icon}</span>
+          <CategoryIcon
+            category={category}
+            emoji={icon}
+            className="h-12 w-12 text-accent transition-transform group-hover:scale-110"
+          />
         </div>
       )}
       <div className="px-3.5 py-3 text-left">

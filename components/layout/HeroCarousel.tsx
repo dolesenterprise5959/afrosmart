@@ -4,15 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { trackHeroEvent } from "@/lib/actions/hero";
 
-// Clean rotating promotional banner (no category labels — categories live in the
-// "Browse by category" section below). The search bar sits above this banner.
+// Rotating sponsored banner. Each slide names its advertiser (minimalist
+// "Advertiser · Sponsored" label) — the image does the selling. Categories live
+// in the "Browse by category" section below; the search bar sits above.
 const BG = [
-  { id: "cars", img: "/placeholders/car-suv.webp" },
-  { id: "real-estate", img: "/placeholders/home-modern.webp" },
-  { id: "rentals", img: "/placeholders/rental-vehicle.webp" },
-  { id: "land", img: "/placeholders/land.webp" },
-  { id: "shops", img: "/placeholders/shop-storefront.webp" },
-  { id: "services", img: "/placeholders/services.webp" },
+  { id: "ecobank", img: "/ads/ecobank.png", advertiser: "Ecobank Liberia" },
+  { id: "lonestar", img: "/ads/lonestar.png", advertiser: "LoneStar Storage" },
+  { id: "cars", img: "/placeholders/car-suv.webp", advertiser: "Liberia Auto Mart" },
+  { id: "real-estate", img: "/placeholders/home-modern.webp", advertiser: "Monrovia Realty" },
+  { id: "rentals", img: "/placeholders/rental-vehicle.webp", advertiser: "EasyRent Liberia" },
+  { id: "services", img: "/placeholders/services.webp", advertiser: "ProServe Liberia" },
 ];
 
 const ROTATE_MS = 6000;
@@ -64,6 +65,16 @@ export function HeroCarousel() {
           className={`object-cover transition-opacity duration-700 ${idx === i ? "opacity-100" : "opacity-0"}`}
         />
       ))}
+      {/* Advertiser name + Sponsored label (minimalist) for the active slide. */}
+      <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5">
+        <span className="rounded-md bg-black/55 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          {BG[i].advertiser}
+        </span>
+        <span className="rounded-md bg-white/15 px-1.5 py-1 text-[10px] font-medium uppercase tracking-wide text-white/85 backdrop-blur-sm">
+          Sponsored
+        </span>
+      </div>
+
       {/* Subtle bottom shade only so the rotation dots stay legible. */}
       <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
 

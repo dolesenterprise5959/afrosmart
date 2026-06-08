@@ -2,21 +2,21 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #141414;
+  --foreground: #0c0c0d;   /* crisper near-black text */
 
   /* AfroSmart premium palette — black primary, gold accent, white surfaces.
      Green is reserved for success/verification only (--success). */
-  --brand: #161616;        /* near-black — primary buttons, emphasis */
+  --brand: #101012;        /* deeper near-black — primary buttons, emphasis */
   --brand-dark: #000000;
   --brand-foreground: #ffffff;
-  --accent: #c79a2b;       /* gold — the AfroSmart accent (highlights, featured) */
+  --accent: #bd8a16;       /* richer gold — the AfroSmart accent (highlights, featured) */
   --accent-foreground: #1a1a1a;
   --success: #15803d;      /* green — success states, verification, positive */
   --success-foreground: #ffffff;
-  --surface: #f5f5f6;      /* page background behind cards */
+  --surface: #f1f1f3;      /* page background behind cards — more contrast vs white */
   --card: #ffffff;
-  --border: #e6e6e8;
-  --muted: #6b7280;
+  --border: #e0e0e4;       /* slightly stronger card separation */
+  --muted: #585f6b;        /* darker muted text for readability */
 }
 
 @theme inline {
