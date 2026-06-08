@@ -8,6 +8,7 @@ import { createListingAction } from "@/app/listing/new/actions";
 import { COUNTIES, formatPrice } from "@/lib/mock";
 import { townsForCounty, OTHER_TOWN } from "@/lib/liberia-towns";
 import { VEHICLE_CONDITIONS, POPULAR_MAKES, modelsForMake, VEHICLE_YEARS } from "@/lib/vehicles";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
@@ -382,41 +383,53 @@ export function ListingWizard() {
 
           {data.kind === "vehicle" && (
             <div className="grid grid-cols-2 gap-2">
-              {/* Make → dependent Model → Year dropdowns (with free-text fallback). */}
-              <select
+              {/* Custom (non-native) dropdowns — the native <select> picker fails to
+                  open in in-app browsers, so these render options as in-page buttons. */}
+              <Dropdown
                 className={field}
                 value={data.v_make}
-                onChange={(e) => setData((d) => ({ ...d, v_make: e.target.value, v_model: "", v_modelOther: false }))}
-              >
-                <option value="">Make</option>
-                {POPULAR_MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
+                placeholder="Make"
+                ariaLabel="Make"
+                options={POPULAR_MAKES.map((m) => ({ value: m, label: m }))}
+                onChange={(v) => setData((d) => ({ ...d, v_make: v, v_model: "", v_modelOther: false }))}
+              />
 
               {modelsForMake(data.v_make).length > 0 && !data.v_modelOther ? (
-                <select
+                <Dropdown
                   className={field}
                   value={data.v_model}
-                  onChange={(e) => {
-                    if (e.target.value === OTHER_MODEL) setData((d) => ({ ...d, v_modelOther: true, v_model: "" }));
-                    else set("v_model", e.target.value);
+                  placeholder="Model"
+                  ariaLabel="Model"
+                  options={[
+                    ...modelsForMake(data.v_make).map((m) => ({ value: m, label: m })),
+                    { value: OTHER_MODEL, label: "Other…" },
+                  ]}
+                  onChange={(v) => {
+                    if (v === OTHER_MODEL) setData((d) => ({ ...d, v_modelOther: true, v_model: "" }));
+                    else set("v_model", v);
                   }}
-                >
-                  <option value="">Model</option>
-                  {modelsForMake(data.v_make).map((m) => <option key={m} value={m}>{m}</option>)}
-                  <option value={OTHER_MODEL}>Other…</option>
-                </select>
+                />
               ) : (
                 <input className={field} placeholder="Model" value={data.v_model} onChange={(e) => set("v_model", e.target.value)} />
               )}
 
-              <select className={field} value={data.v_year} onChange={(e) => set("v_year", e.target.value)}>
-                <option value="">Year</option>
-                {VEHICLE_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-              </select>
+              <Dropdown
+                className={field}
+                value={data.v_year}
+                placeholder="Year"
+                ariaLabel="Year"
+                options={VEHICLE_YEARS.map((y) => ({ value: String(y), label: String(y) }))}
+                onChange={(v) => set("v_year", v)}
+              />
 
-              <select className={field} value={data.v_condition} onChange={(e) => set("v_condition", e.target.value)}>
-                {VEHICLE_CONDITIONS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
+              <Dropdown
+                className={field}
+                value={data.v_condition}
+                placeholder="Condition"
+                ariaLabel="Condition"
+                options={VEHICLE_CONDITIONS.map((c) => ({ value: c.id, label: c.label }))}
+                onChange={(v) => set("v_condition", v)}
+              />
             </div>
           )}
           {data.kind === "property" && (
