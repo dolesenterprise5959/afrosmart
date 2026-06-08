@@ -2,6 +2,7 @@
 
 import { verifySession } from "@/lib/auth/dal";
 import { createListing } from "@/lib/firestore/listings";
+import { markReferralValidOnFirstListing } from "@/lib/firestore/referrals";
 import { ensureUserProfile, getPublicProfile, isSuspended } from "@/lib/firestore/users";
 import { checkRateLimit, rateLimitMessage } from "@/lib/firestore/ratelimit";
 import { isFeaturedEligible } from "@/lib/premium";
@@ -176,6 +177,14 @@ export async function createListingAction(
     publicPhone,
     featured,
   });
+
+  // Referral validity trigger: the referred user has now met phone + profile +
+  // first-listing. Idempotent + non-blocking — a referral error must never fail a post.
+  try {
+    await markReferralValidOnFirstListing(session.uid);
+  } catch {
+    /* ignore — referral crediting must not break posting */
+  }
 
   return { ok: true, id };
 }

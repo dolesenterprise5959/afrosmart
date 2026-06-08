@@ -38,7 +38,11 @@ service cloud.firestore {
             && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
               'verified', 'verifiedType', 'verificationStatus',
               'verificationRequestedType', 'verificationNote', 'verificationRequestedAt',
-              'suspended', 'plan', 'ratingAvg', 'ratingCount', 'ratingSum'
+              'suspended', 'plan', 'ratingAvg', 'ratingCount', 'ratingSum',
+              // Referral & wallet — server-controlled (Admin SDK only); a client must
+              // never self-credit a wallet balance, referral count or earnings.
+              'referralCode', 'referredBy', 'referralCredited',
+              'referralCount', 'walletBalance', 'lifetimeEarnings'
             ]));
       allow delete: if isAdmin();
     }
