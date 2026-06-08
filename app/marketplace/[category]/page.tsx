@@ -78,8 +78,8 @@ export default async function CategoryPage({
         ) : (
           <EmptyState
             icon={meta.icon}
-            title={`No ${meta.label.toLowerCase()} listings${countyFilter ? ` in ${countyFilter}` : " yet"}`}
-            description="Be the first to post in this category."
+            title={countyFilter ? `No ${meta.label.toLowerCase()} listings in ${countyFilter}` : "No listings yet"}
+            description={countyFilter ? "Try another county, or be the first to post." : "Be the first to post."}
             action={<Button href="/listing/new">+ Post a listing</Button>}
           />
         )}
