@@ -201,11 +201,6 @@ export function ListingWizard() {
   // ---- Success ----
   if (createdId) {
     const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/listing/${createdId}` : "";
-    const BOOSTS = [
-      { id: "featured", icon: "⭐", title: "Featured Listing", desc: "Show in the Featured row on the homepage." },
-      { id: "top", icon: "🔝", title: "Top Search Placement", desc: "Appear first in search & category results." },
-      { id: "7day", icon: "🚀", title: "7-Day Boost", desc: "Maximum visibility for a full week." },
-    ];
     async function copyLink() {
       try { await navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* ignore */ }
     }
@@ -226,29 +221,6 @@ export function ListingWizard() {
           <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-xs font-medium hover:bg-surface">
             <span className="text-xl">🔗</span> {copied ? "Copied!" : "Copy link"}
           </button>
-        </div>
-
-        {/* Boost — preview of upcoming paid placement (not yet purchasable, so we
-            show it as a clean roadmap preview rather than a dead-end selector). */}
-        <div className="mt-6 rounded-xl border border-accent/40 bg-accent/5 p-4 text-left">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-bold">🚀 Boost your listing</p>
-            <span className="shrink-0 rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
-              Coming soon
-            </span>
-          </div>
-          <div className="mt-3 flex flex-col gap-2">
-            {BOOSTS.map((b) => (
-              <div key={b.id} className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
-                <span className="text-xl">{b.icon}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{b.title}</span>
-                  <span className="block text-xs text-muted">{b.desc}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-center text-xs text-muted">Your listing stays live for free.</p>
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
@@ -305,9 +277,6 @@ export function ListingWizard() {
               </button>
             ))}
           </div>
-          <p className="mt-4 rounded-lg bg-success/5 px-3 py-2 text-center text-xs text-muted">
-            🛡️ <span className="font-medium text-foreground">Verified Seller</span> badges are coming soon — build buyer trust.
-          </p>
         </div>
       )}
 

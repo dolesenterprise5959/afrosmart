@@ -20,8 +20,8 @@ export interface Sponsor {
 }
 
 const SPONSORS: Sponsor[] = [
-  { name: "Ecobank Liberia" },
-  { name: "LoneStar Cell MTN" },
+  { name: "Ecobank Liberia", image: "/ads/ecobank.png" },
+  { name: "LoneStar Storage", image: "/ads/lonestar.png" },
 ];
 
 export function SponsoredAd({ sponsor }: { sponsor?: Sponsor }) {

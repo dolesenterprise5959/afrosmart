@@ -81,8 +81,8 @@ export default async function PricingPage() {
       </div>
 
       <p className="mt-8 text-center text-xs text-muted">
-        Online payments (mobile money &amp; cards) are coming soon. To upgrade today,{" "}
-        <a href="/contact" className="text-brand">contact our team</a> and we&apos;ll activate your plan.
+        To upgrade, <a href="/contact" className="text-brand">contact our team</a>{" "}
+        and we&apos;ll activate your plan.
       </p>
     </div>
   );
