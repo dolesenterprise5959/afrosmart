@@ -153,6 +153,7 @@ export default async function DashboardPage() {
       )}
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
+        <Link href="/wallet" className="text-brand">💳 Wallet & referrals</Link>
         <Link href="/saved" className="text-brand">♡ Saved listings</Link>
         <Link href="/messages" className="text-brand">💬 Messages</Link>
       </div>

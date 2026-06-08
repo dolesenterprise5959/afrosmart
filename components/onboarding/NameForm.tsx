@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveNameAction } from "@/app/welcome/actions";
 
-export function NameForm({ next }: { next: string }) {
+export function NameForm({ next, defaultReferralCode = "" }: { next: string; defaultReferralCode?: string }) {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [referralCode, setReferralCode] = useState(defaultReferralCode);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -19,7 +20,7 @@ export function NameForm({ next }: { next: string }) {
       return;
     }
     setPending(true);
-    const res = await saveNameAction({ firstName, lastName });
+    const res = await saveNameAction({ firstName, lastName, referralCode });
     if (res?.error) {
       setError(res.error);
       setPending(false);
@@ -57,6 +58,20 @@ export function NameForm({ next }: { next: string }) {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">
+          Referral code <span className="text-muted">(optional)</span>
+        </span>
+        <input
+          className={`${field} uppercase tracking-widest placeholder:tracking-normal placeholder:normal-case`}
+          autoComplete="off"
+          autoCapitalize="characters"
+          placeholder="e.g. AF7K9QXM"
+          value={referralCode}
+          onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+        />
+        <span className="text-xs text-muted">Got a code from a friend? Enter it so they get credit.</span>
       </label>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button

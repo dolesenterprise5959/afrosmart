@@ -13,6 +13,8 @@ export default async function WelcomePage({ searchParams }: PageProps<"/welcome"
   const sp = await searchParams;
   const nextParam = typeof sp.next === "string" ? sp.next : "/dashboard";
   const next = nextParam.startsWith("/") ? nextParam : "/dashboard";
+  // Prefill the referral code from a shared link (?ref=AF7K9QXM).
+  const ref = typeof sp.ref === "string" ? sp.ref.toUpperCase().slice(0, 16) : "";
 
   // Returning users who already entered their name skip straight through.
   if (await hasCompletedOnboarding(session.uid)) redirect(next);
@@ -28,7 +30,7 @@ export default async function WelcomePage({ searchParams }: PageProps<"/welcome"
           Your phone is verified ✅ — what should we call you? This is the name buyers and sellers will see.
         </p>
       </div>
-      <NameForm next={next} />
+      <NameForm next={next} defaultReferralCode={ref} />
     </div>
   );
 }
