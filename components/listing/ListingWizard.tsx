@@ -7,7 +7,7 @@ import { uploadListingPhotos } from "@/lib/firebase/storage-client";
 import { createListingAction } from "@/app/listing/new/actions";
 import { COUNTIES, formatPrice } from "@/lib/mock";
 import { townsForCounty, OTHER_TOWN } from "@/lib/liberia-towns";
-import { VEHICLE_CONDITIONS } from "@/lib/vehicles";
+import { VEHICLE_CONDITIONS, POPULAR_MAKES, modelsForMake, VEHICLE_YEARS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
@@ -30,6 +30,7 @@ const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
 ];
 
 const DRAFT_KEY = "afm:listing-draft";
+const OTHER_MODEL = "__other__"; // sentinel for the Model dropdown's "Other…" option
 const MAX_PHOTOS = 10;
 const STEPS = ["Photos", "Category", "Details", "Review"];
 
@@ -37,7 +38,7 @@ const emptyData = {
   category: "", kind: "" as Kind | "",
   title: "", description: "", price: "", currency: "LRD" as Currency,
   county: "", city: "",
-  v_make: "", v_model: "", v_year: "", v_condition: "new",
+  v_make: "", v_model: "", v_modelOther: false, v_year: "", v_condition: "new",
   p_listingType: "sale", p_propertyType: "house", p_bedrooms: "",
   ph_condition: "",
   s_businessName: "", s_phone: "", s_whatsapp: "",
@@ -381,9 +382,38 @@ export function ListingWizard() {
 
           {data.kind === "vehicle" && (
             <div className="grid grid-cols-2 gap-2">
-              <input className={field} placeholder="Make (Toyota)" value={data.v_make} onChange={(e) => set("v_make", e.target.value)} />
-              <input className={field} placeholder="Model (Corolla)" value={data.v_model} onChange={(e) => set("v_model", e.target.value)} />
-              <input className={field} type="text" inputMode="numeric" placeholder="Year" value={data.v_year} onChange={(e) => set("v_year", e.target.value.replace(/[^\d]/g, ""))} />
+              {/* Make → dependent Model → Year dropdowns (with free-text fallback). */}
+              <select
+                className={field}
+                value={data.v_make}
+                onChange={(e) => setData((d) => ({ ...d, v_make: e.target.value, v_model: "", v_modelOther: false }))}
+              >
+                <option value="">Make</option>
+                {POPULAR_MAKES.map((m) => <option key={m} value={m}>{m}</option>)}
+              </select>
+
+              {modelsForMake(data.v_make).length > 0 && !data.v_modelOther ? (
+                <select
+                  className={field}
+                  value={data.v_model}
+                  onChange={(e) => {
+                    if (e.target.value === OTHER_MODEL) setData((d) => ({ ...d, v_modelOther: true, v_model: "" }));
+                    else set("v_model", e.target.value);
+                  }}
+                >
+                  <option value="">Model</option>
+                  {modelsForMake(data.v_make).map((m) => <option key={m} value={m}>{m}</option>)}
+                  <option value={OTHER_MODEL}>Other…</option>
+                </select>
+              ) : (
+                <input className={field} placeholder="Model" value={data.v_model} onChange={(e) => set("v_model", e.target.value)} />
+              )}
+
+              <select className={field} value={data.v_year} onChange={(e) => set("v_year", e.target.value)}>
+                <option value="">Year</option>
+                {VEHICLE_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
+
               <select className={field} value={data.v_condition} onChange={(e) => set("v_condition", e.target.value)}>
                 {VEHICLE_CONDITIONS.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
               </select>
