@@ -11,7 +11,7 @@ import { VEHICLE_CONDITIONS } from "@/lib/vehicles";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
-type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general";
+type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general" | "community";
 
 const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
   { id: "cars", label: "Cars", icon: "🚗", kind: "vehicle" },
@@ -20,6 +20,13 @@ const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
   { id: "phones", label: "Phones", icon: "📱", kind: "phone" },
   { id: "services", label: "Services", icon: "🛠", kind: "service" },
   { id: "general", label: "Other", icon: "📦", kind: "general" },
+  // Community board — these post without a price (handled as "Free").
+  { id: "free-stuff", label: "Free Stuff", icon: "🎁", kind: "community" },
+  { id: "wanted", label: "Wanted", icon: "🔎", kind: "community" },
+  { id: "events", label: "Events", icon: "🎟️", kind: "community" },
+  { id: "lost-found", label: "Lost & Found", icon: "🧭", kind: "community" },
+  { id: "donations", label: "Donations", icon: "🤝", kind: "community" },
+  { id: "volunteers", label: "Volunteers", icon: "🙌", kind: "community" },
 ];
 
 const DRAFT_KEY = "afm:listing-draft";
@@ -121,7 +128,8 @@ export function ListingWizard() {
   function validateDetails(): string | null {
     if (data.title.trim().length < 3) return "Add a title (at least 3 characters).";
     if (data.description.trim().length < 10) return "Add a short description (at least 10 characters).";
-    if (!(Number(data.price) > 0)) return "Enter a valid price.";
+    // Community posts (free stuff, wanted, events…) don't need a price.
+    if (data.kind !== "community" && !(Number(data.price) > 0)) return "Enter a valid price.";
     if (!data.county) return "Choose a county.";
     if (!data.city.trim()) return "Enter your city or town.";
     if (data.kind === "vehicle") {
@@ -288,7 +296,7 @@ export function ListingWizard() {
       {/* Step 2 — Category */}
       {step === 1 && (
         <div>
-          <h1 className="text-xl font-bold">What are you selling?</h1>
+          <h1 className="text-xl font-bold">What are you posting?</h1>
           <div className="mt-4 grid grid-cols-2 gap-3">
             {QUICK.map((c) => (
               <button
@@ -351,22 +359,29 @@ export function ListingWizard() {
         <div className="flex flex-col gap-3">
           <h1 className="text-xl font-bold">Details</h1>
           <input className={field} placeholder="Title (e.g. Toyota Corolla 2014)" value={data.title} onChange={(e) => set("title", e.target.value)} />
-          {/* Price is the primary field: currency ~25%, amount ~75% */}
-          <div className="flex gap-2">
-            <select className={`${field} shrink-0 basis-1/4 px-2`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
-              <option value="LRD">L$</option>
-              <option value="USD">US$</option>
-            </select>
-            <input
-              className={`${field} min-w-0 flex-1`}
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="Price"
-              value={data.price}
-              onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
-            />
-          </div>
+          {/* Price — hidden for community posts (free stuff, wanted, events…), which are priceless. */}
+          {data.kind === "community" ? (
+            <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted">
+              💚 No price needed — this post is shown as <span className="font-medium text-foreground">Free</span>.
+            </p>
+          ) : (
+            /* Price is the primary field: currency ~25%, amount ~75% */
+            <div className="flex gap-2">
+              <select className={`${field} shrink-0 basis-1/4 px-2`} value={data.currency} onChange={(e) => set("currency", e.target.value)}>
+                <option value="LRD">L$</option>
+                <option value="USD">US$</option>
+              </select>
+              <input
+                className={`${field} min-w-0 flex-1`}
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="Price"
+                value={data.price}
+                onChange={(e) => set("price", e.target.value.replace(/[^\d]/g, ""))}
+              />
+            </div>
+          )}
           <button type="button" onClick={detectLocation} disabled={detecting} className="inline-flex h-10 w-fit items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium hover:border-brand disabled:opacity-50">
             📍 {detecting ? "Detecting…" : "Use my location"}
           </button>

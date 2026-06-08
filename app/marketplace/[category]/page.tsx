@@ -52,7 +52,7 @@ export default async function CategoryPage({
           { label: meta.label },
         ]}
       />
-      <h1 className="mt-2 flex items-center gap-2 text-xl font-bold">
+      <h1 className="mt-2 flex items-center gap-2 text-2xl font-bold tracking-tight sm:text-3xl">
         <span aria-hidden>{meta.icon}</span> {meta.label}
       </h1>
       <p className="mt-1 text-sm text-muted">

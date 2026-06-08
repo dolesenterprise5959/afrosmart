@@ -270,8 +270,8 @@ export function SearchBar({
   return (
     <div ref={rootRef} className={["relative w-full", className].filter(Boolean).join(" ")}>
       <form onSubmit={(e) => { e.preventDefault(); runSearch(query); }} className="flex items-center gap-2" role="search">
-        <div className="flex h-12 flex-1 items-center gap-2 rounded-2xl border border-border bg-card pl-4 pr-2 shadow-sm transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
-          <IconSearch className="h-5 w-5 shrink-0 text-muted" />
+        <div className="flex h-14 flex-1 items-center gap-2.5 rounded-2xl border border-border bg-card pl-4 pr-2 shadow-md transition focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
+          <IconSearch className="h-[22px] w-[22px] shrink-0 text-muted" />
           {listening && (
             <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-red-600">
               <span className="h-2 w-2 animate-pulse rounded-full bg-red-600" />
@@ -286,7 +286,7 @@ export function SearchBar({
             placeholder={listening ? "Speak now…" : placeholder}
             aria-label="Search listings"
             autoComplete="off"
-            className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
+            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted"
           />
           <button
             type="button"

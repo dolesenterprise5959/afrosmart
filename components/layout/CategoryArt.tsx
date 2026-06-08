@@ -36,9 +36,9 @@ export function CategoryArt({
           <span className="text-4xl transition-transform group-hover:scale-110">{icon}</span>
         </div>
       )}
-      <div className="px-3 py-2.5 text-left">
-        <p className="text-lg font-bold leading-tight">{label}</p>
-        {countLine && <p className="mt-0.5 text-xs text-muted">{countLine}</p>}
+      <div className="px-3.5 py-3 text-left">
+        <p className="text-xl font-bold leading-tight tracking-tight">{label}</p>
+        {countLine && <p className="mt-1 text-sm text-muted">{countLine}</p>}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 // keeps validation messages consistent across the app.
 
 import { CATEGORIES } from "@/lib/mock";
+import { isPricelessCategory } from "@/lib/categories";
 import type {
   CategoryId,
   ReportReason,
@@ -25,7 +26,13 @@ export interface ListingFields {
 export function validateListingFields(f: ListingFields): string | null {
   if (f.title.trim().length < 3) return "Please enter a title (at least 3 characters).";
   if (f.description.trim().length < 10) return "Please add a longer description.";
-  if (!Number.isFinite(f.price) || f.price <= 0) return "Please enter a valid price.";
+  // Community-board posts (free stuff, wanted, events…) are priceless: allow 0.
+  // Everything else needs a real, positive price.
+  if (isPricelessCategory(f.category)) {
+    if (!Number.isFinite(f.price) || f.price < 0) return "Please enter a valid price.";
+  } else if (!Number.isFinite(f.price) || f.price <= 0) {
+    return "Please enter a valid price.";
+  }
   if (!CATEGORIES.some((c) => c.id === (f.category as CategoryId))) {
     return "Please choose a category.";
   }

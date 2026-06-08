@@ -39,18 +39,20 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #f1f1f2;
+    /* Richer, deeper black for a premium marketplace feel; crisp white text and
+       a slightly raised card surface for stronger photo/content contrast. */
+    --background: #000000;
+    --foreground: #ffffff;
     /* On dark surfaces the primary becomes light so buttons stay visible. */
-    --brand: #f4f4f5;
+    --brand: #fafafa;
     --brand-dark: #ffffff;
-    --brand-foreground: #0a0a0a;
-    --accent: #d8af3c;
+    --brand-foreground: #000000;
+    --accent: #e0b94a;       /* brighter gold pops against true black */
     --success: #22c55e;
-    --surface: #0c0c0d;
-    --card: #161618;
-    --border: #28282b;
-    --muted: #9b9ba3;
+    --surface: #050506;      /* page background — near-true-black */
+    --card: #17171a;         /* raised card so listings/photos stand out */
+    --border: #2c2c31;       /* a touch stronger for crisper separation */
+    --muted: #a9a9b3;        /* brighter muted text for readability */
   }
 }
 
