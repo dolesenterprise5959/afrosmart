@@ -226,7 +226,7 @@ function LoginForm() {
       // Log EVERY verify failure with its exact code so failures are diagnosable.
       const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
       void logLoginEvent({
-        status: "failed",
+        status: "verify_failed",
         phone: toE164For(phone, country.dialCode),
         country: `${country.code} ${country.dialCode}`,
         code: fbCode ?? "verify-failed",
