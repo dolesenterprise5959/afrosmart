@@ -9,6 +9,7 @@ const items = [
   { href: "/marketplace", label: "Browse", icon: "🛒" },
   { href: "/listing/new", label: "Post", icon: "➕" },
   { href: "/messages", label: "Chats", icon: "💬" },
+  { href: "/wallet", label: "Wallet", icon: "💳" },
   { href: "/dashboard", label: "Account", icon: "👤" },
 ] as const;
 

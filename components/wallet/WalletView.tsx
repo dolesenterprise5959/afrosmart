@@ -2,6 +2,7 @@ import type { ReferralSummary } from "@/lib/firestore/referrals";
 import type { AppNotification } from "@/lib/firestore/notifications";
 import { referralProgress, REFERRALS_PER_REWARD, REWARD_USD } from "@/lib/referral";
 import { CopyButton } from "@/components/ui/CopyButton";
+import { InviteFriends } from "@/components/wallet/InviteFriends";
 
 const WITHDRAW_MIN = 10; // display-only; withdrawals are out of scope in Phase 1.
 const SITE = "https://afrosmart.app";
@@ -13,7 +14,6 @@ export function WalletView({ summary: s, notes }: { summary: ReferralSummary; no
   const pct = Math.round((p.intoCurrent / REFERRALS_PER_REWARD) * 100);
   const eligible = s.walletBalance >= WITHDRAW_MIN;
   const shareUrl = s.referralCode ? `${SITE}/welcome?ref=${s.referralCode}` : SITE;
-  const waText = `Join me on AfroSmart — Liberia's marketplace. Use my referral code ${s.referralCode} when you sign up: ${shareUrl}`;
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-6">
@@ -63,21 +63,14 @@ export function WalletView({ summary: s, notes }: { summary: ReferralSummary; no
         <p className="text-xs text-muted">Your referral code</p>
         <p className="mt-1 text-2xl font-extrabold tracking-[0.3em] text-foreground">{s.referralCode || "—"}</p>
         {s.referralCode && (
-          <div className="mt-3 flex justify-center gap-2">
+          <div className="mt-4 flex flex-col gap-2">
+            <InviteFriends code={s.referralCode} url={shareUrl} />
             <CopyButton
               text={s.referralCode}
               label="📋 Copy code"
               copiedLabel="Copied!"
-              className="inline-flex h-10 items-center rounded-full border border-border bg-card px-4 text-sm font-semibold hover:bg-surface"
+              className="inline-flex h-10 w-full items-center justify-center rounded-full border border-border bg-card text-sm font-semibold hover:bg-surface"
             />
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(waText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[#25D366] px-4 text-sm font-semibold text-white hover:brightness-95"
-            >
-              💬 Share
-            </a>
           </div>
         )}
         <p className="mt-3 text-xs text-muted">
