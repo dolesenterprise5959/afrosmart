@@ -3,17 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { trackHeroEvent } from "@/lib/actions/hero";
+import { HERO_IMAGES } from "@/lib/placeholders";
 
 // Rotating sponsored banner. Each slide names its advertiser (minimalist
 // "Advertiser · Sponsored" label) — the image does the selling. Categories live
 // in the "Browse by category" section below; the search bar sits above.
 const BG = [
-  { id: "ecobank", img: "/placeholders/shop-storefront.webp", advertiser: "Ecobank Liberia" },
-  { id: "lonestar", img: "/placeholders/cargo-truck.webp", advertiser: "LoneStar Storage" },
-  { id: "cars", img: "/placeholders/car-suv.webp", advertiser: "Liberia Auto Mart" },
-  { id: "real-estate", img: "/placeholders/home-modern.webp", advertiser: "Monrovia Realty" },
-  { id: "rentals", img: "/placeholders/rental-vehicle.webp", advertiser: "EasyRent Liberia" },
-  { id: "services", img: "/placeholders/services.webp", advertiser: "ProServe Liberia" },
+  { id: "ecobank", img: HERO_IMAGES.shopStorefront, advertiser: "Ecobank Liberia" },
+  { id: "lonestar", img: HERO_IMAGES.cargoTruck, advertiser: "LoneStar Storage" },
+  { id: "cars", img: HERO_IMAGES.carSuv, advertiser: "Liberia Auto Mart" },
+  { id: "real-estate", img: HERO_IMAGES.homeModern, advertiser: "Monrovia Realty" },
+  { id: "rentals", img: HERO_IMAGES.rentalVehicle, advertiser: "EasyRent Liberia" },
+  { id: "services", img: HERO_IMAGES.services, advertiser: "ProServe Liberia" },
 ];
 
 const ROTATE_MS = 6000;

@@ -1,104 +1,94 @@
 // Category placeholder artwork.
 //
-// User-uploaded photos ALWAYS take priority (see ListingImage). These images are
-// only shown when a listing/category has no real photo yet.
-//
-// TO INSTALL IMAGES: drop your files in public/placeholders/_incoming/ named by
-// key (e.g. barber.webp) or by category (e.g. services.jpg), then run:
-//     node scripts/install-placeholders.mjs
-// That converts/places them and rewrites PLACEHOLDER_FILES below automatically.
-// Any format works (.webp/.jpg/.png) — next/image serves optimized WebP either way.
+// IMPORTANT: these are STATIC IMPORTS, not /public path strings. Firebase App
+// Hosting does not reliably serve files from /public (raw /public/*.webp 404s on
+// the live deployment, and the next/image optimizer is unavailable there). Static
+// imports are bundled + fingerprinted into /_next/static/media, which IS served —
+// so the images actually load. User-uploaded listing photos (Firebase Storage
+// URLs) are unaffected and always take priority (see ListingImage).
 
-/** All image keys the design expects (subjects documented in the README). */
-export const PLACEHOLDER_KEYS = [
-  "food-dishes", "food-vegetables", "food-market",
-  "barber", "beauty-salon", "phone-repair", "carpenter",
-  "motorbike-taxi", "taxi", "cargo-truck",
-  "shop-storefront", "shop-market", "shop-retail",
-  "home-modern", "apartment", "land",
-  "car-sedan", "car-suv", "car-pickup",
-  "smartphone", "electronics",
-  "rental-home", "rental-equipment", "rental-vehicle",
-  "jobs", "agriculture", "construction",
-  "sports", "fashion", "services",
-] as const;
+import type { StaticImageData } from "next/image";
 
-/** Category id → placeholder image key. Unmapped categories use the neutral fallback. */
+import agriculture from "../public/placeholders/agriculture.webp";
+import apartment from "../public/placeholders/apartment.webp";
+import barber from "../public/placeholders/barber.webp";
+import beautySalon from "../public/placeholders/beauty-salon.webp";
+import carPickup from "../public/placeholders/car-pickup.webp";
+import carSedan from "../public/placeholders/car-sedan.webp";
+import carSuv from "../public/placeholders/car-suv.webp";
+import cargoTruck from "../public/placeholders/cargo-truck.webp";
+import carpenter from "../public/placeholders/carpenter.webp";
+import construction from "../public/placeholders/construction.webp";
+import electronics from "../public/placeholders/electronics.webp";
+import foodDishes from "../public/placeholders/food-dishes.webp";
+import foodMarket from "../public/placeholders/food-market.webp";
+import foodVegetables from "../public/placeholders/food-vegetables.webp";
+import homeModern from "../public/placeholders/home-modern.webp";
+import jobs from "../public/placeholders/jobs.webp";
+import land from "../public/placeholders/land.webp";
+import motorbikeTaxi from "../public/placeholders/motorbike-taxi.webp";
+import phoneRepair from "../public/placeholders/phone-repair.webp";
+import rentalEquipment from "../public/placeholders/rental-equipment.webp";
+import rentalHome from "../public/placeholders/rental-home.webp";
+import rentalVehicle from "../public/placeholders/rental-vehicle.webp";
+import services from "../public/placeholders/services.webp";
+import fashion from "../public/placeholders/fashion.webp";
+import sports from "../public/placeholders/sports.webp";
+import shopMarket from "../public/placeholders/shop-market.webp";
+import shopRetail from "../public/placeholders/shop-retail.webp";
+import shopStorefront from "../public/placeholders/shop-storefront.webp";
+import smartphone from "../public/placeholders/smartphone.webp";
+import taxi from "../public/placeholders/taxi.webp";
+
+/** Placeholder key → bundled image. */
+const IMAGES: Record<string, StaticImageData> = {
+  "food-dishes": foodDishes, "food-vegetables": foodVegetables, "food-market": foodMarket,
+  barber, "beauty-salon": beautySalon, "phone-repair": phoneRepair, carpenter,
+  "motorbike-taxi": motorbikeTaxi, taxi, "cargo-truck": cargoTruck,
+  "shop-storefront": shopStorefront, "shop-market": shopMarket, "shop-retail": shopRetail,
+  "home-modern": homeModern, apartment, land,
+  "car-sedan": carSedan, "car-suv": carSuv, "car-pickup": carPickup,
+  smartphone, electronics,
+  "rental-home": rentalHome, "rental-equipment": rentalEquipment, "rental-vehicle": rentalVehicle,
+  jobs, agriculture, construction, sports, fashion, services,
+};
+
+/** Hero/ad images reused by HeroCarousel + SponsoredAd (kept here so all bundled
+ *  artwork lives in one module). */
+export const HERO_IMAGES = {
+  shopStorefront, cargoTruck, carSuv, homeModern, rentalVehicle, services,
+};
+
+/** Category id → placeholder image key. Unmapped categories use the icon fallback. */
 const CATEGORY_IMAGE: Record<string, string> = {
-  // Food & agriculture
   rice: "food-dishes", drinks: "food-dishes", water: "food-dishes",
   "food-crops": "food-vegetables", vegetables: "food-vegetables", farm: "food-vegetables",
   "market-food": "food-market",
-  // Services
   barber: "barber", "hair-braiding": "beauty-salon", "beauty-salon": "beauty-salon",
   "makeup-artist": "beauty-salon", "beauty-supply": "beauty-salon",
   "phone-repair": "phone-repair", "computer-repair": "phone-repair",
   carpentry: "carpenter", masonry: "carpenter", welding: "carpenter",
-  // Transport
   motorbike: "motorbike-taxi", "motorbike-rental": "motorbike-taxi",
   taxi: "taxi", trucks: "cargo-truck", "truck-rental": "cargo-truck",
-  // Shops & business
   restaurants: "shop-storefront", "cook-shops": "shop-storefront", "kobo-shops": "shop-storefront",
   "market-stalls": "shop-market", general: "shop-retail",
-  // Real estate
   property: "home-modern",
-  // Vehicles
   cars: "car-sedan",
-  // Phones / electronics
   phones: "smartphone", electronics: "electronics",
-  // Rentals
   "car-rental": "rental-vehicle", "equipment-rental": "rental-equipment",
   "house-rental": "rental-home", "bicycle-rental": "rental-vehicle",
-  // Jobs / Agriculture / Construction / Beauty
   jobs: "jobs", "job-listings": "jobs",
   agriculture: "agriculture", livestock: "agriculture", "farm-produce": "agriculture",
   construction: "construction", "building-materials": "construction", plumbing: "construction",
   beauty: "beauty-salon", cosmetics: "beauty-salon",
-  // Real Liberia photos: Sports, Fashion, Services, Land
   services: "services", "general-services": "services",
   "sports-fields": "sports", tournaments: "sports", football: "sports", sports: "sports",
   clothing: "fashion", shoes: "fashion", fashion: "fashion",
   land: "land",
 };
 
-// __PLACEHOLDER_FILES_START__ (auto-generated by scripts/install-placeholders.mjs — do not edit by hand)
-export const PLACEHOLDER_FILES: Record<string, string> = {
-  "agriculture": "agriculture.webp",
-  "apartment": "apartment.webp",
-  "barber": "barber.webp",
-  "beauty-salon": "beauty-salon.webp",
-  "car-pickup": "car-pickup.webp",
-  "car-sedan": "car-sedan.webp",
-  "car-suv": "car-suv.webp",
-  "cargo-truck": "cargo-truck.webp",
-  "carpenter": "carpenter.webp",
-  "construction": "construction.webp",
-  "electronics": "electronics.webp",
-  "food-dishes": "food-dishes.webp",
-  "food-market": "food-market.webp",
-  "food-vegetables": "food-vegetables.webp",
-  "home-modern": "home-modern.webp",
-  "jobs": "jobs.webp",
-  "land": "land.webp",
-  "motorbike-taxi": "motorbike-taxi.webp",
-  "phone-repair": "phone-repair.webp",
-  "rental-equipment": "rental-equipment.webp",
-  "rental-home": "rental-home.webp",
-  "rental-vehicle": "rental-vehicle.webp",
-  "services": "services.webp",
-  "fashion": "fashion.webp",
-  "sports": "sports.webp",
-  "shop-market": "shop-market.webp",
-  "shop-retail": "shop-retail.webp",
-  "shop-storefront": "shop-storefront.webp",
-  "smartphone": "smartphone.webp",
-  "taxi": "taxi.webp",
-};
-// __PLACEHOLDER_FILES_END__
-
-/** Returns the placeholder image path for a category, or null to use the fallback. */
-export function placeholderImage(category: string): string | null {
+/** Bundled placeholder image for a category, or null to use the icon fallback. */
+export function placeholderImage(category: string): StaticImageData | null {
   const key = CATEGORY_IMAGE[category];
-  const file = key ? PLACEHOLDER_FILES[key] : undefined;
-  return file ? `/placeholders/${file}` : null;
+  return key ? IMAGES[key] ?? null : null;
 }
