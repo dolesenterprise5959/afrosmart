@@ -8,7 +8,7 @@ import { Logo } from "@/components/ui/Logo";
 import { createRecaptcha, sendOtp, confirmOtp, signInWithCustomTokenAndSession } from "@/lib/firebase/auth-client";
 import { validateMobile, toE164For } from "@/lib/utils/phone";
 import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
-import { describeAuthError } from "@/lib/auth/otp-errors";
+import { describeAuthError, describeVerifyError } from "@/lib/auth/otp-errors";
 import { logLoginEvent } from "@/app/login/actions";
 import { detectInApp, type InAppInfo } from "@/lib/utils/in-app-browser";
 
@@ -93,22 +93,24 @@ function LoginForm() {
     queueMicrotask(() => setInApp(detectInApp()));
   }, []);
 
-  // Anti-spam (resend cooldown) + brute-force lockout countdowns.
+  // Anti-spam (resend cooldown) + brute-force lockout + device rate-limit countdowns.
   const [resendIn, setResendIn] = useState(0);
   const [lockedFor, setLockedFor] = useState(0);
+  const [cooldown, setCooldown] = useState(0); // Firebase "too-many-requests" device cooldown
   const attemptsRef = useRef(0);
 
   const verifierRef = useRef<RecaptchaVerifier | null>(null);
   const confirmationRef = useRef<ConfirmationResult | null>(null);
 
   useEffect(() => {
-    if (resendIn <= 0 && lockedFor <= 0) return;
+    if (resendIn <= 0 && lockedFor <= 0 && cooldown <= 0) return;
     const t = setInterval(() => {
       setResendIn((s) => Math.max(0, s - 1));
       setLockedFor((s) => Math.max(0, s - 1));
+      setCooldown((s) => Math.max(0, s - 1));
     }, 1000);
     return () => clearInterval(t);
-  }, [resendIn, lockedFor]);
+  }, [resendIn, lockedFor, cooldown]);
 
   async function send() {
     setError(null);
@@ -117,7 +119,9 @@ function LoginForm() {
       setError(localError);
       return;
     }
-    if (resendIn > 0) return;
+    if (resendIn > 0 || cooldown > 0) return;
+    // Don't burn a Firebase attempt inside an in-app browser — it can't complete.
+    if (inApp.inApp) { setShowOpenInBrowser(true); return; }
 
     setPending(true);
     const e164 = toE164For(phone, country.dialCode);
@@ -153,8 +157,11 @@ function LoginForm() {
           setRecaptchaSize("normal");
         }
         if (fails >= 2 && FALLBACK_ENABLED) setShowFallback(true);
-      } else if ((reason === "quota" || reason === "too-many") && FALLBACK_ENABLED) {
-        setShowFallback(true);
+      } else if (reason === "quota" || reason === "too-many") {
+        // Device rate-limit: show a countdown instead of letting them keep tapping
+        // (which only deepens the limit). This is the root of "too many attempts".
+        setCooldown(120);
+        if (FALLBACK_ENABLED) setShowFallback(true);
       }
     } finally {
       setPending(false);
@@ -214,15 +221,43 @@ function LoginForm() {
       router.replace(`/welcome?next=${encodeURIComponent(next)}`);
       router.refresh();
     } catch (err) {
-      console.error("[login] verify failed:", err);
-      attemptsRef.current += 1;
-      if (attemptsRef.current >= MAX_ATTEMPTS) {
-        attemptsRef.current = 0;
-        setLockedFor(LOCKOUT_SECONDS);
-        setError(`Too many incorrect codes. Please wait ${LOCKOUT_SECONDS}s, then request a new code.`);
+      const fbCode = (err as { code?: string })?.code;
+      console.error("[login] verify failed:", fbCode ?? err);
+      // Log EVERY verify failure with its exact code so failures are diagnosable.
+      const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+      void logLoginEvent({
+        status: "failed",
+        phone: toE164For(phone, country.dialCode),
+        country: `${country.code} ${country.dialCode}`,
+        code: fbCode ?? "verify-failed",
+        provider: method,
+        ua,
+        inApp: inApp.name,
+      });
+
+      const { reason, message, lockSeconds } = describeVerifyError(fbCode);
+      if (reason === "too-many") {
+        // Firebase device rate-limit — NOT a wrong code. Countdown, don't penalise.
+        setLockedFor(lockSeconds ?? 120);
+        setError(message);
+      } else if (reason === "expired" || reason === "network" || reason === "provider") {
+        // Recoverable without burning an attempt — tell them exactly what to do.
+        setError(message);
+      } else if (reason === "wrong-code") {
+        attemptsRef.current += 1;
+        if (attemptsRef.current >= MAX_ATTEMPTS) {
+          attemptsRef.current = 0;
+          setLockedFor(LOCKOUT_SECONDS);
+          setError(`Too many incorrect codes. Please wait ${LOCKOUT_SECONDS}s, then request a new code.`);
+        } else {
+          const left = MAX_ATTEMPTS - attemptsRef.current;
+          setError(`${message} ${left} attempt${left === 1 ? "" : "s"} left before a short lockout.`);
+        }
+      } else if (method !== "firebase" && err instanceof Error && err.message) {
+        // Fallback (WhatsApp/SMS) path returns a server message — surface it.
+        setError(err.message);
       } else {
-        const left = MAX_ATTEMPTS - attemptsRef.current;
-        setError(`That code didn't work. ${left} attempt${left === 1 ? "" : "s"} left before a short lockout.`);
+        setError(message);
       }
     } finally {
       setPending(false);
@@ -305,9 +340,20 @@ function LoginForm() {
           {/* reCAPTCHA renders here (invisible by default; visible checkbox after a failure). */}
           <div id="recaptcha-container" className={recaptchaSize === "normal" ? "flex justify-center" : ""} />
 
-          <button type="submit" className={submit} disabled={pending || !configured}>
-            {pending ? "Sending…" : "Send code"}
+          <button type="submit" className={submit} disabled={pending || !configured || cooldown > 0 || inApp.inApp}>
+            {cooldown > 0
+              ? `Too many attempts — wait ${cooldown}s`
+              : inApp.inApp
+                ? "Open in Chrome/Safari to continue"
+                : pending
+                  ? "Sending…"
+                  : "Send code"}
           </button>
+          {cooldown > 0 && (
+            <p className="text-center text-xs text-muted">
+              ⏳ This is Firebase’s device safety limit. The timer must finish before another code can be sent.
+            </p>
+          )}
 
           {showFallback && FALLBACK_ENABLED && (
             <div className="mt-1 rounded-xl border border-border bg-card p-3">
@@ -342,6 +388,15 @@ function LoginForm() {
             />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {/* Clear, always-visible countdowns so users know exactly when they can act. */}
+          {lockedFor > 0 && (
+            <p className="text-center text-sm font-medium text-amber-700">
+              ⏳ Wait {lockedFor}s, then tap “Resend code” for a fresh code.
+            </p>
+          )}
+          {lockedFor === 0 && resendIn > 0 && (
+            <p className="text-center text-xs text-muted">You can request a new code in {resendIn}s.</p>
+          )}
           <button type="submit" className={submit} disabled={pending || lockedFor > 0}>
             {pending ? "Verifying…" : lockedFor > 0 ? `Locked — wait ${lockedFor}s` : "Verify & continue"}
           </button>

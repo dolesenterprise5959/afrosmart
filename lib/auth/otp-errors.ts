@@ -8,6 +8,8 @@ export type AuthFailReason =
   | "quota"
   | "too-many"
   | "invalid-number"
+  | "wrong-code"
+  | "expired"
   | "provider"
   | "unknown";
 
@@ -28,6 +30,41 @@ export function describeAuthError(code?: string): { reason: AuthFailReason; mess
       return { reason: "invalid-number", message: "That phone number doesn't look valid. Please check it and try again." };
     default:
       return { reason: "unknown", message: "Couldn't send your code. Try the checkbox, or get it by WhatsApp/SMS." };
+  }
+}
+
+/**
+ * Map a Firebase error from the VERIFY (code-entry) step to a precise reason +
+ * message. Distinguishes a wrong code from an expired code from a device
+ * rate-limit — so a rate-limited user isn't told "wrong code" (and vice versa).
+ * `lockSeconds` is set when the user should be made to wait (rate-limit).
+ */
+export function describeVerifyError(code?: string): {
+  reason: AuthFailReason;
+  message: string;
+  lockSeconds?: number;
+} {
+  switch (code) {
+    case "auth/invalid-verification-code":
+      return { reason: "wrong-code", message: "That code is incorrect. Check the 6 digits and try again." };
+    case "auth/missing-verification-code":
+      return { reason: "wrong-code", message: "Please enter the 6-digit code from your SMS." };
+    case "auth/code-expired":
+    case "auth/session-expired":
+      return { reason: "expired", message: "This code expired. Tap “Resend code” to get a fresh one." };
+    case "auth/too-many-requests":
+      return {
+        reason: "too-many",
+        message: "Too many attempts from this device — this is Firebase's safety limit, not a wrong code. Wait for the timer, then request a new code.",
+        lockSeconds: 120,
+      };
+    case "auth/network-request-failed":
+      return { reason: "network", message: "Network problem. Check your connection and try again." };
+    case "auth/credential-already-in-use":
+    case "auth/account-exists-with-different-credential":
+      return { reason: "provider", message: "This number is already linked to an account. Try signing in again." };
+    default:
+      return { reason: "unknown", message: "Couldn’t verify that code. Tap “Resend code” for a fresh one, or open AfroSmart in Chrome/Safari." };
   }
 }
 
