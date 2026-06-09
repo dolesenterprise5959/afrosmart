@@ -15,6 +15,7 @@ export interface AuthLogEntry {
   status?: AuthStatus; // defaults to "failed"
   ua?: string;         // User-Agent (to spot in-app browsers like Messenger)
   inApp?: string;      // detected in-app browser name, if any
+  ip?: string;         // client IP (captured server-side from request headers)
 }
 
 export async function logAuthEvent(e: AuthLogEntry): Promise<void> {
@@ -29,8 +30,48 @@ export async function logAuthEvent(e: AuthLogEntry): Promise<void> {
       provider: e.provider || "firebase",
       ua: (e.ua || "").slice(0, 300),
       inApp: e.inApp || "",
+      ip: (e.ip || "").slice(0, 60),
     });
   } catch {
     /* logging must never block login */
+  }
+}
+
+/** One stored auth event, for the admin viewer. */
+export interface AuthEventRow {
+  id: string;
+  ts: string;
+  status: AuthStatus | string;
+  country: string;
+  phoneMasked: string;
+  code: string;
+  provider: string;
+  ua: string;
+  inApp: string;
+  ip: string;
+}
+
+/** Most recent auth events, newest first (admin diagnostics). */
+export async function getRecentAuthEvents(max = 150): Promise<AuthEventRow[]> {
+  if (!isAdminConfigured()) return [];
+  try {
+    const snap = await adminDb().collection("authEvents").orderBy("ts", "desc").limit(max).get();
+    return snap.docs.map((d) => {
+      const x = d.data();
+      return {
+        id: d.id,
+        ts: x.ts ?? "",
+        status: x.status ?? "failed",
+        country: x.country ?? "",
+        phoneMasked: x.phoneMasked ?? "•••",
+        code: x.code ?? "",
+        provider: x.provider ?? "",
+        ua: x.ua ?? "",
+        inApp: x.inApp ?? "",
+        ip: x.ip ?? "",
+      };
+    });
+  } catch {
+    return [];
   }
 }
