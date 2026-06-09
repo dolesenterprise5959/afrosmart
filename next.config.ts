@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 // Content-Security-Policy tuned for Firebase Web (Auth phone/reCAPTCHA, Firestore
-// realtime, Storage). Shipped as **Report-Only** so it cannot break the live auth
-// flow before it has been validated in production. Once you've confirmed the
-// browser console reports no violations during a full sign-in + messaging flow,
-// rename the header to `Content-Security-Policy` (and ideally add nonces to drop
-// 'unsafe-inline' from script-src). See docs/LAUNCH_RUNBOOK.md §7.
+// realtime, Storage). ENFORCED — validated against the live homepage + login
+// (Firebase + reCAPTCHA boot) with zero Report-Only violations before flipping.
+// Next hardening step: add nonces to drop 'unsafe-inline' from script-src.
 const contentSecurityPolicy = [
   "default-src 'self'",
   // 'unsafe-inline' covers Next's hydration bootstrap; harden with nonces later.
@@ -13,7 +11,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.googleusercontent.com https://www.gstatic.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com",
+  // www.google.com covers the reCAPTCHA challenge XHRs in addition to the iframe.
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firebasestorage.googleapis.com https://www.google.com",
   "frame-src 'self' https://*.firebaseapp.com https://www.google.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
@@ -29,8 +28,8 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  // Report-Only until validated against the live auth flow (see comment above).
-  { key: "Content-Security-Policy-Report-Only", value: contentSecurityPolicy },
+  // Enforced (validated Report-Only with zero violations — see comment above).
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
 ];
 
 const nextConfig: NextConfig = {
