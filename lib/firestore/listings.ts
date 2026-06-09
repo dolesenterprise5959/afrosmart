@@ -128,12 +128,16 @@ function tokenize(text: string): string[] {
   return [...new Set(words.filter((w) => w.length >= 2))].slice(0, 40);
 }
 
+// Bump to force a fresh cache namespace on deploy (e.g. after out-of-band data
+// changes that didn't go through revalidateTag, like CLI deletes).
+const CACHE_VERSION = "v2";
+
 // Cache wrapper: tag + TTL applied uniformly. Args become part of the cache key.
 function cached<A extends unknown[], R>(
   fn: (...args: A) => Promise<R>,
   keyParts: string[],
 ) {
-  return unstable_cache(fn, keyParts, {
+  return unstable_cache(fn, [...keyParts, CACHE_VERSION], {
     tags: [LISTINGS_TAG],
     revalidate: CACHE_TTL_SECONDS,
   });
