@@ -42,7 +42,12 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   images: {
-    // Optimised listing photos (resized/WebP) — important on Liberian bandwidth.
+    // The Next image optimizer (/_next/image) is unavailable on Firebase App
+    // Hosting (returns 404). next/image already falls back to raw URLs there, but
+    // we set this EXPLICITLY so a future adapter change can't re-enable the broken
+    // optimizer and 404 every image. NOTE: this does not reduce bandwidth — photos
+    // are served full-size; real savings need upload-time resize/compression.
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "firebasestorage.googleapis.com" },
     ],
