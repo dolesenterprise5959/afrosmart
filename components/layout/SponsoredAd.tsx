@@ -1,4 +1,6 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
+import ecobank from "../../public/ads/ecobank.png";
+import lonestar from "../../public/ads/lonestar.png";
 
 // Approved minimalist advertisement format:
 //
@@ -13,15 +15,15 @@ import Image from "next/image";
 export interface Sponsor {
   /** Advertiser name shown above the creative. */
   name: string;
-  /** Path to the creative under /public (e.g. "/ads/ecobank.webp"). */
-  image?: string;
+  /** Bundled creative (static import → served from /_next/static/media). */
+  image?: StaticImageData;
   /** Optional click-through to the advertiser. */
   href?: string;
 }
 
 const SPONSORS: Sponsor[] = [
-  { name: "Ecobank Liberia", image: "/ads/ecobank.png" },
-  { name: "LoneStar Storage", image: "/ads/lonestar.png" },
+  { name: "Ecobank Liberia", image: ecobank },
+  { name: "LoneStar Storage", image: lonestar },
 ];
 
 export function SponsoredAd({ sponsor }: { sponsor?: Sponsor }) {
