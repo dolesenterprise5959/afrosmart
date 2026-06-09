@@ -118,6 +118,16 @@ function docToListing(doc: FirestoreDoc): Listing {
 
 const byNewest = (a: Listing, b: Listing) => b.createdAt.localeCompare(a.createdAt);
 
+// How many recent listings the substring fallback scans (covers legacy listings
+// created before searchTokens existed, plus very recent posts).
+const SEARCH_SCAN_LIMIT = 200;
+
+/** Lowercased, deduped keyword tokens for Firestore array-contains search. */
+function tokenize(text: string): string[] {
+  const words = text.toLowerCase().match(/[a-z0-9]+/g) ?? [];
+  return [...new Set(words.filter((w) => w.length >= 2))].slice(0, 40);
+}
+
 // Cache wrapper: tag + TTL applied uniformly. Args become part of the cache key.
 function cached<A extends unknown[], R>(
   fn: (...args: A) => Promise<R>,
@@ -134,14 +144,35 @@ async function fetchRecentListings(): Promise<Listing[]> {
   if (!isAdminConfigured()) {
     return [...SAMPLE_LISTINGS].filter((l) => l.status === "active").sort(byNewest);
   }
-  const snap = await adminDb()
-    .collection(COLLECTION)
-    .orderBy("createdAt", "desc")
-    .limit(FETCH_LIMIT)
-    .get();
-  return snap.docs.map(docToListing).filter((l) => l.status === "active");
+  const col = adminDb().collection(COLLECTION);
+  try {
+    // Filter active server-side so inactive docs don't eat the page (needs the
+    // (status, createdAt) index).
+    const snap = await col.where("status", "==", "active").orderBy("createdAt", "desc").limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing);
+  } catch {
+    // Index still building — fall back to ordering only + in-memory active filter.
+    const snap = await col.orderBy("createdAt", "desc").limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status === "active");
+  }
 }
 export const getRecentListings = cached(fetchRecentListings, ["listings:recent"]);
+
+/** Larger active-listing window used as the substring fallback for search. */
+async function fetchRecentForSearch(): Promise<Listing[]> {
+  if (!isAdminConfigured()) {
+    return [...SAMPLE_LISTINGS].filter((l) => l.status === "active").sort(byNewest);
+  }
+  const col = adminDb().collection(COLLECTION);
+  try {
+    const snap = await col.where("status", "==", "active").orderBy("createdAt", "desc").limit(SEARCH_SCAN_LIMIT).get();
+    return snap.docs.map(docToListing);
+  } catch {
+    const snap = await col.orderBy("createdAt", "desc").limit(SEARCH_SCAN_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status === "active");
+  }
+}
+const getRecentForSearch = cached(fetchRecentForSearch, ["listings:search-scan"]);
 
 /**
  * Count active listings per group of category ids (for homepage category cards).
@@ -196,8 +227,14 @@ async function fetchSearchIndex(): Promise<SearchIndexItem[]> {
   if (!isAdminConfigured()) {
     return SAMPLE_LISTINGS.filter((l) => l.status === "active").map(toIndex);
   }
-  const snap = await adminDb().collection(COLLECTION).orderBy("createdAt", "desc").limit(300).get();
-  return snap.docs.map(docToListing).filter((l) => l.status === "active").map(toIndex);
+  const col = adminDb().collection(COLLECTION);
+  try {
+    const snap = await col.where("status", "==", "active").orderBy("createdAt", "desc").limit(300).get();
+    return snap.docs.map(docToListing).map(toIndex);
+  } catch {
+    const snap = await col.orderBy("createdAt", "desc").limit(300).get();
+    return snap.docs.map(docToListing).filter((l) => l.status === "active").map(toIndex);
+  }
 }
 export const getSearchIndex = cached(fetchSearchIndex, ["listings:search-index"]);
 
@@ -205,12 +242,14 @@ async function fetchFeaturedListings(): Promise<Listing[]> {
   if (!isAdminConfigured()) {
     return SAMPLE_LISTINGS.filter((l) => l.featured && l.status === "active");
   }
-  const snap = await adminDb()
-    .collection(COLLECTION)
-    .where("featured", "==", true)
-    .limit(FETCH_LIMIT)
-    .get();
-  return snap.docs.map(docToListing).filter((l) => l.status === "active").sort(byNewest);
+  const col = adminDb().collection(COLLECTION);
+  try {
+    const snap = await col.where("featured", "==", true).where("status", "==", "active").orderBy("createdAt", "desc").limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing);
+  } catch {
+    const snap = await col.where("featured", "==", true).limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status === "active").sort(byNewest);
+  }
 }
 export const getFeaturedListings = cached(fetchFeaturedListings, ["listings:featured"]);
 
@@ -220,12 +259,14 @@ async function fetchListingsByCategory(category: string): Promise<Listing[]> {
       (l) => l.category === category && l.status === "active",
     ).sort(byNewest);
   }
-  const snap = await adminDb()
-    .collection(COLLECTION)
-    .where("category", "==", category)
-    .limit(FETCH_LIMIT)
-    .get();
-  return snap.docs.map(docToListing).filter((l) => l.status === "active").sort(byNewest);
+  const col = adminDb().collection(COLLECTION);
+  try {
+    const snap = await col.where("category", "==", category).where("status", "==", "active").orderBy("createdAt", "desc").limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing);
+  } catch {
+    const snap = await col.where("category", "==", category).limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status === "active").sort(byNewest);
+  }
 }
 export const getListingsByCategory = cached(fetchListingsByCategory, ["listings:category"]);
 
@@ -233,12 +274,14 @@ async function fetchListingsBySeller(sellerId: string): Promise<Listing[]> {
   if (!isAdminConfigured()) {
     return SAMPLE_LISTINGS.filter((l) => l.sellerId === sellerId).sort(byNewest);
   }
-  const snap = await adminDb()
-    .collection(COLLECTION)
-    .where("sellerId", "==", sellerId)
-    .limit(FETCH_LIMIT)
-    .get();
-  return snap.docs.map(docToListing).filter((l) => l.status !== "removed").sort(byNewest);
+  const col = adminDb().collection(COLLECTION);
+  try {
+    const snap = await col.where("sellerId", "==", sellerId).orderBy("createdAt", "desc").limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status !== "removed");
+  } catch {
+    const snap = await col.where("sellerId", "==", sellerId).limit(FETCH_LIMIT).get();
+    return snap.docs.map(docToListing).filter((l) => l.status !== "removed").sort(byNewest);
+  }
 }
 export const getListingsBySeller = cached(fetchListingsBySeller, ["listings:seller"]);
 
@@ -266,12 +309,53 @@ export async function getListing(id: string): Promise<Listing | null> {
   return doc.exists ? docToListing(doc) : null;
 }
 
-/** Simple substring search over recent listings (in-memory for the MVP). */
+/**
+ * Keyword search across ALL listings (not just the recent 60).
+ *
+ * Primary path: a Firestore `array-contains` query on the most selective query
+ * token against the stored `searchTokens` — this scales to any catalog size.
+ * Results are then refined in memory to require every query token. A recent
+ * substring scan is unioned in so listings created before `searchTokens` existed
+ * (and partial-word matches) stay findable. Empty query → recent listings.
+ */
 export async function searchListings(query: string): Promise<Listing[]> {
-  const all = await getRecentListings();
   const q = query.trim().toLowerCase();
-  if (!q) return all;
-  return all.filter((l) => `${l.title} ${l.description}`.toLowerCase().includes(q));
+  if (!isAdminConfigured()) {
+    const all = [...SAMPLE_LISTINGS].filter((l) => l.status === "active").sort(byNewest);
+    return q ? all.filter((l) => `${l.title} ${l.description}`.toLowerCase().includes(q)) : all;
+  }
+  if (!q) return getRecentListings();
+
+  const tokens = tokenize(q);
+  const matches = new Map<string, Listing>();
+
+  // 1) Scalable token search across the whole collection (most selective token).
+  if (tokens.length) {
+    const anchor = [...tokens].sort((a, b) => b.length - a.length)[0];
+    try {
+      const snap = await adminDb()
+        .collection(COLLECTION)
+        .where("status", "==", "active")
+        .where("searchTokens", "array-contains", anchor)
+        .orderBy("createdAt", "desc")
+        .limit(100)
+        .get();
+      for (const d of snap.docs) {
+        const l = docToListing(d);
+        const hay = `${l.title} ${l.description} ${l.category}`.toLowerCase();
+        if (tokens.every((t) => hay.includes(t))) matches.set(l.id, l);
+      }
+    } catch {
+      /* index still building — the substring scan below still returns results */
+    }
+  }
+
+  // 2) Recent-window substring fallback (legacy/un-tokenized listings + substrings).
+  for (const l of await getRecentForSearch()) {
+    if (`${l.title} ${l.description}`.toLowerCase().includes(q)) matches.set(l.id, l);
+  }
+
+  return [...matches.values()].sort(byNewest);
 }
 
 /** Create a listing owned by `sellerId`. Returns the new document id. */
@@ -294,6 +378,10 @@ export async function createListing(
       photos: input.photos,
       status: "active",
       featured: input.featured ?? false,
+      // Keyword tokens powering scalable array-contains search (see searchListings).
+      searchTokens: tokenize(
+        `${input.title} ${input.description} ${input.category} ${input.vehicle?.make ?? ""} ${input.vehicle?.model ?? ""}`,
+      ),
       createdAt: Timestamp.now(),
       // Firestore rejects `undefined`, so only include the maps when present.
       ...(input.vehicle ? { vehicle: input.vehicle } : {}),
