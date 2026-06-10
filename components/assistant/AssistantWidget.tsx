@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/mock";
 import { GREETING_QUICK_REPLIES } from "@/lib/assistant/knowledge";
 import type { Currency } from "@/lib/types";
 
+import { Sparkles, Send } from "lucide-react";
 interface Listing { id: string; title: string; price: number; currency: string; photo: string; category: string }
 interface Msg { role: "user" | "bot"; text: string; quickReplies?: string[]; listings?: Listing[] }
 
@@ -85,7 +86,7 @@ export function AssistantWidget() {
           aria-label="Open AfroSmart Assistant"
           className="fixed bottom-20 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-brand-foreground shadow-lg hover:bg-brand-dark"
         >
-          <span className="text-base">✨</span> Ask AI
+          <Sparkles className="h-4 w-4" /> Ask AI
         </button>
       )}
 
@@ -97,7 +98,7 @@ export function AssistantWidget() {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand/10 text-base">✨</span>
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand/10"><Sparkles className="h-4 w-4 text-brand" /></span>
                 <div>
                   <p className="text-sm font-semibold leading-tight">AfroSmart Assistant</p>
                   <p className="text-[11px] text-muted">Buy • Sell • Get help</p>
@@ -158,7 +159,7 @@ export function AssistantWidget() {
                 className="h-11 min-w-0 flex-1 rounded-full border border-border bg-card px-4 text-sm outline-none focus:border-brand"
               />
               <button type="submit" disabled={busy || !input.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand text-brand-foreground disabled:opacity-50" aria-label="Send">
-                ➤
+                <Send className="h-4 w-4" />
               </button>
             </form>
           </div>

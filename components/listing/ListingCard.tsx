@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { isFreeStuffCategory } from "@/lib/categories";
 import type { Listing } from "@/lib/types";
 
+import { MapPin, Building2, Sparkles } from "lucide-react";
 export function ListingCard({ listing }: { listing: Listing }) {
   // Free giveaways get a green FREE badge; either the category or a 0 price qualifies.
   const isFree = isFreeStuffCategory(listing.category) || !listing.price || listing.price <= 0;
@@ -27,7 +28,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
         )}
         {listing.featured && (
           <span className={isFree ? "absolute right-2 top-2" : "absolute left-2 top-2"}>
-            <Badge tone="accent">⭐ Featured</Badge>
+            <Badge tone="accent"><Sparkles className="mr-1 inline h-3 w-3" />Featured</Badge>
           </span>
         )}
       </div>
@@ -37,9 +38,9 @@ export function ListingCard({ listing }: { listing: Listing }) {
         </h3>
         <ConvertedPrice amount={listing.price} currency={listing.currency} className="text-xl" />
         <p className="mt-auto flex items-center gap-1.5 pt-1.5 text-[13px] text-muted">
-          <span className="truncate">📍 {listing.city}, {listing.county}</span>
+          <span className="flex items-center gap-1 truncate"><MapPin className="h-3.5 w-3.5 shrink-0" /> {listing.city}, {listing.county}</span>
           {listing.sellerType === "business" && (
-            <span className="shrink-0 rounded bg-brand/10 px-1 font-medium text-brand-dark">🏢</span>
+            <Building2 className="h-3.5 w-3.5 shrink-0 text-brand-dark" />
           )}
         </p>
       </div>

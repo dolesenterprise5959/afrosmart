@@ -18,6 +18,7 @@ import { toLocalPhone } from "@/lib/utils/phone";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 
+import { Phone, Lock, Unlock } from "lucide-react";
 interface ThreadDoc {
   buyerId: string;
   sellerId: string;
@@ -140,10 +141,10 @@ export default function ThreadPage() {
             href={`tel:${phone}`}
             className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand px-4 text-sm font-medium text-brand-foreground"
           >
-            📞 Call
+            <Phone className="mr-1 inline h-4 w-4 align-text-bottom" />Call
           </a>
         ) : (
-          <Badge>🔒 Call locked</Badge>
+          <Badge><Lock className="mr-1 inline h-3 w-3" />Call locked</Badge>
         )}
       </div>
 
@@ -151,7 +152,7 @@ export default function ThreadPage() {
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto py-4">
         {thread?.callUnlocked && (
           <p className="mx-auto rounded-full bg-brand/10 px-3 py-1 text-center text-xs text-brand-dark">
-            🔓 Call unlocked{phone ? ` — ${toLocalPhone(phone)}` : ""}. You can now call.
+            <Unlock className="mr-1 inline h-4 w-4 align-text-bottom" />Call unlocked{phone ? ` — ${toLocalPhone(phone)}` : ""}. You can now call.
           </p>
         )}
         {messages.length === 0 && (

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { formatPrice } from "@/lib/mock";
 import type { CategoryId } from "@/lib/types";
 
+import { MapPin } from "lucide-react";
 interface SavedItem {
   id: string;
   listingId: string;
@@ -63,7 +64,7 @@ export default function SavedPage() {
       ) : !user ? (
         <div className="mt-6">
           <EmptyState
-            icon="🔒"
+            icon="locked"
             title="Sign in to see your saved listings"
             action={<Button href="/login?next=/saved">Sign in</Button>}
           />
@@ -71,7 +72,7 @@ export default function SavedPage() {
       ) : items.length === 0 ? (
         <div className="mt-6">
           <EmptyState
-            icon="♡"
+            icon="heart"
             title="Nothing saved yet"
             description="Tap Save on any listing to keep it here for later."
             action={<Button href="/marketplace">Browse listings</Button>}
@@ -100,7 +101,7 @@ export default function SavedPage() {
                   {item.title}
                 </Link>
                 <span className="text-base font-bold text-brand-dark">{formatPrice(item.price)}</span>
-                <p className="text-xs text-muted">📍 {item.city}, {item.county}</p>
+                <p className="text-xs text-muted"><MapPin className="mr-0.5 inline h-3.5 w-3.5 align-text-bottom" />{item.city}, {item.county}</p>
                 <button
                   onClick={() => unsave(item.listingId)}
                   className="mt-1 self-start text-xs text-muted underline hover:text-red-600"

@@ -33,7 +33,7 @@ export default async function VerifyPage() {
         <div className="mt-6 rounded-2xl border border-brand/30 bg-brand/5 p-5">
           <div className="flex items-center gap-2">
             <VerifiedBadge kind={v.verifiedType === "business" ? "business" : "seller"} />
-            <span className="text-sm font-medium">You&apos;re verified 🎉</span>
+            <span className="text-sm font-medium">You&apos;re verified</span>
           </div>
           <p className="mt-2 text-sm text-muted">
             Your badge now appears on your <Link href={`/u/${session.uid}`} className="text-brand">profile</Link>{" "}

@@ -25,9 +25,9 @@ export default async function WelcomePage({ searchParams }: PageProps<"/welcome"
         <div className="flex justify-center">
           <Logo href={null} full size="lg" />
         </div>
-        <h1 className="mt-4 text-xl font-bold">Welcome to AfroSmart 🎉</h1>
+        <h1 className="mt-4 text-xl font-bold">Welcome to AfroSmart</h1>
         <p className="mt-1 text-sm text-muted">
-          Your phone is verified ✅ — what should we call you? This is the name buyers and sellers will see.
+          Your phone is verified — what should we call you? This is the name buyers and sellers will see.
         </p>
       </div>
       <NameForm next={next} defaultReferralCode={ref} />
