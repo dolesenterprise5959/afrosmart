@@ -105,7 +105,7 @@ export default async function PropertiesPage({ searchParams }: PageProps<"/prope
           <ListingGrid listings={results} />
         ) : (
           <EmptyState
-            icon="🏠"
+            icon="home"
             title="No properties found"
             description={hasFilters ? "Try widening your filters." : "Be the first to list a property."}
           />

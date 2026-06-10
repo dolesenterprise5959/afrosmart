@@ -109,7 +109,7 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
           <ListingGrid listings={results} />
         ) : (
           <EmptyState
-            icon="🚗"
+            icon="car"
             title="No vehicles found"
             description={hasFilters ? "Try widening your filters." : "Be the first to list a vehicle."}
           />

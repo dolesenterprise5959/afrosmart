@@ -17,6 +17,7 @@ import { hasUnlockedThreadBetween } from "@/lib/firestore/threads";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { incrementProfileView } from "@/lib/firestore/analytics";
 
+import { MapPin } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
@@ -63,7 +64,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
             {user.ratingAvg.toFixed(1)} · {user.ratingCount} ratings
           </p>
           <p className="text-sm text-muted">
-            {sellerTypeLabel(sellerType(user))} · 📍 {user.city}, {user.county}
+            {sellerTypeLabel(sellerType(user))} · <MapPin className="inline h-4 w-4 align-text-bottom" /> {user.city}, {user.county}
             {user.joinedAt && <> · Member since {new Date(user.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}</>}
           </p>
         </div>
@@ -81,7 +82,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
       {listings.length > 0 ? (
         <ListingGrid listings={listings} />
       ) : (
-        <EmptyState icon="📦" title="No active listings" />
+        <EmptyState icon="box" title="No active listings" />
       )}
 
       {/* Reviews */}
@@ -99,7 +100,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[id]">) {
               </div>
             ))
           ) : (
-            <EmptyState icon="⭐" title="No ratings yet" description="Be the first to rate." />
+            <EmptyState icon="star" title="No ratings yet" description="Be the first to rate." />
           )}
         </div>
         <div className="flex flex-col gap-3">

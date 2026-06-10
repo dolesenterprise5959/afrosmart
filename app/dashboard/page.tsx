@@ -12,6 +12,7 @@ import { getPublicProfile } from "@/lib/firestore/users";
 import { getBusinessAnalytics } from "@/lib/firestore/analytics";
 import { planInfo } from "@/lib/premium";
 
+import { MapPin } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
@@ -55,7 +56,7 @@ export default async function DashboardPage() {
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-xl font-bold leading-tight">{me.displayName}</h1>
               <p className="mt-0.5 truncate text-sm text-white/70">
-                📍 {me.city || "Liberia"}{me.county ? `, ${me.county}` : ""}
+                <MapPin className="mr-1 inline h-4 w-4 align-text-bottom" />{me.city || "Liberia"}{me.county ? `, ${me.county}` : ""}
                 {memberSince && <> · Member since {memberSince}</>}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">

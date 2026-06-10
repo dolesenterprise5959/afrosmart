@@ -90,7 +90,7 @@ export default async function Home() {
       {/* Latest */}
       <section className="mt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">🆕 Latest listings</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Latest listings</h2>
           <Link href="/marketplace" className="shrink-0 text-sm font-medium text-brand">See all</Link>
         </div>
         <ListingGrid listings={recentTop} />

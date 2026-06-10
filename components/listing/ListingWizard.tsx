@@ -13,6 +13,7 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
+import { MessageCircle, Share2, Link2, FileText, ImageIcon, Camera, MapPin } from "lucide-react";
 type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general" | "community";
 
 const QUICK: { id: string; label: string; kind: Kind }[] = [
@@ -216,13 +217,13 @@ export function ListingWizard() {
         {/* Share */}
         <div className="mt-5 grid grid-cols-3 gap-2">
           <a href={`https://wa.me/?text=${encodeURIComponent(`${data.title} — ${formatPrice(Number(data.price) || 0, data.currency)}\nOn AfroSmart: ${shareUrl}`)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-xs font-medium hover:bg-surface">
-            <span className="text-xl">💬</span> WhatsApp
+            <MessageCircle className="h-5 w-5" /> WhatsApp
           </a>
           <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-xs font-medium hover:bg-surface">
-            <span className="text-xl">📘</span> Facebook
+            <Share2 className="h-5 w-5" /> Facebook
           </a>
           <button type="button" onClick={copyLink} className="flex flex-col items-center gap-1 rounded-xl border border-border bg-card py-3 text-xs font-medium hover:bg-surface">
-            <span className="text-xl">🔗</span> {copied ? "Copied!" : "Copy link"}
+            <Link2 className="h-5 w-5" /> {copied ? "Copied!" : "Copy link"}
           </button>
         </div>
 
@@ -256,7 +257,7 @@ export function ListingWizard() {
 
       {restored && (
         <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-brand/5 px-3 py-2 text-xs text-muted">
-          <span>📝 Draft recovered — your earlier details were restored.</span>
+          <span><FileText className="mr-1 inline h-4 w-4 align-text-bottom" />Draft recovered — your earlier details were restored.</span>
           <button type="button" onClick={startOver} className="shrink-0 font-medium text-brand">Start fresh</button>
         </div>
       )}
@@ -293,7 +294,7 @@ export function ListingWizard() {
             onClick={() => galleryRef.current?.click()}
             className="mt-4 flex h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-surface text-muted hover:border-brand"
           >
-            <span className="text-4xl">🖼️</span>
+            <ImageIcon className="h-10 w-10 text-muted" />
             <span className="text-sm font-medium">Tap to choose photos</span>
           </button>
           <button
@@ -301,7 +302,7 @@ export function ListingWizard() {
             onClick={() => cameraRef.current?.click()}
             className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-base font-semibold text-brand-foreground hover:bg-brand-dark"
           >
-            📷 Take a photo
+            <Camera className="mr-1 inline h-4 w-4 align-text-bottom" />Take a photo
           </button>
           <input ref={galleryRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
@@ -350,7 +351,7 @@ export function ListingWizard() {
             </div>
           )}
           <button type="button" onClick={detectLocation} disabled={detecting} className="inline-flex h-10 w-fit items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium hover:border-brand disabled:opacity-50">
-            📍 {detecting ? "Detecting…" : "Use my location"}
+            <MapPin className="mr-1 inline h-4 w-4 align-text-bottom" />{detecting ? "Detecting…" : "Use my location"}
           </button>
           {/* County → City/Town: pick from a list (less typing), or Other for manual */}
           <div className="flex gap-2">
@@ -492,7 +493,7 @@ export function ListingWizard() {
             <div className="p-3">
               <p className="text-base font-bold">{data.title || "Untitled"}</p>
               <p className="mt-0.5 text-lg font-bold text-foreground">{formatPrice(Number(data.price) || 0, data.currency)}</p>
-              <p className="mt-0.5 text-sm text-muted">📍 {data.city}, {data.county} · {catLabel} · {photos.length} photo{photos.length === 1 ? "" : "s"}</p>
+              <p className="mt-0.5 text-sm text-muted"><MapPin className="mr-1 inline h-4 w-4 align-text-bottom" />{data.city}, {data.county} · {catLabel} · {photos.length} photo{photos.length === 1 ? "" : "s"}</p>
               <p className="mt-2 line-clamp-3 whitespace-pre-line text-sm text-muted">{data.description}</p>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import type { ReportReason, ReportTargetType } from "@/lib/types";
 
+import { Flag } from "lucide-react";
 const REASONS: { id: ReportReason; label: string }[] = [
   { id: "scam", label: "Scam" },
   { id: "spam", label: "Spam" },
@@ -48,7 +49,7 @@ export function ReportDialog({
         }}
         className="text-center text-xs text-muted underline"
       >
-        🚩 {label}
+        <Flag className="mr-1 inline h-3.5 w-3.5" />{label}
       </button>
     );
   }

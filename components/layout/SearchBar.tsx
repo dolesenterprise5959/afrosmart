@@ -7,6 +7,7 @@ import { ListingImage } from "@/components/listing/ListingImage";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import type { Currency } from "@/lib/types";
 
+import { Clock, Flame } from "lucide-react";
 interface SearchIndexItem {
   id: string;
   title: string;
@@ -327,7 +328,7 @@ export function SearchBar({
                   onMouseDown={(e) => { e.preventDefault(); runSearch(t); }}
                   className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm hover:bg-surface"
                 >
-                  <span aria-hidden className="text-muted">🕘</span>
+                  <Clock className="h-4 w-4 text-muted" aria-hidden />
                   <span className="flex-1 truncate">{t}</span>
                 </button>
               ))}
@@ -343,7 +344,7 @@ export function SearchBar({
                   onMouseDown={(e) => { e.preventDefault(); runSearch(t); }}
                   className="rounded-full bg-surface px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand/10"
                 >
-                  🔥 {t}
+                  <Flame className="inline h-3.5 w-3.5" /> {t}
                 </button>
               ))}
             </div>

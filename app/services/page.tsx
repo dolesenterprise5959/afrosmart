@@ -17,6 +17,7 @@ import { isBusinessSeller } from "@/lib/sellers";
 import { getRecentListings, getFeaturedListings } from "@/lib/firestore/listings";
 import { getBusinesses } from "@/lib/firestore/users";
 
+import { Trophy } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -105,7 +106,7 @@ export default async function ServicesPage({ searchParams }: PageProps<"/service
       {/* Top-rated businesses */}
       {!hasFilters && topRated.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">🏆 Top-rated businesses</h2>
+          <h2 className="mb-3 text-lg font-semibold"><Trophy className="mr-1.5 inline h-5 w-5 align-text-bottom" />Top-rated businesses</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {topRated.map((b) => (
               <Link key={b.id} href={`/u/${b.id}`} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 hover:border-brand">
@@ -135,7 +136,7 @@ export default async function ServicesPage({ searchParams }: PageProps<"/service
           <ListingGrid listings={services} />
         ) : (
           <EmptyState
-            icon="🛠️"
+            icon="tools"
             title="No services found"
             description={hasFilters ? "Try a different search or county." : "Be the first to list your service."}
             action={<Button href="/listing/new">+ List your service</Button>}

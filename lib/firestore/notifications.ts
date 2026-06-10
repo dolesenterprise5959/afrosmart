@@ -42,7 +42,7 @@ export async function notifyReferralValid(
   const paid = info.rewardAdded > 0;
   await addNotification(referrerUid, {
     type: "referral",
-    title: paid ? `🎉 You earned US$ ${info.rewardAdded}!` : "🎉 New valid referral!",
+    title: paid ? `You earned US$ ${info.rewardAdded}!` : "New valid referral!",
     body: paid
       ? `That's ${info.newCount} valid referrals — US$ ${info.rewardAdded} was added to your wallet.`
       : `A friend you referred just posted their first listing. You now have ${info.newCount} valid referral${info.newCount === 1 ? "" : "s"}.`,

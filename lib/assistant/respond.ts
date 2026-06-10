@@ -59,7 +59,7 @@ export async function respond(rawMessage: string): Promise<AssistantReply> {
   // Greeting
   if (GREETINGS.includes(q)) {
     return {
-      reply: "Hi! 👋 I'm the AfroSmart Assistant. Ask me how to post, log in, contact a seller, or tell me what you want to buy.",
+      reply: "Hi! I'm the AfroSmart Assistant. Ask me how to post, log in, contact a seller, or tell me what you want to buy.",
       quickReplies: GREETING_QUICK_REPLIES,
       matched: "greeting",
     };

@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 
+import { Phone } from "lucide-react";
 function relativeTime(ts?: Timestamp): string {
   if (!ts) return "";
   const diff = Date.now() - ts.toMillis();
@@ -47,7 +48,7 @@ export default function MessagesPage() {
       ) : !user ? (
         <div className="mt-6">
           <EmptyState
-            icon="🔒"
+            icon="locked"
             title="Sign in to see your messages"
             action={<Button href="/login?next=/messages">Sign in</Button>}
           />
@@ -55,7 +56,7 @@ export default function MessagesPage() {
       ) : threads.length === 0 ? (
         <div className="mt-6">
           <EmptyState
-            icon="💬"
+            icon="chat"
             title="No messages yet"
             description="When you message a seller, your chats show up here."
             action={<Button href="/marketplace">Browse listings</Button>}
@@ -86,7 +87,7 @@ export default function MessagesPage() {
                   {unread ? (
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-brand" title="Unread" />
                   ) : t.callUnlocked ? (
-                    <span title="Call unlocked">📞</span>
+                    <span title="Call unlocked"><Phone className="inline h-4 w-4" /></span>
                   ) : null}
                 </Link>
               </li>

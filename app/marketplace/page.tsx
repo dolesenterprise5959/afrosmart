@@ -68,7 +68,7 @@ export default async function MarketplacePage({
           <ListingGrid listings={listings} />
         ) : (
           <EmptyState
-            icon="🔍"
+            icon="search"
             title="No listings found"
             description="Try a different search, county or currency."
             action={

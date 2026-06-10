@@ -13,6 +13,7 @@ import { logLoginEvent } from "@/app/login/actions";
 import { detectInApp, type InAppInfo } from "@/lib/utils/in-app-browser";
 import { MessageCircle, Mail } from "lucide-react";
 
+import { AlertTriangle } from "lucide-react";
 type FallbackChannel = "whatsapp" | "sms";
 
 // In-app browsers (Messenger/Facebook/Instagram WebViews) block the cross-origin
@@ -29,7 +30,7 @@ function OpenInBrowserCard({ info, heading }: { info: InAppInfo; heading?: strin
   }
   return (
     <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-amber-900">
-      <p className="text-sm font-semibold">⚠️ {heading ?? "Sign-in needs Chrome or Safari"}</p>
+      <p className="text-sm font-semibold"><AlertTriangle className="mr-1 inline h-4 w-4" />{heading ?? "Sign-in needs Chrome or Safari"}</p>
       <p className="mt-1 text-xs">
         {info.name ? `${info.name}'s built-in browser` : "This in-app browser"} blocks phone verification.
         Open AfroSmart in your normal browser to sign in.
@@ -286,7 +287,7 @@ function LoginForm() {
 
       {!configured && (
         <div className="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
-          ⚠️ Firebase isn’t configured yet. Add your keys to <code>.env.local</code>{" "}
+          <AlertTriangle className="mr-1 inline h-4 w-4" />Firebase isn’t configured yet. Add your keys to <code>.env.local</code>{" "}
           (see <code>.env.local.example</code>) to enable phone sign-in.
         </div>
       )}

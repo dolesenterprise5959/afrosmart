@@ -7,7 +7,7 @@ export function ListingGrid({
   listings,
   emptyTitle = "No listings yet",
   emptyDescription = "Be the first to post.",
-  emptyIcon = "🛍️",
+  emptyIcon = "bag",
   showPostAction = true,
 }: {
   listings: Listing[];

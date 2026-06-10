@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 
+import { Share2, Check } from "lucide-react";
 // Share a listing via the native share sheet (mobile) with a copy-link fallback.
 export function ShareButton({
   title,
@@ -36,7 +37,7 @@ export function ShareButton({
 
   return (
     <Button onClick={share} variant="outline" size="lg" className={className}>
-      {copied ? "✓ Link copied" : "↗ Share"}
+      {copied ? <span className="inline-flex items-center gap-1.5"><Check className="h-4 w-4" /> Link copied</span> : <span className="inline-flex items-center gap-1.5"><Share2 className="h-4 w-4" /> Share</span>}
     </Button>
   );
 }

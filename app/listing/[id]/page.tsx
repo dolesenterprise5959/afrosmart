@@ -24,6 +24,7 @@ import { getPublicProfile } from "@/lib/firestore/users";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { toLocalPhone } from "@/lib/utils/phone";
 
+import { MapPin, Calendar, Phone } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 // Open Graph tags so WhatsApp/Facebook unfurl the link with the cover photo +
@@ -85,7 +86,7 @@ export default async function ListingDetailPage({
               <ConvertedPrice amount={listing.price} currency={listing.currency} className="text-2xl" />
             </div>
             <p className="mt-1 text-sm text-muted">
-              📍 {listing.city}, {listing.county} County
+              <MapPin className="mr-1 inline h-4 w-4 align-text-bottom" />{listing.city}, {listing.county} County
             </p>
           </div>
 
@@ -147,7 +148,7 @@ export default async function ListingDetailPage({
                 {seller.phoneVerified && <VerifiedBadge kind="phone" label="Phone Verified" />}
                 {seller.joinedAt && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-0.5 text-xs text-muted">
-                    📅 Member since {new Date(seller.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
+                    <Calendar className="mr-1 inline h-4 w-4 align-text-bottom" />Member since {new Date(seller.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}
                   </span>
                 )}
               </div>
@@ -170,7 +171,7 @@ export default async function ListingDetailPage({
                   href={`tel:${listing.publicPhone}`}
                   className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-success text-base font-semibold text-success-foreground hover:brightness-95"
                 >
-                  📞 Call {toLocalPhone(listing.publicPhone)}
+                  <Phone className="mr-1 inline h-4 w-4 align-text-bottom" />Call {toLocalPhone(listing.publicPhone)}
                 </a>
               )}
               <MessageSellerButton listingId={listing.id} />
