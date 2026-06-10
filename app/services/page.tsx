@@ -6,6 +6,7 @@ import { CountyFilter } from "@/components/layout/CountyFilter";
 import { CurrencyFilter } from "@/components/layout/CurrencyFilter";
 import { ListingGrid } from "@/components/listing/ListingGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
@@ -57,7 +58,7 @@ export default async function ServicesPage({ searchParams }: PageProps<"/service
     <div className="mx-auto w-full max-w-6xl px-4 py-5">
       {/* Hero */}
       <section className="rounded-3xl bg-gradient-to-br from-neutral-900 to-black px-5 py-6 text-white sm:px-8 sm:py-8">
-        <h1 className="text-2xl font-bold sm:text-3xl">🛠️ Services & Businesses</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Services & Businesses</h1>
         <p className="mt-1 max-w-xl text-sm text-white/75">
           Find trusted barbers, salons, mechanics, caterers, cleaners and more — near you in Liberia.
         </p>
@@ -85,7 +86,7 @@ export default async function ServicesPage({ searchParams }: PageProps<"/service
                 href={categoryHref(c.id)}
                 className="group flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card px-2 py-3 text-center transition-colors hover:border-brand hover:bg-surface"
               >
-                <span className="text-xl transition-transform group-hover:scale-110" aria-hidden>{c.icon}</span>
+                <CategoryIcon category={c.id} className="h-6 w-6 text-accent transition-transform group-hover:scale-110" />
                 <span className="text-[11px] font-medium leading-tight">{c.label}</span>
               </Link>
             ))}

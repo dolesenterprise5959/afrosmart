@@ -11,6 +11,7 @@ import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
 import { describeAuthError, describeVerifyError } from "@/lib/auth/otp-errors";
 import { logLoginEvent } from "@/app/login/actions";
 import { detectInApp, type InAppInfo } from "@/lib/utils/in-app-browser";
+import { MessageCircle, Mail } from "lucide-react";
 
 type FallbackChannel = "whatsapp" | "sms";
 
@@ -362,11 +363,11 @@ function LoginForm() {
               <div className="mt-2 flex gap-2">
                 <button type="button" onClick={() => void sendFallback("whatsapp")} disabled={pending}
                   className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#25D366] text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50">
-                  💬 WhatsApp
+                  <MessageCircle className="h-4 w-4" /> WhatsApp
                 </button>
                 <button type="button" onClick={() => void sendFallback("sms")} disabled={pending}
                   className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-full border border-border text-sm font-semibold hover:bg-surface disabled:opacity-50">
-                  📩 SMS
+                  <Mail className="h-4 w-4" /> SMS
                 </button>
               </div>
             </div>

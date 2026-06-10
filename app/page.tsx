@@ -15,18 +15,18 @@ export const dynamic = "force-dynamic";
 // else lives on the dedicated /categories page ("View All Categories").
 // `count` groups the category ids whose active listings are tallied for the badge.
 const TOP_CATEGORIES = [
-  { id: "free-stuff", label: "Free Stuff", icon: "🎁", href: "/marketplace/free-stuff", count: ["free-stuff"] },
-  { id: "wanted", label: "Wanted", icon: "🔎", href: "/marketplace/wanted", count: ["wanted"] },
-  { id: "events", label: "Events", icon: "🎟️", href: "/marketplace/events", count: ["events"] },
-  { id: "lost-found", label: "Lost & Found", icon: "🧭", href: "/marketplace/lost-found", count: ["lost-found"] },
-  { id: "cars", label: "Cars", icon: "🚗", href: "/vehicles", count: ["cars"] },
-  { id: "property", label: "Real Estate", icon: "🏠", href: "/properties", count: ["property"] },
-  { id: "car-rental", label: "Rentals", icon: "🔑", href: "/marketplace/car-rental", count: ["car-rental", "equipment-rental", "house-rental", "bicycle-rental", "motorbike-rental", "truck-rental"] },
-  { id: "land", label: "Land", icon: "🌍", href: "/properties", count: ["land"] },
-  { id: "restaurants", label: "Shops", icon: "🛍️", href: "/marketplace/restaurants", count: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
-  { id: "sports-fields", label: "Sports", icon: "⚽", href: "/marketplace/sports-fields", count: ["sports-fields", "football", "tournaments"] },
-  { id: "clothing", label: "Fashion", icon: "👗", href: "/marketplace/clothing", count: ["clothing", "shoes"] },
-  { id: "services", label: "Services", icon: "🛠️", href: "/services", count: ["barber", "hair-braiding", "beauty-salon", "phone-repair", "carpentry", "plumbing", "cleaning", "tailor"] },
+  { id: "free-stuff", label: "Free Stuff", href: "/marketplace/free-stuff", count: ["free-stuff"] },
+  { id: "wanted", label: "Wanted", href: "/marketplace/wanted", count: ["wanted"] },
+  { id: "events", label: "Events", href: "/marketplace/events", count: ["events"] },
+  { id: "lost-found", label: "Lost & Found", href: "/marketplace/lost-found", count: ["lost-found"] },
+  { id: "cars", label: "Cars", href: "/vehicles", count: ["cars"] },
+  { id: "property", label: "Real Estate", href: "/properties", count: ["property"] },
+  { id: "car-rental", label: "Rentals", href: "/marketplace/car-rental", count: ["car-rental", "equipment-rental", "house-rental", "bicycle-rental", "motorbike-rental", "truck-rental"] },
+  { id: "land", label: "Land", href: "/properties", count: ["land"] },
+  { id: "restaurants", label: "Shops", href: "/marketplace/restaurants", count: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
+  { id: "sports-fields", label: "Sports", href: "/marketplace/sports-fields", count: ["sports-fields", "football", "tournaments"] },
+  { id: "clothing", label: "Fashion", href: "/marketplace/clothing", count: ["clothing", "shoes"] },
+  { id: "services", label: "Services", href: "/services", count: ["barber", "hair-braiding", "beauty-salon", "phone-repair", "carpentry", "plumbing", "cleaning", "tailor"] },
 ];
 
 export default async function Home() {
@@ -67,7 +67,7 @@ export default async function Home() {
               href={c.href}
               className="group block w-[55vw] shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-brand hover:bg-surface sm:w-60"
             >
-              <CategoryArt category={c.id} icon={c.icon} label={c.label} count={counts[c.id]} />
+              <CategoryArt category={c.id} label={c.label} count={counts[c.id]} />
             </Link>
           ))}
         </div>

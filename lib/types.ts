@@ -10,8 +10,6 @@ export type CategoryId = string;
 export interface Category {
   id: CategoryId;
   label: string;
-  /** Emoji used as a lightweight, offline-friendly icon. */
-  icon: string;
 }
 
 export interface County {

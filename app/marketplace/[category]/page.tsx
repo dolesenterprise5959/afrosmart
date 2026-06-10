@@ -15,9 +15,9 @@ export const dynamic = "force-dynamic";
 
 // Group aliases — virtual category pages that aggregate several real categories
 // (used by the hero banner links so /marketplace/land and /marketplace/shops work).
-const CATEGORY_ALIASES: Record<string, { id: string; label: string; icon: string; ids: string[] }> = {
-  land: { id: "land", label: "Land for Sale", icon: "🌍", ids: ["property"] },
-  shops: { id: "shops", label: "Shops & Retail", icon: "🛍️", ids: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
+const CATEGORY_ALIASES: Record<string, { id: string; label: string; ids: string[] }> = {
+  land: { id: "land", label: "Land for Sale", ids: ["property"] },
+  shops: { id: "shops", label: "Shops & Retail", ids: ["restaurants", "cook-shops", "kobo-shops", "market-stalls", "general"] },
 };
 
 // Define the known category routes; listings are fetched per request.
@@ -99,7 +99,6 @@ export default async function CategoryPage({
           <ListingGrid listings={listings} />
         ) : (
           <EmptyState
-            icon={meta.icon}
             title={countyFilter ? `No ${meta.label.toLowerCase()} listings in ${countyFilter}` : "No listings yet"}
             description={countyFilter ? "Try another county, or be the first to post." : "Be the first to post."}
             action={<Button href="/listing/new">+ Post a listing</Button>}
