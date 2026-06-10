@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Local review artifacts (not committed)
 .screenshots/
+
+# Playwright MCP run artifacts
+.playwright-mcp/
