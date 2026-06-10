@@ -10,6 +10,7 @@ import { isFeaturedEligible } from "@/lib/premium";
 import { sellerType as deriveSellerType } from "@/lib/sellers";
 import { isServiceCategory } from "@/lib/services";
 import { toE164 } from "@/lib/utils/phone";
+import { isAllowedImageUrl } from "@/lib/utils/image-url";
 import type { ServiceInfo } from "@/lib/types";
 import { validateListingFields, validatePropertyFields, validateVehicleFields } from "@/lib/validation";
 import { FUEL_TYPES, TRANSMISSIONS, VEHICLE_CONDITIONS } from "@/lib/vehicles";
@@ -89,14 +90,20 @@ export async function createListingAction(
     return { error: rateLimitMessage("listing", limit.retryAfterSec) };
   }
 
-  const title = input.title?.trim() ?? "";
-  const description = input.description?.trim() ?? "";
+  // Cap lengths before validation/storage — the server action is directly
+  // callable, so unbounded title/description would bloat the listing doc.
+  const title = (input.title?.trim() ?? "").slice(0, 120);
+  const description = (input.description?.trim() ?? "").slice(0, 5000);
   const price = Number(input.price);
   const currency = input.currency === "USD" ? "USD" : "LRD";
   const category = input.category as CategoryId;
   const county = input.county?.trim() ?? "";
   const city = input.city?.trim() ?? "";
-  const photos = Array.isArray(input.photos) ? input.photos.slice(0, 6) : [];
+  // Keep only real Firebase Storage URLs from our uploader; drop anything the
+  // client may have injected (arbitrary hosts, javascript:, internal targets).
+  const photos = Array.isArray(input.photos)
+    ? input.photos.filter(isAllowedImageUrl).slice(0, 6)
+    : [];
 
   const error = validateListingFields({ title, description, price, category, county, city });
   if (error) return { error };
