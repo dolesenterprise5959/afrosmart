@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getCategory } from "@/lib/mock";
 import { placeholderImage } from "@/lib/placeholders";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import type { CategoryId } from "@/lib/types";
 
 // Priority: user's uploaded photo → category AI placeholder image (if available)
@@ -26,7 +27,6 @@ export function ListingImage({
   sizes?: string;
 }) {
   const meta = getCategory(category);
-  const icon = meta?.icon ?? "📦";
 
   // 1) The user's own uploaded photo always wins.
   if (photo && isImageUrl(photo)) {
@@ -59,7 +59,7 @@ export function ListingImage({
         .join(" ")}
     >
       <span className="flex flex-col items-center gap-1">
-        <span className="text-4xl opacity-80">{icon}</span>
+        <CategoryIcon category={category} className="h-9 w-9 opacity-80" />
         <span className="text-[10px] font-medium uppercase tracking-wide opacity-70">{meta?.label ?? "Listing"}</span>
       </span>
     </div>

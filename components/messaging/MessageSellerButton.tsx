@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { createThread } from "@/lib/messaging/client";
 import { Button } from "@/components/ui/Button";
+import { MessageCircle } from "lucide-react";
 
 // Starts (or resumes) a conversation with the seller, then navigates to it.
 // Unauthenticated users are sent to login first.
@@ -33,7 +34,7 @@ export function MessageSellerButton({ listingId }: { listingId: string }) {
   return (
     <div className="flex flex-col gap-1">
       <Button onClick={onClick} size="lg" className="w-full" disabled={pending || loading}>
-        {pending ? "Opening chat…" : "💬 Message seller"}
+        {pending ? "Opening chat…" : <span className="inline-flex items-center gap-1.5"><MessageCircle className="h-4 w-4" /> Message seller</span>}
       </Button>
       {error && <p className="text-sm text-red-600">{error}</p>}
     </div>

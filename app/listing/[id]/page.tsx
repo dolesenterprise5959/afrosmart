@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { ListingGallery } from "@/components/listing/ListingGallery";
@@ -78,7 +79,7 @@ export default async function ListingDetailPage({
         {/* Details */}
         <div className="flex flex-col gap-4">
           <div>
-            {category && <Badge tone="brand">{category.icon} {category.label}</Badge>}
+            {category && <Badge tone="brand"><CategoryIcon category={category.id} className="mr-1 inline h-3.5 w-3.5 align-text-bottom" />{category.label}</Badge>}
             <h1 className="mt-2 text-2xl font-bold leading-tight">{listing.title}</h1>
             <div className="mt-1">
               <ConvertedPrice amount={listing.price} currency={listing.currency} className="text-2xl" />

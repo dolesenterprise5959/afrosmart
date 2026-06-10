@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getCategory, formatPrice } from "@/lib/mock";
 import { ListingImage } from "@/components/listing/ListingImage";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import type { Currency } from "@/lib/types";
 
 interface SearchIndexItem {
@@ -17,15 +18,15 @@ interface SearchIndexItem {
 
 // The 9 browsable categories offered as quick suggestions.
 const CATEGORY_SUGGESTIONS = [
-  { label: "Cars", icon: "🚗", href: "/marketplace/cars" },
-  { label: "Real Estate", icon: "🏠", href: "/properties" },
-  { label: "Rentals", icon: "🏘", href: "/marketplace/rentals" },
-  { label: "Land", icon: "🌍", href: "/marketplace/land" },
-  { label: "Phones", icon: "📱", href: "/marketplace/phones" },
-  { label: "Shops", icon: "🛍", href: "/marketplace/shops" },
-  { label: "Sports", icon: "⚽", href: "/marketplace/sports-fields" },
-  { label: "Fashion", icon: "👗", href: "/marketplace/clothing" },
-  { label: "Services", icon: "🛠", href: "/services" },
+  { id: "cars", label: "Cars", href: "/marketplace/cars" },
+  { id: "property", label: "Real Estate", href: "/properties" },
+  { id: "rentals", label: "Rentals", href: "/marketplace/rentals" },
+  { id: "land", label: "Land", href: "/marketplace/land" },
+  { id: "phones", label: "Phones", href: "/marketplace/phones" },
+  { id: "retail", label: "Shops", href: "/marketplace/shops" },
+  { id: "sports-fields", label: "Sports", href: "/marketplace/sports-fields" },
+  { id: "clothing", label: "Fashion", href: "/marketplace/clothing" },
+  { id: "services", label: "Services", href: "/services" },
 ];
 
 const TRENDING = ["Toyota", "iPhone", "House", "Land", "Generator", "Honda"];
@@ -284,7 +285,7 @@ export function SearchBar({
                   onMouseDown={(e) => { e.preventDefault(); goto(c.href); }}
                   className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm hover:bg-surface"
                 >
-                  <span aria-hidden className="text-base">{c.icon}</span>
+                  <CategoryIcon category={c.id} className="h-4 w-4 text-muted" />
                   <span className="flex-1 truncate">{highlight(c.label, q)}</span>
                   <span className="rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted">Category</span>
                 </button>

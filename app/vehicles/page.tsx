@@ -77,7 +77,7 @@ export default async function VehiclesPage({ searchParams }: PageProps<"/vehicle
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
       {/* Hero */}
       <section className="rounded-3xl bg-gradient-to-br from-neutral-900 to-black px-5 py-7 text-white sm:px-8">
-        <h1 className="text-2xl font-bold sm:text-3xl">🚗 Vehicles</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Vehicles</h1>
         <p className="mt-1 max-w-md text-sm text-white/75">
           Cars, trucks and more across Liberia — search by make, year, price and condition.
         </p>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Pencil, Check, Undo2, Play, Pause, Trash2 } from "lucide-react";
 import {
   markSold, markAvailable, pauseListing, unpauseListing, deleteListing,
 } from "@/app/listing/manage-actions";
@@ -42,18 +43,18 @@ export function ListingMenu({ id, status }: { id: string; status: ListingStatus 
           <>
             <button type="button" aria-hidden tabIndex={-1} className="fixed inset-0 z-10 cursor-default" onClick={() => setOpen(false)} />
             <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-card text-sm shadow-lg">
-              <Link href={`/listing/${id}/edit`} className="block px-3 py-2.5 hover:bg-surface">✏️ Edit</Link>
+              <Link href={`/listing/${id}/edit`} className="flex items-center gap-2 px-3 py-2.5 hover:bg-surface"><Pencil className="h-4 w-4" /> Edit</Link>
               {status !== "sold" ? (
-                <button type="button" disabled={busy} onClick={() => run(markSold)} className="block w-full px-3 py-2.5 text-left hover:bg-surface">✅ Mark as Sold</button>
+                <button type="button" disabled={busy} onClick={() => run(markSold)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left hover:bg-surface"><Check className="h-4 w-4" /> Mark as Sold</button>
               ) : (
-                <button type="button" disabled={busy} onClick={() => run(markAvailable)} className="block w-full px-3 py-2.5 text-left hover:bg-surface">↩️ Mark Available</button>
+                <button type="button" disabled={busy} onClick={() => run(markAvailable)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left hover:bg-surface"><Undo2 className="h-4 w-4" /> Mark Available</button>
               )}
               {status === "paused" ? (
-                <button type="button" disabled={busy} onClick={() => run(unpauseListing)} className="block w-full px-3 py-2.5 text-left hover:bg-surface">▶️ Unpause</button>
+                <button type="button" disabled={busy} onClick={() => run(unpauseListing)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left hover:bg-surface"><Play className="h-4 w-4" /> Unpause</button>
               ) : status === "active" ? (
-                <button type="button" disabled={busy} onClick={() => run(pauseListing)} className="block w-full px-3 py-2.5 text-left hover:bg-surface">⏸️ Pause</button>
+                <button type="button" disabled={busy} onClick={() => run(pauseListing)} className="flex w-full items-center gap-2 px-3 py-2.5 text-left hover:bg-surface"><Pause className="h-4 w-4" /> Pause</button>
               ) : null}
-              <button type="button" onClick={() => { setOpen(false); setConfirmDel(true); }} className="block w-full px-3 py-2.5 text-left text-red-600 hover:bg-surface">🗑️ Delete</button>
+              <button type="button" onClick={() => { setOpen(false); setConfirmDel(true); }} className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-red-600 hover:bg-surface"><Trash2 className="h-4 w-4" /> Delete</button>
             </div>
           </>
         )}

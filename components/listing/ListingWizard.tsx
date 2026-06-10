@@ -9,25 +9,26 @@ import { COUNTIES, formatPrice } from "@/lib/mock";
 import { townsForCounty, OTHER_TOWN } from "@/lib/liberia-towns";
 import { VEHICLE_CONDITIONS, POPULAR_MAKES, modelsForMake, VEHICLE_YEARS } from "@/lib/vehicles";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { LISTING_TYPES, PROPERTY_TYPES } from "@/lib/properties";
 import type { Currency } from "@/lib/types";
 
 type Kind = "vehicle" | "property" | "rental" | "phone" | "service" | "general" | "community";
 
-const QUICK: { id: string; label: string; icon: string; kind: Kind }[] = [
-  { id: "cars", label: "Cars", icon: "🚗", kind: "vehicle" },
-  { id: "property", label: "Real Estate", icon: "🏠", kind: "property" },
-  { id: "rentals", label: "Rentals", icon: "🏘", kind: "rental" },
-  { id: "phones", label: "Phones", icon: "📱", kind: "phone" },
-  { id: "services", label: "Services", icon: "🛠", kind: "service" },
-  { id: "general", label: "Other", icon: "📦", kind: "general" },
+const QUICK: { id: string; label: string; kind: Kind }[] = [
+  { id: "cars", label: "Cars", kind: "vehicle" },
+  { id: "property", label: "Real Estate", kind: "property" },
+  { id: "rentals", label: "Rentals", kind: "rental" },
+  { id: "phones", label: "Phones", kind: "phone" },
+  { id: "services", label: "Services", kind: "service" },
+  { id: "general", label: "Other", kind: "general" },
   // Community board — these post without a price (handled as "Free").
-  { id: "free-stuff", label: "Free Stuff", icon: "🎁", kind: "community" },
-  { id: "wanted", label: "Wanted", icon: "🔎", kind: "community" },
-  { id: "events", label: "Events", icon: "🎟️", kind: "community" },
-  { id: "lost-found", label: "Lost & Found", icon: "🧭", kind: "community" },
-  { id: "donations", label: "Donations", icon: "🤝", kind: "community" },
-  { id: "volunteers", label: "Volunteers", icon: "🙌", kind: "community" },
+  { id: "free-stuff", label: "Free Stuff", kind: "community" },
+  { id: "wanted", label: "Wanted", kind: "community" },
+  { id: "events", label: "Events", kind: "community" },
+  { id: "lost-found", label: "Lost & Found", kind: "community" },
+  { id: "donations", label: "Donations", kind: "community" },
+  { id: "volunteers", label: "Volunteers", kind: "community" },
 ];
 
 const DRAFT_KEY = "afm:listing-draft";
@@ -274,7 +275,7 @@ export function ListingWizard() {
                 onClick={() => pickCategory(c)}
                 className={`flex flex-col items-center gap-2 rounded-xl border bg-card py-6 text-center transition-colors hover:border-brand hover:bg-surface ${data.category === c.id ? "border-brand ring-1 ring-brand" : "border-border"}`}
               >
-                <span className="text-3xl">{c.icon}</span>
+                <CategoryIcon category={c.id} className="h-8 w-8 text-accent" />
                 <span className="text-base font-semibold">{c.label}</span>
               </button>
             ))}

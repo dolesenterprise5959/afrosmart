@@ -9,7 +9,7 @@ export default async function BusinessesPage() {
   const businesses = await getBusinesses();
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6">
-      <h1 className="text-xl font-bold">🏢 Businesses</h1>
+      <h1 className="text-xl font-bold">Businesses</h1>
       <p className="mt-1 text-sm text-muted">Verified shops and companies on AfroSmart.</p>
       <ul className="mt-6 grid gap-3 sm:grid-cols-2">
         {businesses.map((b) => (

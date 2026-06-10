@@ -65,7 +65,8 @@ const GROUP_OF: Record<string, string> = {};
 for (const g of CATEGORY_GROUPS) for (const c of g.categories) GROUP_OF[c.id] = g.id;
 
 function iconFor(category: string): LucideIcon {
-  return ITEM_ICON[category] ?? GROUP_ICON[GROUP_OF[category] ?? ""] ?? Tag;
+  // Accepts a category id OR a group id (group ids fall through GROUP_OF → GROUP_ICON).
+  return ITEM_ICON[category] ?? GROUP_ICON[GROUP_OF[category] ?? category] ?? Tag;
 }
 
 export function CategoryIcon({ category, className }: { category: string; className?: string }) {

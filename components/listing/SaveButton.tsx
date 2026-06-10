@@ -6,6 +6,7 @@ import { deleteDoc, doc, onSnapshot, serverTimestamp, setDoc } from "firebase/fi
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getDb } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/Button";
+import { Heart } from "lucide-react";
 import type { CategoryId } from "@/lib/types";
 
 // A saved item stores a denormalised snapshot of the listing so the /saved page
@@ -63,7 +64,7 @@ export function SaveButton({ listing }: { listing: SaveSummary }) {
 
   return (
     <Button onClick={toggle} variant={saved ? "secondary" : "outline"} size="lg" className="flex-1">
-      {saved ? "♥ Saved" : "♡ Save"}
+      <span className="inline-flex items-center gap-1.5"><Heart className={`h-4 w-4 ${saved ? "fill-current" : ""}`} /> {saved ? "Saved" : "Save"}</span>
     </Button>
   );
 }
