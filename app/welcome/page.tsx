@@ -3,6 +3,7 @@ import { Logo } from "@/components/ui/Logo";
 import { NameForm } from "@/components/onboarding/NameForm";
 import { verifySession } from "@/lib/auth/dal";
 import { ensureAccountDoc, hasCompletedOnboarding } from "@/lib/firestore/users";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +12,8 @@ export default async function WelcomePage({ searchParams }: PageProps<"/welcome"
   await ensureAccountDoc(session.uid, session.phone);
 
   const sp = await searchParams;
-  const nextParam = typeof sp.next === "string" ? sp.next : "/dashboard";
-  const next = nextParam.startsWith("/") ? nextParam : "/dashboard";
+  // Validate the redirect target: blocks open-redirect phishing (//evil.com etc.).
+  const next = safeNextPath(typeof sp.next === "string" ? sp.next : null);
   // Prefill the referral code from a shared link (?ref=AF7K9QXM).
   const ref = typeof sp.ref === "string" ? sp.ref.toUpperCase().slice(0, 16) : "";
 
