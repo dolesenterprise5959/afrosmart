@@ -90,9 +90,11 @@ npm run dev                        # http://localhost:3000
 ## Deployment
 
 The canonical target is **Firebase App Hosting** (`apphosting.yaml`); see
-`DEPLOYMENT_GUIDE.md`. Do **not** set `output: "standalone"` in `next.config.ts`
-for that path — the bundled `Dockerfile` is an alternate direct-Cloud-Run path
-and is the only place standalone output belongs.
+`DEPLOYMENT_GUIDE.md`. A direct **Cloud Run** path via the bundled `Dockerfile`
+is the alternative — it sets `BUILD_STANDALONE=true` so `next build` emits a
+standalone server, while App Hosting (which sets no such env) keeps the default
+output. Pick one; the app is **not** served through Firebase Hosting
+(`firebase.json` carries only Firestore/Storage/emulator config).
 
 ## Security notes
 
