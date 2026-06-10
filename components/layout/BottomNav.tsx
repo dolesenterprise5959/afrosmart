@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Home, Store, PlusCircle, MessageCircle, Wallet, User } from "lucide-react";
 import { useUnread } from "@/components/messaging/UnreadProvider";
 
 const items = [
-  { href: "/", label: "Home", icon: "🏠" },
-  { href: "/marketplace", label: "Browse", icon: "🛒" },
-  { href: "/listing/new", label: "Post", icon: "➕" },
-  { href: "/messages", label: "Chats", icon: "💬" },
-  { href: "/wallet", label: "Wallet", icon: "💳" },
-  { href: "/dashboard", label: "Account", icon: "👤" },
+  { href: "/", label: "Home", Icon: Home },
+  { href: "/marketplace", label: "Browse", Icon: Store },
+  { href: "/listing/new", label: "Post", Icon: PlusCircle },
+  { href: "/messages", label: "Chats", Icon: MessageCircle },
+  { href: "/wallet", label: "Wallet", Icon: Wallet },
+  { href: "/dashboard", label: "Account", Icon: User },
 ] as const;
 
 export function BottomNav() {
@@ -37,11 +38,11 @@ export function BottomNav() {
               >
                 <span
                   aria-hidden
-                  className={`relative grid h-8 w-12 place-items-center rounded-full text-lg leading-none transition-colors ${
+                  className={`relative grid h-8 w-12 place-items-center rounded-full transition-colors ${
                     active ? "bg-brand/10" : ""
                   }`}
                 >
-                  {item.icon}
+                  <item.Icon className="h-5 w-5" strokeWidth={2} />
                   {item.href === "/messages" && unreadCount > 0 && (
                     <span className="absolute right-1.5 top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
                       {unreadCount > 9 ? "9+" : unreadCount}

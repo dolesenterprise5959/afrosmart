@@ -1,65 +1,80 @@
-// Clean, branded line icons for categories (monochrome, inherit currentColor so
-// they pick up the AfroSmart gold accent). Falls back to the category emoji for
-// any id without a dedicated icon, so the long-tail taxonomy still renders.
+// Category icons — a single, consistent SVG set (lucide-react). Every category
+// resolves to a real line icon: a specific match where one exists, otherwise its
+// group's icon, otherwise a neutral Tag. No emoji is ever rendered.
 
-import type { SVGProps } from "react";
+import { createElement } from "react";
+import type { LucideIcon } from "lucide-react";
+import {
+  Megaphone, Wrench, Store, ShoppingBag, Building2, KeyRound, Bike, Car, Home, Briefcase,
+  Apple, Gift, Search, Ticket, Compass, HandHeart, Users, Package, Map,
+  Trophy, Shirt, Footprints, Sparkles, Laptop, Smartphone, Droplets, Fish, Drumstick, Egg,
+  Carrot, CupSoda, Droplet, Wheat, Scissors, Camera, Video, Utensils, Headphones, Guitar,
+  SprayCan, Plug, Hammer, Flame, Paintbrush, Settings, Snowflake, Zap, Shield, Truck,
+  ShoppingCart, Wallet, Phone, Church, School, TreePalm, Clapperboard, Beef, Tag,
+} from "lucide-react";
+import { CATEGORY_GROUPS } from "@/lib/categories";
 
-type IconFn = (p: SVGProps<SVGSVGElement>) => React.ReactElement;
-
-const base = (children: React.ReactNode): IconFn =>
-  function Icon(p: SVGProps<SVGSVGElement>) {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.75}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-        {...p}
-      >
-        {children}
-      </svg>
-    );
-  };
-
-const ICONS: Record<string, IconFn> = {
-  "free-stuff": base(<><path d="M20 12v8H4v-8" /><path d="M2 7h20v5H2z" /><path d="M12 22V7" /><path d="M12 7S10.5 3 8 4s1 3 4 3 .5-3-2-3" /></>),
-  wanted: base(<><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>),
-  events: base(<><path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z" /><path d="M14 6v12" /></>),
-  "lost-found": base(<><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" /><circle cx="12" cy="9" r="2.5" /></>),
-  donations: base(<><path d="M20.8 6.6a4.5 4.5 0 0 0-7.6-2.1L12 5.7l-1.2-1.2a4.5 4.5 0 1 0-6.4 6.4l1.2 1.2L12 19l6.4-6.9 1.2-1.2a4.5 4.5 0 0 0 1.2-4.3Z" /></>),
-  volunteers: base(<><circle cx="9" cy="8" r="3" /><path d="M4 20a5 5 0 0 1 10 0" /><path d="M16 4.5a3 3 0 0 1 0 6" /><path d="M18 14a5 5 0 0 1 3 5" /></>),
-  services: base(<><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5 2.5-2.5Z" /></>),
-  cars: base(<><path d="M5 13l1.5-4.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.5L19 13" /><path d="M4 13h16v4H4z" /><circle cx="7.5" cy="17.5" r="1.5" /><circle cx="16.5" cy="17.5" r="1.5" /></>),
-  property: base(<><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" /></>),
-  jobs: base(<><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M3 12h18" /></>),
-  land: base(<><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z" /></>),
-  restaurants: base(<><path d="M6 3v7a2 2 0 0 0 4 0V3" /><path d="M8 10v11" /><path d="M16 3c-1.5 0-2.5 2-2.5 5S15 13 16 13s2.5-2 2.5-5S17.5 3 16 3Z" /><path d="M16 13v8" /></>),
-  "sports-fields": base(<><circle cx="12" cy="12" r="9" /><path d="m12 7 2.5 1.8-1 3h-3l-1-3L12 7Z" /></>),
-  clothing: base(<><path d="M8 3 4 6l2 3 1-1v10h10V8l1 1 2-3-4-3-2 2a2.5 2.5 0 0 1-4 0L8 3Z" /></>),
+// Per-group default (used when a category has no specific icon below).
+const GROUP_ICON: Record<string, LucideIcon> = {
+  "community-board": Megaphone,
+  food: Apple,
+  services: Wrench,
+  business: Store,
+  retail: ShoppingBag,
+  community: Building2,
+  rentals: KeyRound,
+  transport: Bike,
+  vehicles: Car,
+  "real-estate": Home,
+  more: Briefcase,
 };
 
-export function CategoryIcon({
-  category,
-  emoji,
-  className,
-}: {
-  category: string;
-  /** Emoji to show when no branded icon exists for this category. */
-  emoji?: string;
-  className?: string;
-}) {
-  const Icon = ICONS[category];
-  if (!Icon) {
-    // No branded icon — render the emoji so the full taxonomy still has a glyph.
-    return <span className={["text-4xl leading-none", className].filter(Boolean).join(" ")} aria-hidden>{emoji ?? "🏷️"}</span>;
-  }
-  return <Icon className={className} />;
+// Specific matches (cleanly mappable items). Anything not here falls back to its
+// group's icon — so e.g. produce without a dedicated glyph still reads as "food".
+const ITEM_ICON: Record<string, LucideIcon> = {
+  // community-board
+  "free-stuff": Gift, wanted: Search, events: Ticket, "lost-found": Compass, donations: HandHeart, volunteers: Users,
+  // food & agriculture
+  rice: Wheat, "fresh-fish": Fish, "dry-fish": Fish, chicken: Drumstick, goat: Beef, cow: Beef, pig: Beef,
+  eggs: Egg, fruits: Apple, vegetables: Carrot, drinks: CupSoda, water: Droplet, livestock: Beef,
+  // services
+  barber: Scissors, "hair-braiding": Scissors, "beauty-salon": Sparkles, "makeup-artist": Sparkles,
+  photography: Camera, videography: Video, catering: Utensils, "dj-services": Headphones, musicians: Guitar,
+  cleaning: SprayCan, "house-cleaning": SprayCan, laundry: SprayCan, plumbing: Droplets, "electrical-repair": Plug,
+  carpentry: Hammer, masonry: Hammer, welding: Flame, painting: Paintbrush, mechanics: Wrench, "auto-parts": Settings,
+  "car-wash": Droplets, "ac-repair": Snowflake, "generator-repair": Zap, "phone-repair": Smartphone,
+  "computer-repair": Laptop, tailor: Scissors, "security-services": Shield, "delivery-services": Truck, services: Wrench,
+  // business & shops
+  restaurants: Utensils, "cook-shops": Utensils, "market-stalls": Store, "kobo-shops": ShoppingCart,
+  "mobile-money": Wallet, "phone-services": Phone, beauty: Sparkles, "water-suppliers": Truck, "ice-suppliers": Snowflake,
+  // retail
+  clothing: Shirt, shoes: Footprints, cosmetics: Sparkles, electronics: Laptop, phones: Smartphone,
+  "sim-cards": Smartphone, "scratch-cards": Ticket,
+  // community
+  churches: Church, schools: School, beaches: TreePalm, "sports-fields": Trophy, entertainment: Clapperboard,
+  tournaments: Trophy, football: Trophy,
+  // rentals & transport
+  "car-rental": Car, "truck-rental": Truck, "motorbike-rental": Bike, "bicycle-rental": Bike,
+  "equipment-rental": Wrench, motorbike: Bike, taxi: Car,
+  // vehicles / real estate / more
+  cars: Car, property: Home, land: Map, jobs: Briefcase, general: Package,
+};
+
+// id → group id (derived once from the taxonomy).
+const GROUP_OF: Record<string, string> = {};
+for (const g of CATEGORY_GROUPS) for (const c of g.categories) GROUP_OF[c.id] = g.id;
+
+function iconFor(category: string): LucideIcon {
+  return ITEM_ICON[category] ?? GROUP_ICON[GROUP_OF[category] ?? ""] ?? Tag;
 }
 
-/** True when a dedicated branded icon exists (lets callers theme it). */
-export function hasCategoryIcon(category: string): boolean {
-  return category in ICONS;
+export function CategoryIcon({ category, className }: { category: string; className?: string }) {
+  // createElement (not <Icon/>) so the lint rule doesn't flag a stable lookup as a
+  // component "created during render".
+  return createElement(iconFor(category), { className, strokeWidth: 1.75, "aria-hidden": true });
+}
+
+/** Every category now has a real icon. */
+export function hasCategoryIcon(): boolean {
+  return true;
 }

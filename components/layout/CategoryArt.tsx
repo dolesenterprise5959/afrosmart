@@ -6,12 +6,12 @@ import { CategoryIcon } from "@/components/ui/CategoryIcon";
 // "N Listings" count beneath. Falls back to a gold icon tile when no photo.
 export function CategoryArt({
   category,
-  icon,
   label,
   count,
 }: {
   category: string;
-  icon: string;
+  /** Legacy emoji prop — accepted for back-compat but no longer rendered. */
+  icon?: string;
   label: string;
   count?: number;
 }) {
@@ -36,7 +36,6 @@ export function CategoryArt({
         <div className="grid aspect-[4/3] w-full place-items-center bg-accent/15">
           <CategoryIcon
             category={category}
-            emoji={icon}
             className="h-12 w-12 text-accent transition-transform group-hover:scale-110"
           />
         </div>

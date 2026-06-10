@@ -1,5 +1,6 @@
 import type { ReferralSummary } from "@/lib/firestore/referrals";
 import type { AppNotification } from "@/lib/firestore/notifications";
+import { Wallet } from "lucide-react";
 import { referralProgress, REFERRALS_PER_REWARD, REWARD_USD } from "@/lib/referral";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { InviteFriends } from "@/components/wallet/InviteFriends";
@@ -17,7 +18,7 @@ export function WalletView({ summary: s, notes }: { summary: ReferralSummary; no
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-6">
-      <h1 className="text-2xl font-bold tracking-tight">💳 Wallet</h1>
+      <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight"><Wallet className="h-6 w-6 text-accent" /> Wallet</h1>
       <p className="mt-1 text-sm text-muted">
         Earn US$ {REWARD_USD} for every {REFERRALS_PER_REWARD} friends who join with your code and post their first listing.
       </p>
@@ -67,7 +68,7 @@ export function WalletView({ summary: s, notes }: { summary: ReferralSummary; no
             <InviteFriends code={s.referralCode} url={shareUrl} />
             <CopyButton
               text={s.referralCode}
-              label="📋 Copy code"
+              label="Copy code"
               copiedLabel="Copied!"
               className="inline-flex h-10 w-full items-center justify-center rounded-full border border-border bg-card text-sm font-semibold hover:bg-surface"
             />

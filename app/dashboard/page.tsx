@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eye, MousePointerClick, MessageCircle, Package, Heart, UserRound, Wallet } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -34,12 +35,12 @@ export default async function DashboardPage() {
   const showAnalytics = plan === "business" || plan === "premium";
 
   const metrics = [
-    { label: "Listing views", value: analytics.totalViews, icon: "👁️" },
-    { label: "Listing clicks", value: analytics.totalClicks, icon: "👆" },
-    { label: "Messages received", value: analytics.messagesReceived, icon: "💬" },
-    { label: "Active listings", value: analytics.activeListings, icon: "📦" },
-    { label: "Saved by buyers", value: analytics.savedCount, icon: "♥" },
-    { label: "Profile views", value: analytics.profileViews, icon: "🧑" },
+    { label: "Listing views", value: analytics.totalViews, Icon: Eye },
+    { label: "Listing clicks", value: analytics.totalClicks, Icon: MousePointerClick },
+    { label: "Messages received", value: analytics.messagesReceived, Icon: MessageCircle },
+    { label: "Active listings", value: analytics.activeListings, Icon: Package },
+    { label: "Saved by buyers", value: analytics.savedCount, Icon: Heart },
+    { label: "Profile views", value: analytics.profileViews, Icon: UserRound },
   ];
 
   return (
@@ -117,7 +118,7 @@ export default async function DashboardPage() {
             {metrics.map((m) => (
               <div key={m.label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                 <p className="text-2xl font-bold">{m.value.toLocaleString()}</p>
-                <p className="mt-0.5 text-xs text-muted">{m.icon} {m.label}</p>
+                <p className="mt-0.5 flex items-center gap-1 text-xs text-muted"><m.Icon className="h-3.5 w-3.5" /> {m.label}</p>
               </div>
             ))}
           </div>
@@ -153,9 +154,9 @@ export default async function DashboardPage() {
       )}
 
       <div className="mt-8 flex flex-wrap gap-4 text-sm">
-        <Link href="/wallet" className="text-brand">💳 Wallet & referrals</Link>
-        <Link href="/saved" className="text-brand">♡ Saved listings</Link>
-        <Link href="/messages" className="text-brand">💬 Messages</Link>
+        <Link href="/wallet" className="inline-flex items-center gap-1.5 text-brand"><Wallet className="h-4 w-4" /> Wallet &amp; referrals</Link>
+        <Link href="/saved" className="inline-flex items-center gap-1.5 text-brand"><Heart className="h-4 w-4" /> Saved listings</Link>
+        <Link href="/messages" className="inline-flex items-center gap-1.5 text-brand"><MessageCircle className="h-4 w-4" /> Messages</Link>
       </div>
     </div>
   );

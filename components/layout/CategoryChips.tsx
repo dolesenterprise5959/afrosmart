@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LayoutGrid } from "lucide-react";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { CATEGORIES } from "@/lib/mock";
 
 /** Horizontally scrollable category links. `active` highlights the current one. */
@@ -10,7 +12,7 @@ export function CategoryChips({ active }: { active?: string }) {
           href="/marketplace"
           className={chipClass(active === undefined || active === "all")}
         >
-          <span aria-hidden>✨</span> All
+          <LayoutGrid className="h-4 w-4" aria-hidden /> All
         </Link>
         {CATEGORIES.map((c) => (
           <Link
@@ -18,7 +20,7 @@ export function CategoryChips({ active }: { active?: string }) {
             href={`/marketplace/${c.id}`}
             className={chipClass(active === c.id)}
           >
-            <span aria-hidden>{c.icon}</span> {c.label}
+            <CategoryIcon category={c.id} className="h-4 w-4" /> {c.label}
           </Link>
         ))}
       </div>
