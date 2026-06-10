@@ -1,0 +1,92 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "AfroSmart home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]:
+          - img "AfroSmart" [ref=e7]
+          - generic [ref=e8]:
+            - generic [ref=e9]: AfroSmart
+            - generic [ref=e10]: Buy • Sell • Connect Across Liberia
+      - search [ref=e13]:
+        - generic [ref=e14]:
+          - img [ref=e15]
+          - searchbox "Search listings" [ref=e18]
+          - button "Voice search" [ref=e19]:
+            - img [ref=e20]
+        - button "Search" [ref=e23]
+      - navigation [ref=e24]:
+        - link "+ Post" [ref=e25] [cursor=pointer]:
+          - /url: /listing/new
+  - main [ref=e27]
+  - contentinfo [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - link "AfroSmart home" [ref=e32] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e33]:
+              - img "AfroSmart" [ref=e35]
+              - generic [ref=e37]: AfroSmart
+          - paragraph [ref=e38]: Buy. Sell. Connect Across Africa.
+          - paragraph [ref=e39]: Liberia's community marketplace — food, services, retail, transport and more.
+        - navigation "Marketplace" [ref=e40]:
+          - heading "Marketplace" [level=3] [ref=e41]
+          - list [ref=e42]:
+            - listitem [ref=e43]:
+              - link "Browse all" [ref=e44] [cursor=pointer]:
+                - /url: /marketplace
+            - listitem [ref=e45]:
+              - link "Services & businesses" [ref=e46] [cursor=pointer]:
+                - /url: /services
+            - listitem [ref=e47]:
+              - link "Vehicles" [ref=e48] [cursor=pointer]:
+                - /url: /vehicles
+            - listitem [ref=e49]:
+              - link "Real Estate" [ref=e50] [cursor=pointer]:
+                - /url: /properties
+            - listitem [ref=e51]:
+              - link "Electronics" [ref=e52] [cursor=pointer]:
+                - /url: /marketplace/electronics
+            - listitem [ref=e53]:
+              - link "Post a listing" [ref=e54] [cursor=pointer]:
+                - /url: /listing/new
+        - navigation "Company" [ref=e55]:
+          - heading "Company" [level=3] [ref=e56]
+          - list [ref=e57]:
+            - listitem [ref=e58]:
+              - link "About AfroSmart" [ref=e59] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e60]:
+              - link "Browse marketplace" [ref=e61] [cursor=pointer]:
+                - /url: /marketplace
+            - listitem [ref=e62]:
+              - link "Pricing & Plans" [ref=e63] [cursor=pointer]:
+                - /url: /pricing
+            - listitem [ref=e64]:
+              - link "Get verified" [ref=e65] [cursor=pointer]:
+                - /url: /verify
+            - listitem [ref=e66]:
+              - link "Contact us" [ref=e67] [cursor=pointer]:
+                - /url: /contact
+        - navigation "Help & Safety" [ref=e68]:
+          - heading "Help & Safety" [level=3] [ref=e69]
+          - list [ref=e70]:
+            - listitem [ref=e71]:
+              - link "Help Center" [ref=e72] [cursor=pointer]:
+                - /url: /help
+            - listitem [ref=e73]:
+              - link "Safety Center" [ref=e74] [cursor=pointer]:
+                - /url: /safety
+            - listitem [ref=e75]:
+              - link "Privacy Policy" [ref=e76] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e77]:
+              - link "Terms of Service" [ref=e78] [cursor=pointer]:
+                - /url: /terms
+      - generic [ref=e79]:
+        - paragraph [ref=e80]: © 2026 AfroSmart. Liberia's digital marketplace.
+        - paragraph [ref=e81]: Made in Liberia 🇱🇷 · Connecting buyers & sellers across Africa.
+  - button "Open AfroSmart Assistant" [ref=e82]:
+    - img [ref=e83]
+    - text: Ask AI

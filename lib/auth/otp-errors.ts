@@ -63,6 +63,10 @@ export function describeVerifyError(code?: string): {
     case "auth/credential-already-in-use":
     case "auth/account-exists-with-different-credential":
       return { reason: "provider", message: "This number is already linked to an account. Try signing in again." };
+    case "auth/session-failed":
+      // Phone verified, but the server couldn't start the session — never a wrong
+      // code. Don't penalise the user; tell them what actually happened.
+      return { reason: "provider", message: "We verified your phone, but couldn't start your session. Please try again in a moment." };
     default:
       return { reason: "unknown", message: "Couldn’t verify that code. Tap “Resend code” for a fresh one, or open AfroSmart in Chrome/Safari." };
   }
