@@ -7,9 +7,12 @@ import "server-only";
 import { adminDb, isAdminConfigured } from "@/lib/firebase/admin";
 import { evaluateRateLimit, type RateLimitState } from "@/lib/utils/ratelimit-core";
 
-export type RateAction = "message" | "report" | "listing" | "thread" | "rating" | "verification";
+export type RateAction =
+  | "message" | "report" | "listing" | "thread" | "rating" | "verification"
+  | "otp_ip" | "assistant";
 
-// Tuned for normal use while blocking spam. Windows are per-user.
+// Tuned for normal use while blocking spam. Most windows are per-user; the
+// otp_ip/assistant windows are keyed by client IP for unauthenticated endpoints.
 export const RATE_LIMITS: Record<RateAction, { max: number; windowMs: number }> = {
   message: { max: 30, windowMs: 60_000 }, // 30 messages / minute
   report: { max: 5, windowMs: 60 * 60_000 }, // 5 reports / hour
@@ -17,6 +20,8 @@ export const RATE_LIMITS: Record<RateAction, { max: number; windowMs: number }> 
   thread: { max: 20, windowMs: 60 * 60_000 }, // 20 new conversations / hour
   rating: { max: 20, windowMs: 60 * 60_000 }, // 20 ratings / hour
   verification: { max: 3, windowMs: 24 * 60 * 60_000 }, // 3 verification requests / day
+  otp_ip: { max: 15, windowMs: 60 * 60_000 }, // 15 OTP sends / hour / IP (SMS-cost guard)
+  assistant: { max: 30, windowMs: 60_000 }, // 30 assistant messages / minute / IP
 };
 
 export interface RateLimitDecision {
@@ -63,7 +68,11 @@ export function rateLimitMessage(action: RateAction, retryAfterSec: number): str
             ? "submitting ratings"
             : action === "verification"
               ? "requesting verification"
-              : "starting conversations";
+              : action === "otp_ip"
+                ? "requesting codes"
+                : action === "assistant"
+                  ? "messaging the assistant"
+                  : "starting conversations";
   const wait =
     retryAfterSec >= 60 ? `${Math.ceil(retryAfterSec / 60)} minute(s)` : `${retryAfterSec} second(s)`;
   return `You're ${noun} too fast. Please wait ${wait} and try again.`;
