@@ -28,6 +28,9 @@ ENV NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY \
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID \
     NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
 ENV NEXT_TELEMETRY_DISABLED=1
+# Opt into Next.js standalone output for the container runtime below. App Hosting
+# (Option A) does NOT set this, so its build is unaffected. See next.config.ts.
+ENV BUILD_STANDALONE=true
 RUN npm run build
 
 # 3) Runtime — only the standalone server + static assets

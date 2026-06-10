@@ -33,11 +33,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // NOTE: do NOT set `output: "standalone"` here — Firebase App Hosting (the live
-  // deploy target) builds with its own Next.js adapter, and `standalone` makes it
-  // skip serving the `public/` folder, so every public asset (hero banners,
-  // category/placeholder images, ad creatives) 404s. The Dockerfile/Cloud Run path
-  // (Option B in DEPLOYMENT_GUIDE) sets standalone itself when needed.
+  // `output: "standalone"` is OPT-IN via BUILD_STANDALONE=true, set only by the
+  // Dockerfile/Cloud Run path (Option B), which needs `.next/standalone/server.js`.
+  // Firebase App Hosting (Option A, the canonical target) builds with its own
+  // adapter and must NOT use standalone — it would skip serving `public/`, 404ing
+  // every static asset. App Hosting sets no such env, so it keeps the default output.
+  output: process.env.BUILD_STANDALONE === "true" ? "standalone" : undefined,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
