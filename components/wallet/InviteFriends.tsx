@@ -1,5 +1,7 @@
 "use client";
 
+import { Gift } from "lucide-react";
+
 // Prominent invite CTA: uses the native share sheet (Web Share API) when available
 // — best on mobile — and falls back to WhatsApp (the dominant channel in Liberia).
 export function InviteFriends({ code, url }: { code: string; url: string }) {
@@ -23,7 +25,7 @@ export function InviteFriends({ code, url }: { code: string; url: string }) {
       onClick={invite}
       className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand text-base font-semibold text-brand-foreground hover:bg-brand-dark"
     >
-      🎁 Invite Friends
+<Gift className="h-5 w-5" /> Invite Friends
     </button>
   );
 }
