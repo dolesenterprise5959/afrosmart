@@ -5,7 +5,10 @@ import { referralProgress, REFERRALS_PER_REWARD, REWARD_USD } from "@/lib/referr
 import { CopyButton } from "@/components/ui/CopyButton";
 import { InviteFriends } from "@/components/wallet/InviteFriends";
 
-const WITHDRAW_MIN = 10; // display-only; withdrawals are out of scope in Phase 1.
+// Payout threshold. Cash-out itself isn't built yet (no payout rail), so the UI
+// must not imply a withdrawal is available — it only shows progress toward the
+// minimum and an honest "coming soon". See issue: wallet payout rail.
+const WITHDRAW_MIN = 10;
 const SITE = "https://afrosmart.app";
 
 /** Presentational wallet UI — pure render from data (no auth/IO), so it can be
@@ -13,7 +16,8 @@ const SITE = "https://afrosmart.app";
 export function WalletView({ summary: s, notes }: { summary: ReferralSummary; notes: AppNotification[] }) {
   const p = referralProgress(s.referralCount);
   const pct = Math.round((p.intoCurrent / REFERRALS_PER_REWARD) * 100);
-  const eligible = s.walletBalance >= WITHDRAW_MIN;
+  const reachedMin = s.walletBalance >= WITHDRAW_MIN;
+  const toMin = Math.max(0, WITHDRAW_MIN - s.walletBalance).toFixed(2);
   const shareUrl = s.referralCode ? `${SITE}/welcome?ref=${s.referralCode}` : SITE;
 
   return (
@@ -53,9 +57,12 @@ export function WalletView({ summary: s, notes }: { summary: ReferralSummary; no
           <p className="mt-1 text-xl font-bold">{s.referralCount}</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-xs text-muted">Withdrawal</p>
-          <p className={`mt-1 text-sm font-semibold ${eligible ? "text-success" : "text-muted"}`}>
-            {eligible ? "Eligible ✓" : `Opens at US$ ${WITHDRAW_MIN}`}
+          <p className="text-xs text-muted">Payouts</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">Coming soon</p>
+          <p className="mt-0.5 text-xs text-muted">
+            {reachedMin
+              ? `You've reached the US$ ${WITHDRAW_MIN} minimum — we'll notify you when cash-out opens.`
+              : `US$ ${toMin} more to reach the US$ ${WITHDRAW_MIN} minimum.`}
           </p>
         </div>
       </div>
