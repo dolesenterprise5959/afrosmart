@@ -24,8 +24,25 @@ export function reportError(error: unknown, context?: Record<string, unknown>): 
 }
 
 function forward(payload: Record<string, unknown>): void {
-  // If/when a monitoring service is configured, forward here. Kept a no-op so the
-  // app has zero new runtime dependencies until a DSN is provided.
-  // e.g. if (process.env.NEXT_PUBLIC_SENTRY_DSN) Sentry.captureException(...)
-  void payload;
+  // Optional, zero-dependency forwarding to an external collector. Set
+  // ERROR_WEBHOOK_URL (server-side env) to receive one JSON POST per error —
+  // e.g. a Cloud Function, a Slack/Discord incoming webhook, or a Sentry tunnel.
+  // Unset => no-op, so there are still no new runtime dependencies by default.
+  // Read from process.env so it never leaks to the client bundle (no NEXT_PUBLIC_).
+  const url =
+    typeof process !== "undefined" && process.env ? process.env.ERROR_WEBHOOK_URL : undefined;
+  if (!url) return;
+  try {
+    // Fire-and-forget; keepalive lets it complete past a serverless response.
+    void fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {
+      /* a failed report must never surface to the user */
+    });
+  } catch {
+    /* never throw from the error reporter */
+  }
 }
