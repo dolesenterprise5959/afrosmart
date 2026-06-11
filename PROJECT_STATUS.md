@@ -34,8 +34,8 @@ property, services, jobs, general goods) with privacy-preserving contact
 
 **Platform & hardening**
 - Firestore + Storage **security rules** (phone privacy, server-only writes, ownership)
-- Security headers (CSP report-only), production credentials via **ADC**
-- Performance: browse-read caching (`unstable_cache`), `next/image`, `output: standalone`
+- Security headers (CSP **enforced**), production credentials via **ADC**
+- Performance: browse-read caching (`unstable_cache`, 30s TTL); `next/image` (unoptimized — raw URLs)
 - **Docker** image + **CI** (lint·typecheck·test·build + rules-emulator job)
 - Config-as-code: `firebase.json`, `firestore.indexes.json`, `apphosting.yaml`, env/templates
 - Docs: `LAUNCH_RUNBOOK.md`, `DEPLOYMENT_GUIDE.md`, `BETA_LAUNCH_CHECKLIST.md`, `MONITORING.md`
@@ -44,7 +44,7 @@ property, services, jobs, general goods) with privacy-preserving contact
 
 - **Provisioning** (operational, not code): create Firebase project, deploy rules/indexes/storage, hosting, domain, monitoring + budget cap
 - **Prove rules suite on the emulator** (needs Java) — authored, not yet executed
-- Enable **Firebase App Check**; flip CSP report-only → enforcing after validation
+- Enable **Firebase App Check** after validation (CSP is already enforced)
 - Scale follow-ups: DB-side ordering + **pagination** (composite indexes ready), **shared cache handler** (Redis) for multi-instance, real-photo display end-to-end
 - Future scope (not MVP): in-app payments, mobile app (Flutter), AI assistant, community feed
 

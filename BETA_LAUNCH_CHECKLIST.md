@@ -22,7 +22,7 @@ Verified by `next build` ✅, `tsc --noEmit` ✅, `vitest run` (41/41) ✅, `esl
 | **Firebase integration** | 🟡 | Client + Admin SDK wired; Admin prefers **ADC** in prod (no shipped key). **Needs a real project + `.env.local`/secrets.** |
 | **Firestore rules** | 🟡 | `firestore.rules` + `storage.rules` authored & strict (phone privacy, server-only writes, ownership). Suite authored (`tests/rules/`) but **not yet run on the emulator (needs Java)**. |
 | **Mobile responsiveness** | ✅ | Mobile-first Tailwind: bottom tab nav (`md:hidden`), responsive grids (`grid-cols-2 sm:3 lg:4`), `max-w` containers, mobile inline search. |
-| **Performance** | ✅ | Browse reads cached (`unstable_cache`, 30s TTL, busted on write); `next/image` for photos; `output: standalone`; security headers. |
+| **Performance** | ✅ | Browse reads cached (`unstable_cache`, 30s TTL, busted on write); `next/image` for photos (unoptimized — raw URLs); security headers (CSP enforced). |
 | **CI / Docker** | ✅ | `.github/workflows/ci.yml` (lint·typecheck·test·build + rules-emulator job); `Dockerfile` (multi-stage standalone). |
 
 **Critical errors found & fixed in this audit:** 1 — `revalidateTag` missing the Next 16 `profile` argument (build-breaking); fixed to `revalidateTag(LISTINGS_TAG, "max")`. No other errors. No functionality removed.
@@ -34,8 +34,8 @@ Verified by `next build` ✅, `tsc --noEmit` ✅, `vitest run` (41/41) ✅, `esl
 ### Engineering (complete)
 - [x] All MVP features built & wired to Firestore
 - [x] Security model: server-mediated writes, rate limiting, rating gate
-- [x] Security headers (CSP report-only), ADC for prod credentials
-- [x] Performance hardening (cache, images, standalone)
+- [x] Security headers (CSP enforced), ADC for prod credentials
+- [x] Performance hardening (cache, images, security headers)
 - [x] Build / typecheck / lint / unit tests all green
 - [x] Config-as-code: `firebase.json`, `firestore.indexes.json`, `apphosting.yaml`, templates
 
@@ -51,7 +51,7 @@ Verified by `next build` ✅, `tsc --noEmit` ✅, `vitest run` (41/41) ✅, `esl
 
 ### Go-live hardening (after provisioning)
 - [ ] ⬜ Live E2E smoke (signup → post → message → reply → unlock → rate → report → admin resolve)
-- [ ] ⬜ Validate CSP, then flip `Content-Security-Policy-Report-Only` → enforcing
+- [ ] ⬜ CSP is already enforced — confirm zero violations in the browser console during sign-in
 - [ ] ⬜ Enable Firebase **App Check** (Firestore/Storage/Auth)
 - [ ] ⬜ Confirm a 429 fires under spam (rate limits live)
 
