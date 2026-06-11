@@ -106,7 +106,7 @@ AfroSmart needs a **Node server** (SSR, route handlers, server actions, `force-d
 - [ ] Set **min instances = 1** (avoid cold starts for Liberia latency) and a sane max.
 
 **Alternative: Cloud Run (container)**
-- [ ] Add a `Dockerfile` (Next standalone output); build with Cloud Build.
+- [ ] `Dockerfile` is included (Next standalone output via `BUILD_STANDALONE`); build with Cloud Build.
 - [ ] `gcloud run deploy afrosmart --source . --region <region> --allow-unauthenticated`.
 - [ ] Bind the runtime **service account** with least privilege (Firestore/Storage user roles only) → enables ADC (§7).
 - [ ] Configure concurrency, min instances = 1, memory ≥ 512 MB.
