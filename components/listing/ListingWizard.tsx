@@ -326,7 +326,7 @@ export function ListingWizard() {
       {step === 2 && (
         <div className="flex flex-col gap-3">
           <h1 className="text-xl font-bold">Details</h1>
-          <input className={field} placeholder="Title (e.g. Toyota Corolla 2014)" value={data.title} onChange={(e) => set("title", e.target.value)} />
+          <input className={field} placeholder="What are you selling?" value={data.title} onChange={(e) => set("title", e.target.value)} />
           {/* Price — hidden for community posts (free stuff, wanted, events…), which are priceless. */}
           {data.kind === "community" ? (
             <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted">
