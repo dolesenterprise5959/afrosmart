@@ -3,6 +3,7 @@
 import { verifySession } from "@/lib/auth/dal";
 import { adminDb } from "@/lib/firebase/admin";
 import { setProfilePhoto } from "@/lib/firestore/users";
+import { isAllowedImageUrl } from "@/lib/utils/image-url";
 
 export interface UpdateProfileResult {
   ok?: boolean;
@@ -23,9 +24,11 @@ export async function updateProfileAction(
 ): Promise<UpdateProfileResult> {
   const session = await verifySession();
 
-  const displayName = input.displayName?.trim() ?? "";
-  const county = input.county?.trim() ?? "";
-  const city = input.city?.trim() ?? "";
+  // Cap lengths: server actions are callable directly, so an attacker could POST
+  // a multi-MB string straight into the user doc without these bounds.
+  const displayName = (input.displayName?.trim() ?? "").slice(0, 80);
+  const county = (input.county?.trim() ?? "").slice(0, 60);
+  const city = (input.city?.trim() ?? "").slice(0, 60);
 
   if (displayName.length < 2) return { error: "Please enter your name." };
 
@@ -45,7 +48,9 @@ export async function setProfilePhotoAction(
   photoURL: string | null,
 ): Promise<UpdateProfileResult> {
   const session = await verifySession();
-  if (photoURL && !/^https:\/\//.test(photoURL)) return { error: "Invalid photo URL." };
+  // Only accept URLs from our own Firebase Storage uploader — never an arbitrary
+  // attacker-controlled host (SSRF / off-site image injection).
+  if (photoURL && !isAllowedImageUrl(photoURL)) return { error: "Invalid photo URL." };
   await setProfilePhoto(session.uid, photoURL);
   return { ok: true };
 }

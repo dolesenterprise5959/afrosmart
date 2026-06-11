@@ -24,16 +24,27 @@ export function createRecaptcha(containerId: string, size: "invisible" | "normal
   return new RecaptchaVerifier(getFirebaseAuth(), containerId, { size });
 }
 
-/** Sign in with a fallback custom token (WhatsApp/SMS path), then set the session cookie. */
-export async function signInWithCustomTokenAndSession(token: string): Promise<void> {
-  const cred = await signInWithCustomToken(getFirebaseAuth(), token);
-  const idToken = await cred.user.getIdToken();
+// Exchange a verified Firebase ID token for the server session cookie. The phone
+// is already verified at this point, so a failure here is NOT a wrong code — we
+// tag it with a distinct code so the UI doesn't mislabel it as "incorrect code".
+async function establishSession(idToken: string): Promise<void> {
   const res = await fetch("/api/auth/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
   });
-  if (!res.ok) throw new Error("Could not establish session");
+  if (!res.ok) {
+    const err = new Error("Could not establish session") as Error & { code?: string };
+    err.code = "auth/session-failed";
+    throw err;
+  }
+}
+
+/** Sign in with a fallback custom token (WhatsApp/SMS path), then set the session cookie. */
+export async function signInWithCustomTokenAndSession(token: string): Promise<void> {
+  const cred = await signInWithCustomToken(getFirebaseAuth(), token);
+  const idToken = await cred.user.getIdToken();
+  await establishSession(idToken);
 }
 
 /** Send an OTP SMS. Returns a confirmation handle for the verify step. */
@@ -51,13 +62,7 @@ export async function confirmOtp(
 ): Promise<void> {
   const credential = await confirmation.confirm(code);
   const idToken = await credential.user.getIdToken();
-
-  const res = await fetch("/api/auth/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken }),
-  });
-  if (!res.ok) throw new Error("Could not establish session");
+  await establishSession(idToken);
 }
 
 /** Clear both the server session cookie and the client auth state. */

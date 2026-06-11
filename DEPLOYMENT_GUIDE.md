@@ -86,8 +86,16 @@ gcloud run deploy afrosmart \
   --min-instances 1 --memory 512Mi \
   --set-build-env-vars NEXT_PUBLIC_FIREBASE_API_KEY=...,NEXT_PUBLIC_FIREBASE_PROJECT_ID=...,...
 ```
-The `Dockerfile` produces a standalone image; the runtime service account
-provides ADC (no key in the image).
+The `Dockerfile` sets `BUILD_STANDALONE=true`, so `next build` emits
+`.next/standalone/server.js` and the image runs `node server.js`; the runtime
+service account provides ADC (no key in the image). App Hosting (Option A) does
+**not** set that env, so its build keeps the default output.
+
+> **One web target at a time.** Options A and B both serve the app on Cloud Run;
+> pick one. `firebase.json` intentionally has **no** `hosting` block — the app is
+> not served through Firebase Hosting. `firebase.json` only carries Firestore,
+> Storage, and emulator config (used by the `firebase deploy --only firestore:*`
+> / `storage` commands above).
 
 ## Step 7 — Domain & SSL
 

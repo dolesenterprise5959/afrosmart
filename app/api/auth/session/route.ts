@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { adminAuth } from "@/lib/firebase/admin";
+import { adminAuth, isAdminConfigured } from "@/lib/firebase/admin";
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS } from "@/lib/auth/constants";
 
 // POST: exchange a freshly-minted Firebase ID token (from phone OTP sign-in)
@@ -15,6 +15,17 @@ export async function POST(request: Request) {
 
   if (typeof idToken !== "string" || !idToken) {
     return Response.json({ error: "Missing idToken" }, { status: 400 });
+  }
+
+  // Distinct from a 401: the token may be perfectly valid, but the server has no
+  // Admin credentials to mint a session (common in local dev without a service
+  // account). Returning 503 makes this diagnosable instead of looking like a
+  // rejected token. See README → "Making login actually work locally".
+  if (!isAdminConfigured()) {
+    return Response.json(
+      { error: "Server auth is not configured (Admin SDK credentials missing)." },
+      { status: 503 },
+    );
   }
 
   try {

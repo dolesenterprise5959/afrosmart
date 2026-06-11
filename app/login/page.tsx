@@ -11,6 +11,7 @@ import { COUNTRIES, DEFAULT_COUNTRY, findCountry } from "@/lib/countries";
 import { describeAuthError, describeVerifyError } from "@/lib/auth/otp-errors";
 import { logLoginEvent } from "@/app/login/actions";
 import { detectInApp, type InAppInfo } from "@/lib/utils/in-app-browser";
+import { safeNextPath } from "@/lib/utils/safe-redirect";
 import { MessageCircle, Mail } from "lucide-react";
 
 import { AlertTriangle } from "lucide-react";
@@ -69,7 +70,7 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const next = safeNextPath(params.get("next"));
   const { configured } = useAuth();
 
   // Country — Liberia by default; a deep-link (?country=US) preselects another.
